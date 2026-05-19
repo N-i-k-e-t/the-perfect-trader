@@ -1,0 +1,4 @@
+-- DEPRECATED: edit migrations in supabase/migrations/ instead.
+-- This file is kept for reference only. Use:
+--   supabase/migrations/20260321000000_trader_snapshots.sql
+-- Then: npm run db:push  or  npm run db:reset

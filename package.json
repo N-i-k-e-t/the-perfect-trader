@@ -1,0 +1,51 @@
+{
+  "name": "the-perfect-trader",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "setup:supabase": "powershell -ExecutionPolicy Bypass -File ./scripts/setup-supabase.ps1",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:status": "supabase status",
+    "db:reset": "supabase db reset",
+    "db:push": "supabase db push",
+    "db:pull": "supabase db pull",
+    "db:diff": "supabase db diff -f",
+    "db:new": "supabase migration new",
+    "db:studio": "supabase studio",
+    "db:types": "supabase gen types typescript --local > src/types/database.ts",
+    "db:env": "powershell -ExecutionPolicy Bypass -File ./scripts/sync-env-local.ps1",
+    "docker:dev": "docker compose --profile dev up dev",
+    "docker:build": "docker compose up app --build"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.97.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.34.3",
+    "jszip": "^3.10.1",
+    "lucide-react": "^0.575.0",
+    "next": "16.1.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "tailwind-merge": "^3.5.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "prisma": "^7.4.1",
+    "supabase": "^2.100.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

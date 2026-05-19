@@ -1,0 +1,2 @@
+-- Optional test data (runs on `npm run db:reset` when logged-in users exist locally).
+-- Leave empty for production-like resets.

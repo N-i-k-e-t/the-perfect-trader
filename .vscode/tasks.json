@@ -1,0 +1,77 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Supabase: Start local",
+      "type": "shell",
+      "command": "npm run db:start",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Supabase: Stop local",
+      "type": "shell",
+      "command": "npm run db:stop",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Supabase: Reset DB (apply migrations)",
+      "type": "shell",
+      "command": "npm run db:reset",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Supabase: Push to cloud",
+      "type": "shell",
+      "command": "npm run db:push",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Supabase: Open Studio",
+      "type": "shell",
+      "command": "npm run db:studio",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Supabase: Sync .env.local (local)",
+      "type": "shell",
+      "command": "npm run db:env",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Supabase: New migration",
+      "type": "shell",
+      "command": "npm run db:new -- ${input:migrationName}",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "Supabase: Generate TypeScript types",
+      "type": "shell",
+      "command": "npm run db:types",
+      "options": { "cwd": "${workspaceFolder}" },
+      "problemMatcher": []
+    },
+    {
+      "label": "App: Dev server",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}" },
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "migrationName",
+      "type": "promptString",
+      "description": "Migration name (snake_case)",
+      "default": "my_change"
+    }
+  ]
+}
