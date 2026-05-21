@@ -43,7 +43,7 @@ export default function WelcomeTour() {
         if (currentStep < tourSteps.length - 1) {
             setCurrentStep(currentStep + 1);
         } else {
-            router.push('/dashboard');
+            router.push('/today');
         }
     };
 

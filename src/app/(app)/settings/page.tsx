@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { usePerfectTrader } from '@/lib/context';
 import PersonaSheet from '@/components/settings/PersonaSheet';
 import { IS_BETA } from '@/lib/config';
-import { STORAGE_KEY } from '@/lib/brand';
+import { STORAGE_KEY, STORAGE_KEY_LEGACY } from '@/lib/brand';
 import { 
     ChevronRight, 
     LogOut, 
@@ -40,6 +40,16 @@ export default function ProfilePage() {
     const handleLogout = () => {
         logout();
         router.push('/login');
+    };
+
+    const handleDeleteLocalData = () => {
+        if (!confirm('Delete all local app data on this device? Cloud data remains until you request account deletion from support.')) {
+            return;
+        }
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(STORAGE_KEY_LEGACY);
+        showToast('Local data cleared', 'success');
+        handleLogout();
     };
 
     const handleExport = () => {
@@ -172,7 +182,8 @@ export default function ProfilePage() {
                             <MenuItem icon={Edit3} label="Edit Profile" />
                             <MenuItem icon={CreditCard} label="Subscription" value={user?.isPro ? 'Pro' : IS_BETA ? 'Beta free' : '3-Day Trial'} iconColor="text-blue-500" onClick={() => router.push('/pricing')} />
                             <MenuItem icon={Download} label="Export Data" value="JSON" onClick={handleExport} iconColor="text-orange-500" />
-                            <MenuItem icon={ShieldCheck} label="Privacy Policy" onClick={() => router.push('/privacy')} isLast />
+                            <MenuItem icon={ShieldCheck} label="Privacy Policy" onClick={() => router.push('/privacy')} />
+                            <MenuItem icon={LogOut} label="Clear local data" onClick={handleDeleteLocalData} iconColor="text-red-500" isLast />
                         </div>
                     </section>
 

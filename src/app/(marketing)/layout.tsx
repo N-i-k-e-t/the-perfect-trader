@@ -1,3 +1,5 @@
+import MarketingNav from '@/components/MarketingNav';
+
 export default function MarketingLayout({
     children,
 }: {
@@ -5,6 +7,7 @@ export default function MarketingLayout({
 }) {
     return (
         <div className="flex flex-col min-h-[100dvh]">
+            <MarketingNav />
             {children}
         </div>
     );

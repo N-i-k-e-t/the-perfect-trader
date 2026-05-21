@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { usePerfectTrader } from '@/lib/context';
 import { motion, AnimatePresence } from 'framer-motion';
+import { IS_BETA } from '@/lib/config';
 import { 
     Target, 
     Camera, 
@@ -87,30 +88,6 @@ export default function LandingPage() {
 
     return (
         <div className="min-h-[100dvh] bg-white flex flex-col selection:bg-blue-100 italic-none text-[#1a1a2e] overflow-x-hidden">
-            {/* NAVBAR */}
-            <nav className="fixed top-0 left-0 right-0 h-[64px] z-[1000] backdrop-blur-xl bg-white/80 border-b border-gray-100/50 flex items-center justify-between"
-                style={{
-                    paddingLeft: 'max(env(safe-area-inset-left), 24px)',
-                    paddingRight: 'max(env(safe-area-inset-right), 24px)',
-                }}
-            >
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-[#1a1a2e] text-white rounded-lg flex items-center justify-center shadow-lg">
-                        <Target size={18} strokeWidth={3} />
-                    </div>
-                    <span className="text-[20px] font-black tracking-tight text-[#1a1a2e]">The Perfect Trader</span>
-                </div>
-                <div className="flex items-center gap-6">
-                    <Link href="/pricing" className="hidden sm:block text-[13px] font-black uppercase tracking-widest text-gray-400 hover:text-[#1a1a2e] transition-colors">Pricing</Link>
-                    <Link 
-                        href="/login" 
-                        className="text-[14px] font-bold text-[#1a1a2e] bg-gray-50 px-5 py-2 rounded-full border border-gray-100 active:scale-95 transition-all shadow-sm"
-                    >
-                        Log In
-                    </Link>
-                </div>
-            </nav>
-
             <main className="flex-1 flex flex-col pt-[64px]">
                 {/* HERO SECTION */}
                 <section className="relative pt-16 md:pt-24 pb-20 px-6 overflow-hidden">
@@ -135,10 +112,10 @@ export default function LandingPage() {
 
                         <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto px-6">
                             <Link
-                                href="/signup"
+                                href={IS_BETA ? '/beta' : '/signup'}
                                 className="bg-[#1a1a2e] text-white text-[16px] font-black h-[60px] rounded-full w-full sm:min-w-[320px] flex items-center justify-center active:scale-[0.97] transition-all touch-manipulation shadow-[0_20px_40px_rgba(26,26,46,0.15)] group"
                             >
-                                Start Free — 3 Day Trial
+                                {IS_BETA ? 'Join free beta' : 'Start free — 3 day trial'}
                                 <ArrowRight size={20} className="ml-2 group-hover:translate-x-1 transition-transform" />
                             </Link>
                         </motion.div>
@@ -146,7 +123,9 @@ export default function LandingPage() {
                         <motion.div variants={itemVariants} className="mt-8 flex flex-col items-center gap-4">
                             <div className="flex items-center gap-1 text-[#eab308]">
                                 {[1,2,3,4,5].map(i => <Star key={i} size={14} className="fill-current" />)}
-                                <span className="ml-2 text-[12px] font-black text-[#1a1a2e] uppercase tracking-widest">Rated 4.9/5 by 2,100+ Traders</span>
+                                <span className="ml-2 text-[12px] font-black text-[#1a1a2e] uppercase tracking-widest">
+                                    {IS_BETA ? 'Open beta — all features free' : 'Rated by active traders'}
+                                </span>
                             </div>
                             <div className="flex -space-x-3 mb-2">
                                 {[1,2,3,4,5,6].map(i => (
@@ -696,7 +675,7 @@ export default function LandingPage() {
                             Your next 14 days of <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 italic">discipline</span> start now.
                         </h3>
                         <p className="text-[18px] font-bold text-gray-400 mb-12 max-w-[480px]">
-                            Join 2,100+ traders who have stopped gambling and started executing like professionals.
+                            Join the beta and build the discipline loop: pre-session, rules, journal, review.
                         </p>
                         <Link
                             href="/signup"
@@ -795,6 +774,7 @@ export default function LandingPage() {
                         <Link href="/cookies" className="hover:text-white transition-colors">Cookies</Link>
                         <Link href="/refund" className="hover:text-white transition-colors">Refunds</Link>
                         <Link href="/about" className="hover:text-white transition-colors">About</Link>
+                        <Link href="/download" className="hover:text-white transition-colors">Download</Link>
                     </div>
                     <span className="text-white/20">© 2026 The Perfect Trader. Engineered for Discipline.</span>
                 </div>

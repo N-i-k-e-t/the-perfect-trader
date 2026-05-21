@@ -54,6 +54,67 @@ export const BLOG_POSTS: BlogPost[] = [
             'Join via the beta page, use the product daily, and tell us what would make you pay when Pro launches.',
         ],
     },
+    {
+        slug: 'revenge-trading-trap',
+        title: 'The Revenge Trading Trap',
+        excerpt: 'How to recognize tilt after a loss and stop the next trade from doubling the damage.',
+        category: 'Psychology',
+        publishedAt: '2026-05-20',
+        readMinutes: 7,
+        body: [
+            'Revenge trading is not anger — it is the urge to win back control immediately after a rule break or red trade.',
+            'The Perfect Trader flags broken rules per trade and ties mood before and after entries so you see the pattern.',
+            'When compliance drops below your baseline, end the session. Discipline is a stop-loss on behavior.',
+        ],
+    },
+    {
+        slug: 'five-trading-rules-you-need',
+        title: 'The Only 5 Trading Rules You Actually Need',
+        excerpt: 'Fewer, clearer rules beat a fifty-line document you never read before the open.',
+        category: 'Education',
+        publishedAt: '2026-05-19',
+        readMinutes: 6,
+        body: [
+            'Risk cap, max trades, no averaging losers, confirmation entry, and end-of-day review cover most retail blow-ups.',
+            'Store them in Rules, lock before session, and mark compliance on every journal entry.',
+        ],
+    },
+    {
+        slug: 'ai-coach-how-it-works',
+        title: 'How Our AI Coach Reads Your Patterns',
+        excerpt: 'Pattern Analyst, Discipline Coach, and Risk Sentinel — what they see and what they never do.',
+        category: 'Product',
+        publishedAt: '2026-05-18',
+        readMinutes: 5,
+        body: [
+            'Agents run on your logged behavior — not on buy/sell calls. They surface rule breaks, mood drift, and streak risk.',
+            'Optional Gemini features only run when you trigger scan or parse; see our Privacy Policy for details.',
+        ],
+    },
+    {
+        slug: 'perfect-trader-vs-tradervue',
+        title: 'The Perfect Trader vs Tradervue: Honest Comparison',
+        excerpt: 'They log trades well; we score discipline and psychology first.',
+        category: 'Product',
+        publishedAt: '2026-05-17',
+        readMinutes: 8,
+        body: [
+            'Tradervue-class tools excel at P&L and imports. We focus on pre-session state, rule adherence grades, and diary psychology.',
+            'Many traders use both: execution stats elsewhere, behavior OS here.',
+        ],
+    },
+    {
+        slug: 'journaling-five-minutes-daily',
+        title: 'Journaling 5 Minutes Daily',
+        excerpt: 'A minimal evening review that compounds faster than weekend spreadsheet marathons.',
+        category: 'Education',
+        publishedAt: '2026-05-16',
+        readMinutes: 4,
+        body: [
+            'Three prompts: What rule mattered today? Where did mood leak? One sentence for tomorrow.',
+            'That is enough to feed analytics and coach cards without burnout.',
+        ],
+    },
 ];
 
 export function getPost(slug: string): BlogPost | undefined {

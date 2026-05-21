@@ -19,7 +19,7 @@ final trialGateProvider = Provider<TrialGate>((ref) {
   if (user == null) {
     return const TrialGate(expired: false, daysLeft: AppConstants.trialDays);
   }
-  if (user.isPro) {
+  if (AppConstants.betaMode || user.isPro) {
     return const TrialGate(expired: false, daysLeft: 0, isPro: true);
   }
   final startRaw = user.trialStartDate;

@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "legacy/**",
+    "mobile/**",
+    "prompt-13-my.md",
   ]),
 ]);
 

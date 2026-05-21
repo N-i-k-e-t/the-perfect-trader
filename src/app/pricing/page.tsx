@@ -20,7 +20,7 @@ export default function PricingPage() {
 
     useEffect(() => {
         if (isHydrated && user) {
-            router.push('/dashboard');
+            router.push('/today');
         }
     }, [isHydrated, user, router]);
 
