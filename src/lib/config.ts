@@ -3,6 +3,9 @@ export const IS_BETA =
     process.env.NEXT_PUBLIC_BETA_MODE !== 'false' &&
     process.env.NEXT_PUBLIC_BETA_MODE !== '0';
 
+/** Closed beta: only the first N accounts can sign up (see `get_beta_capacity` RPC). */
+export const BETA_USER_CAP = Number(process.env.NEXT_PUBLIC_BETA_USER_CAP ?? '100') || 100;
+
 export const APP_VERSION = '1.1.0';
 
 export const SUPPORT_EMAIL =

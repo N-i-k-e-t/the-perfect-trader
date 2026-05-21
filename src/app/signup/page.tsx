@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { usePerfectTrader } from '@/lib/context';
 import { createClient } from '@/utils/supabase/client';
+import { fetchBetaCapacity, type BetaCapacity } from '@/lib/beta-capacity';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Eye, EyeOff, Target, User, ArrowLeft, Loader2, Sparkles, Check } from 'lucide-react';
+import { Lock, Eye, EyeOff, Loader2, Sparkles, Check } from 'lucide-react';
 
 export default function SignupPage() {
     const { showToast } = usePerfectTrader();
@@ -14,8 +15,16 @@ export default function SignupPage() {
     const supabase = createClient();
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [capacity, setCapacity] = useState<BetaCapacity | null>(null);
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
     const [termsAccepted, setTermsAccepted] = useState(false);
+
+    useEffect(() => {
+        fetchBetaCapacity().then((c) => {
+            setCapacity(c);
+            if (c.full) router.replace('/beta/full');
+        });
+    }, [router]);
 
     const strength = useMemo(() => {
         const pass = formData.password;
@@ -32,8 +41,20 @@ export default function SignupPage() {
         return { score, color: 'bg-green-500' };
     }, [formData.password]);
 
+    const ensureSlot = async (): Promise<boolean> => {
+        const c = await fetchBetaCapacity();
+        setCapacity(c);
+        if (c.full) {
+            router.push('/beta/full');
+            return false;
+        }
+        return true;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!(await ensureSlot())) return;
         
         if (formData.password.length < 8) {
             showToast('Password too short (min 8 chars)', 'error');
@@ -75,6 +96,7 @@ export default function SignupPage() {
             showToast('Please accept the Terms & Conditions first', 'info');
             return;
         }
+        if (!(await ensureSlot())) return;
 
         try {
             const { error } = await supabase.auth.signInWithOAuth({
@@ -117,6 +139,11 @@ export default function SignupPage() {
                     </div>
                     <h1 className="text-[34px] font-black text-[#1a1a2e] mb-1 tracking-tighter leading-none">Create Account.</h1>
                     <p className="text-[15px] font-bold text-gray-400 mt-2">Join The Perfect Trader and build your trading plan.</p>
+                    {capacity && !capacity.full && (
+                        <p className="text-[12px] font-black text-yellow-600 mt-3 uppercase tracking-wider">
+                            {capacity.remaining} of {capacity.max} beta spots left
+                        </p>
+                    )}
                 </div>
 
                 {/* SIGNUP CARD */}

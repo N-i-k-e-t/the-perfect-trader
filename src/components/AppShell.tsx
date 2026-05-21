@@ -12,6 +12,7 @@ import SettingsSheet from './SettingsSheet';
 import { Target, Flame, Sparkles } from 'lucide-react';
 import { useMemo } from 'react';
 import { IS_BETA } from '@/lib/config';
+import { fetchBetaCapacity, type BetaCapacity } from '@/lib/beta-capacity';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
     const { labMode, user, isCheckingAuth, dailyLogs, analytics } = usePerfectTrader();
@@ -21,9 +22,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     const [daysLeft, setDaysLeft] = useState(3);
     const [isHydrated, setIsHydrated] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [betaCapacity, setBetaCapacity] = useState<BetaCapacity | null>(null);
 
     useEffect(() => {
         setIsHydrated(true);
+    }, []);
+
+    useEffect(() => {
+        if (!IS_BETA) return;
+        fetchBetaCapacity().then(setBetaCapacity);
     }, []);
 
     // Route Protection
@@ -140,7 +147,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                             <Sparkles size={18} className="text-yellow-500 shrink-0" />
                             <p className="text-[12px] font-bold text-white/80 leading-snug">
                                 <span className="text-yellow-500 font-black uppercase tracking-wider text-[10px] block mb-0.5">Beta</span>
-                                All features free — help us improve before Pro launches.
+                                All features free
+                                {betaCapacity
+                                    ? ` · ${betaCapacity.remaining}/${betaCapacity.max} beta spots left`
+                                    : ' — help us improve before Pro launches'}.
                             </p>
                         </div>
                     )}

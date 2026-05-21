@@ -1,16 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import { APP_NAME } from '@/lib/brand';
-import { SUPPORT_EMAIL } from '@/lib/config';
+import { BETA_USER_CAP, SUPPORT_EMAIL } from '@/lib/config';
+import { fetchBetaCapacity } from '@/lib/beta-capacity';
 
 const WAITLIST_KEY = 'perfect_trader_beta_waitlist';
 
 export default function BetaPage() {
+    const router = useRouter();
     const [email, setEmail] = useState('');
     const [done, setDone] = useState(false);
+    const [remaining, setRemaining] = useState<number | null>(null);
+
+    useEffect(() => {
+        fetchBetaCapacity().then((c) => {
+            setRemaining(c.remaining);
+            if (c.full) router.replace('/beta/full');
+        });
+    }, [router]);
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -32,13 +43,19 @@ export default function BetaPage() {
                     <Sparkles size={32} />
                 </div>
                 <h1 className="text-[32px] font-black tracking-tight mb-4">Beta access</h1>
-                <p className="text-white/60 font-medium mb-8 leading-relaxed">
-                    {APP_NAME} is in closed beta. All features are free. Help us shape the product before Pro launches.
+                <p className="text-white/60 font-medium mb-4 leading-relaxed">
+                    {APP_NAME} is in closed beta — <strong className="text-white">first {BETA_USER_CAP} traders only</strong>.
+                    All features are free during beta.
                 </p>
+                {remaining !== null && remaining > 0 && (
+                    <p className="text-yellow-500 font-black text-[14px] uppercase tracking-widest mb-8">
+                        {remaining} spots remaining
+                    </p>
+                )}
                 {done ? (
                     <div className="bg-white/10 rounded-[24px] p-8 border border-white/10">
                         <p className="font-black text-yellow-500 mb-2">You&apos;re on the list</p>
-                        <p className="text-[14px] text-white/70 mb-6">Or skip the wait — create an account now.</p>
+                        <p className="text-[14px] text-white/70 mb-6">Or claim a spot now while seats last.</p>
                         <Link href="/signup" className="block w-full h-14 bg-yellow-500 text-[#1a1a2e] rounded-full font-black flex items-center justify-center">
                             Create account
                         </Link>
@@ -57,7 +74,7 @@ export default function BetaPage() {
                             Join waitlist
                         </button>
                         <Link href="/signup" className="text-[13px] font-bold text-white/50 hover:text-white mt-2">
-                            Already invited? Sign up →
+                            Claim a beta spot →
                         </Link>
                     </form>
                 )}

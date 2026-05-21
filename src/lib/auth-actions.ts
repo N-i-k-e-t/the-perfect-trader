@@ -25,6 +25,12 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
     const supabase = await createClient();
 
+    const { data: cap } = await supabase.rpc('get_beta_capacity');
+    const capacity = cap as { allowed?: boolean; full?: boolean } | null;
+    if (capacity?.full || capacity?.allowed === false) {
+        redirect('/beta/full');
+    }
+
     const data = {
         email: formData.get('email') as string,
         password: formData.get('password') as string,
