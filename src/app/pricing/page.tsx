@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { usePerfectTrader } from '@/lib/context';
-import { Star, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Star, ShieldCheck } from 'lucide-react';
+import { IS_BETA } from '@/lib/config';
+import { APP_NAME } from '@/lib/brand';
 
 export default function PricingPage() {
     const { user } = usePerfectTrader();
@@ -57,12 +59,36 @@ export default function PricingPage() {
 
             <main className="max-w-[620px] mx-auto px-6 pt-12 text-center">
                 <h1 className="text-2xl md:text-[28px] font-bold text-[#1a1a2e] mb-2">
-                    Master Your Trading Discipline.
+                    {IS_BETA ? `${APP_NAME} Beta` : 'Master Your Trading Discipline.'}
                 </h1>
                 <p className="text-base text-[#6b7280] mb-12">
-                    Track your rules. Build consistency. Trade with confidence.
+                    {IS_BETA
+                        ? 'All features are free during beta. Paid plans (Pro / Premium) launch after we validate with real traders.'
+                        : 'Track your rules. Build consistency. Trade with confidence.'}
                 </p>
 
+                {IS_BETA ? (
+                    <div className="mb-12 text-left bg-[#1a1a2e]/5 rounded-3xl p-8 border border-[#1a1a2e]/10">
+                        <p className="text-[14px] font-bold text-[#1a1a2e] mb-4">Planned tiers (not billed yet)</p>
+                        <ul className="text-[13px] text-[#6b7280] font-medium flex flex-col gap-2">
+                            <li>Free — 10 trades/mo, basic journal</li>
+                            <li>Pro (~₹749/mo) — unlimited trades, AI coaching, analytics</li>
+                            <li>Premium — advanced coaching + storage</li>
+                        </ul>
+                        <Link
+                            href="/signup"
+                            className="mt-8 w-full bg-[#1a1a2e] text-white h-14 flex items-center justify-center rounded-full text-base font-bold"
+                        >
+                            Use beta free — create account
+                        </Link>
+                        <Link href="/beta" className="block text-center mt-4 text-[13px] font-bold text-[#6b7280]">
+                            Join waitlist →
+                        </Link>
+                    </div>
+                ) : null}
+
+                {!IS_BETA && (
+                <>
                 {/* Plan Cards */}
                 <div className="flex flex-col gap-4 mb-12">
                     {/* Most Popular */}
@@ -170,6 +196,8 @@ export default function PricingPage() {
                     </div>
                 </div>
                 <p className="text-[11px] font-bold text-[#9ca3af] uppercase tracking-[0.2em] mt-8">Coming Soon to Devices</p>
+                </>
+                )}
             </main>
         </div>
     );

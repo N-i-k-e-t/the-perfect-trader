@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Mail, MessageSquare, ArrowLeft, Target } from 'lucide-react';
+import { SUPPORT_EMAIL } from '@/lib/config';
 
 export default function ContactPage() {
     return (
@@ -31,7 +32,7 @@ export default function ContactPage() {
 
                 <div className="w-full flex flex-col gap-4">
                     <a 
-                        href="mailto:support@The Perfect Trader.app" 
+                        href="mailto:support@theperfecttrader.app" 
                         className="w-full h-[72px] bg-gray-50 rounded-[28px] border border-gray-100 flex items-center px-6 gap-4 hover:bg-gray-100 transition-colors group"
                     >
                         <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-[#1a1a2e] shadow-sm group-hover:scale-110 transition-transform">
@@ -39,21 +40,23 @@ export default function ContactPage() {
                         </div>
                         <div className="flex flex-col items-start">
                             <span className="text-[15px] font-black text-[#1a1a2e]">Email Support</span>
-                            <span className="text-[12px] font-bold text-gray-400">support@The Perfect Trader.app</span>
+                            <span className="text-[12px] font-bold text-gray-400">support@theperfecttrader.app</span>
                         </div>
                     </a>
 
-                    <button 
+                    <Link 
+                        href="/beta"
                         className="w-full h-[72px] bg-gray-50 rounded-[28px] border border-gray-100 flex items-center px-6 gap-4 hover:bg-gray-100 transition-colors group"
                     >
                         <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-[#1a1a2e] shadow-sm group-hover:scale-110 transition-transform">
                             <MessageSquare size={20} strokeWidth={3} />
                         </div>
                         <div className="flex flex-col items-start">
-                            <span className="text-[15px] font-black text-[#1a1a2e]">Community Discord</span>
-                            <span className="text-[12px] font-bold text-gray-400">Join the elite architects</span>
+                            <span className="text-[15px] font-black text-[#1a1a2e]">Beta program</span>
+                            <span className="text-[12px] font-bold text-gray-400">Join waitlist or sign up</span>
                         </div>
-                    </button>
+                    </Link>
+                    <a href={`mailto:${SUPPORT_EMAIL}`} className="text-[12px] font-bold text-gray-300 mt-4">{SUPPORT_EMAIL}</a>
                 </div>
 
                 <div className="mt-16 flex items-center gap-2">

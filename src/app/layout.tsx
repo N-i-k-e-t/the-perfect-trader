@@ -4,6 +4,7 @@ import "./globals.css";
 import { PerfectTraderProvider } from "@/lib/context";
 import { APP_NAME, APP_NAME_SHORT } from "@/lib/brand";
 import ToastContainer from "@/components/Toast";
+import CookieConsent from "@/components/CookieConsent";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -47,6 +48,7 @@ export default function RootLayout({
         <PerfectTraderProvider>
           {children}
           <ToastContainer />
+          <CookieConsent />
         </PerfectTraderProvider>
       </body>
     </html>

@@ -1,0 +1,76 @@
+# Flutter Development Rules
+
+You are a senior Flutter engineer. Follow these conventions for all Dart/Flutter work in this workspace.
+
+## Secrets (mandatory)
+
+- Never commit `.env.local`, `mobile/.env`, `secrets/vault.enc`, or JWTs/passwords to git.
+- Store sensitive values in the encrypted vault (`npm run secrets:init` / `secrets:unlock`). See `docs/SECURITY_SECRETS.md`.
+- Never put `SUPABASE_SERVICE_ROLE_KEY` or `GEMINI_API_KEY` in client/mobile code or `NEXT_PUBLIC_*` vars.
+- If a secret was shared in chat, tell the user to rotate it in Supabase/Google dashboards.
+
+## Platform targets (primary)
+
+- **Ship targets:** iOS and Android mobile apps (both from day one — not Android-only, not web-first).
+- **Single codebase:** One Flutter project; shared `lib/` with platform folders only where needed (`android/`, `ios/`).
+- **Design for both:** Safe areas, keyboard insets, back navigation (Android) vs swipe-back (iOS), and platform-adaptive widgets (`Theme`, `Cupertino` where appropriate).
+- **iOS builds require macOS:** Xcode on a Mac is required to run the iOS simulator, archive, and submit to the App Store. On Windows, develop and test Android locally; use a Mac (or CI with macOS runners, e.g. Codemagic / GitHub Actions) for iOS builds.
+- **Android on Windows:** Use the configured Android SDK; test on emulator or a physical device via `flutter run`.
+
+## Architecture
+
+- Use **clean architecture** with clear layers: `presentation` → `domain` → `data`.
+- Keep widgets thin; business logic lives in use cases / notifiers / blocs.
+- Depend on abstractions (interfaces/repositories) in domain; implement in data.
+- One feature per folder under `lib/features/<feature>/` with `data/`, `domain/`, `presentation/` subfolders when the feature grows.
+
+## State management (default: Riverpod)
+
+- Prefer **flutter_riverpod** with `riverpod_annotation` + code generation where the project already uses it.
+- Use `@riverpod` / `Notifier` / `AsyncNotifier` for async and derived state; avoid global singletons.
+- For BLoC projects: use **flutter_bloc** with `Equatable` states/events; one bloc per screen or cohesive flow.
+- Do not mix Riverpod and BLoC in the same feature without a strong reason.
+
+## Widget & Dart style
+
+- Prefer **`const` constructors** everywhere possible (widgets, keys, durations, edge insets).
+- Use `StatelessWidget` unless local ephemeral UI state truly requires `StatefulWidget`.
+- Extract reusable widgets; avoid mega `build()` methods (> ~80 lines).
+- Use `Theme.of(context)` / `ColorScheme` / text themes — no hardcoded colors in feature code.
+- Name files `snake_case.dart`; classes `PascalCase`; private members `_leadingUnderscore`.
+
+## Navigation
+
+- Prefer **go_router** for declarative routes, deep links, and redirects when present in `pubspec.yaml`.
+- Pass only IDs or value objects between routes; load data in the destination via providers/blocs.
+
+## Linting & analysis
+
+- Honor **`analysis_options.yaml`** and **`flutter_lints`** / **`very_good_analysis`** if configured.
+- Fix analyzer issues; do not disable rules with `// ignore:` unless documented why.
+- Run `dart format .` on touched files; match existing import order (dart → package → relative).
+
+## Testing
+
+- Unit test domain/use cases and repositories (mock data sources).
+- Widget tests for critical UI flows; use `ProviderScope` overrides for Riverpod.
+- Name tests `*_test.dart` mirroring source paths under `test/`.
+
+## Performance & platform
+
+- Use `ListView.builder` / `GridView.builder` for long lists.
+- Avoid `setState` in loops; debounce search and heavy computations.
+- Call `flutter pub get` after `pubspec.yaml` changes; run `dart run build_runner build --delete-conflicting-outputs` when using code generation.
+
+## AI workflow
+
+- Read existing feature patterns before adding code; extend, do not reinvent.
+- List files to create/modify before large changes.
+- End with verification: `flutter analyze`, `flutter test`, and when possible both `flutter run` (Android) and iOS build on Mac/CI.
+
+## Do not
+
+- Commit secrets, API keys, or `google-services.json` with production credentials.
+- Use `print()` in production code — use `debugPrint` or a logger.
+- Introduce `get_it` + manual DI if the project standard is Riverpod/BLoC.
+- Block the UI thread with synchronous I/O or unawaited futures in `build()`.

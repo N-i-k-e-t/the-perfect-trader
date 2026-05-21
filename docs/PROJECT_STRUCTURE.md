@@ -25,6 +25,7 @@
 ├── scripts/                        ← setup-supabase.ps1, sync-env-local.ps1
 │
 ├── docs/                           ← all documentation
+│   ├── blueprint/                  ← **diagrams: architecture, flows, mind map**
 │   ├── MASTER_AI_PROMPT.md         ← paste into AI tools
 │   ├── PROJECT_STRUCTURE.md        ← this file
 │   ├── ARCHITECTURE.md

@@ -18,7 +18,12 @@ Open http://localhost:3000
 
 | Topic | Path |
 |-------|------|
+| **Blueprint (diagrams & flows)** | [docs/blueprint/README.md](docs/blueprint/README.md) |
 | **Folder structure** | [docs/PROJECT_STRUCTURE.md](docs/PROJECT_STRUCTURE.md) |
+| **Go live now (15 min)** | [docs/guides/GO_LIVE_NOW.md](docs/guides/GO_LIVE_NOW.md) |
+| **Web CI/CD pipeline** | [docs/web/DEVOPS_PIPELINE.md](docs/web/DEVOPS_PIPELINE.md) |
+| **Data domains (app / work / thoughts)** | [docs/web/DATA_DOMAINS.md](docs/web/DATA_DOMAINS.md) |
+| **Master launch + resource plan** | [docs/platform/MASTER_LAUNCH_AND_RESOURCES.md](docs/platform/MASTER_LAUNCH_AND_RESOURCES.md) |
 | **Local development** | [docs/guides/LOCAL_DEVELOPMENT.md](docs/guides/LOCAL_DEVELOPMENT.md) |
 | **Launch (GitHub → Vercel)** | [docs/guides/LAUNCH.md](docs/guides/LAUNCH.md) |
 | **Cloud deployment** | [docs/guides/CLOUD_DEPLOYMENT.md](docs/guides/CLOUD_DEPLOYMENT.md) |

@@ -1,41 +1,83 @@
-'use client';
-
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import LegalPageLayout, { LegalH2, LegalP, LegalUl } from '@/components/legal/LegalPageLayout';
+import { IS_BETA, LEGAL_ENTITY } from '@/lib/config';
+import { APP_NAME } from '@/lib/brand';
 
 export default function TermsPage() {
     return (
-        <div className="min-h-[100dvh] bg-white">
-            <div className="max-w-[700px] mx-auto px-6 py-12 md:py-24">
-                <Link href="/" className="inline-flex items-center gap-2 text-[#6b7280] hover:text-[#1a1a2e] transition-colors mb-12 font-medium">
-                    <ArrowLeft size={20} />
-                    Back to The Perfect Trader
-                </Link>
+        <LegalPageLayout title="Terms of Service" lastUpdated="May 21, 2026">
+            <LegalP>
+                These Terms govern your use of {APP_NAME}, operated by {LEGAL_ENTITY}. If you do not agree, do not
+                use the Service.
+            </LegalP>
 
-                <h1 className="text-[32px] md:text-[48px] font-bold text-[#1a1a2e] mb-6 leading-tight">
-                    Terms & Conditions
-                </h1>
-                
-                <div className="text-[#6b7280] flex flex-col gap-6 text-[15px] leading-relaxed">
-                    <p>Last updated: October 2023</p>
+            <LegalH2>1. The Service</LegalH2>
+            <LegalP>
+                {APP_NAME} is a psychology-first trading discipline tool: rules, mood tracking, journaling, and
+                behavioral analytics. We do not execute trades, provide signals, or manage your capital.
+            </LegalP>
 
-                    <h2 className="text-xl font-bold text-[#1a1a2e] mt-4">1. Acceptance of Terms</h2>
-                    <p>By accessing and using The Perfect Trader ("the Application"), you accept and agree to be bound by the terms and provision of this agreement. In addition, when using this Application's particular services, you shall be subject to any posted guidelines or rules applicable to such services.</p>
+            <LegalH2>2. Not financial advice</LegalH2>
+            <LegalP>
+                <strong>We are not financial advisors.</strong> Nothing in the app is investment, tax, or legal
+                advice. You are solely responsible for trading decisions and outcomes. Past discipline scores do not
+                guarantee future results.
+            </LegalP>
 
-                    <h2 className="text-xl font-bold text-[#1a1a2e] mt-4">2. Financial Disclaimer</h2>
-                    <p>The Perfect Trader is a tool designed to help traders track their personal discipline and behavior. <strong>We are not financial advisors.</strong> The App does not provide financial, investment, or trading advice. All trading involves risk, and you are solely responsible for your own trading decisions and outcomes.</p>
+            {IS_BETA && (
+                <>
+                    <LegalH2>3. Beta program</LegalH2>
+                    <LegalP>
+                        The Service is in <strong>beta</strong>. Features may change, break, or be removed. We may
+                        migrate data with notice. During beta, paid subscriptions may not be active — access is
+                        provided free unless we announce otherwise.
+                    </LegalP>
+                </>
+            )}
 
-                    <h2 className="text-xl font-bold text-[#1a1a2e] mt-4">3. Subscriptions</h2>
-                    <p>Some parts of the Service are billed on a subscription basis ("Subscription(s)"). You will be billed in advance on a recurring and periodic basis (such as weekly or annually), depending on the type of Subscription plan you select when purchasing the Subscription.</p>
+            <LegalH2>4. Accounts</LegalH2>
+            <LegalP>
+                You must provide accurate registration information and keep credentials secure. You are responsible
+                for activity under your account.
+            </LegalP>
 
-                    <h2 className="text-xl font-bold text-[#1a1a2e] mt-4">4. User Accounts</h2>
-                    <p>When you create an account with us, you must provide us information that is accurate, complete, and current at all times. Failure to do so constitutes a breach of the Terms, which may result in immediate termination of your account on our Service.</p>
+            <LegalH2>5. Acceptable use</LegalH2>
+            <LegalUl
+                items={[
+                    'No illegal activity, harassment, or attempts to breach security.',
+                    'No scraping or automated abuse of the API.',
+                    `No misrepresentation of affiliation with ${APP_NAME}.`,
+                ]}
+            />
 
-                    <p className="mt-8 text-sm opacity-70">
-                        This is a placeholder for demonstration purposes. The Perfect Trader is a conceptual application.
-                    </p>
-                </div>
-            </div>
-        </div>
+            <LegalH2>6. Subscriptions (when available)</LegalH2>
+            <LegalP>
+                Paid plans will be billed in advance on a recurring basis (monthly or annual) via Stripe on web or
+                app-store billing on mobile when launched. See our Refund Policy. You may cancel before renewal.
+            </LegalP>
+
+            <LegalH2>7. Intellectual property</LegalH2>
+            <LegalP>
+                We own the app, brand, and UI. You own your trading content. You grant us a license to host and
+                process your content solely to operate the Service.
+            </LegalP>
+
+            <LegalH2>8. Limitation of liability</LegalH2>
+            <LegalP>
+                To the maximum extent permitted by law, we are not liable for trading losses, indirect damages, or
+                downtime. Our total liability is limited to fees you paid us in the prior 12 months (or zero during
+                free beta).
+            </LegalP>
+
+            <LegalH2>9. Termination</LegalH2>
+            <LegalP>
+                You may stop using the Service anytime. We may suspend accounts that violate these Terms.
+            </LegalP>
+
+            <LegalH2>10. Governing law</LegalH2>
+            <LegalP>
+                These Terms are governed by the laws of India unless otherwise required by your jurisdiction. Disputes
+                should first be raised via support.
+            </LegalP>
+        </LegalPageLayout>
     );
 }

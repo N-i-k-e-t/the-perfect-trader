@@ -18,6 +18,7 @@ Master index for product, engineering, security, and operations. Read in order f
 | 10 | [Scaling & capacity](./10-SCALING-AND-CAPACITY.md) | Users, limits, cost, when to change architecture |
 | — | [Open questions & decisions](./OPEN-QUESTIONS.md) | TBDs, doubts, separate deep-dives |
 
+**Visual maps (brief):** [../blueprint/README.md](../blueprint/README.md)  
 **Repo layout:** [../PROJECT_STRUCTURE.md](../PROJECT_STRUCTURE.md)  
 **Local / cloud:** [../guides/LOCAL_DEVELOPMENT.md](../guides/LOCAL_DEVELOPMENT.md) · [../guides/CLOUD_DEPLOYMENT.md](../guides/CLOUD_DEPLOYMENT.md)  
 **Database:** [../DATABASE.md](../DATABASE.md)  

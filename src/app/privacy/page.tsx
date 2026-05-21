@@ -1,41 +1,104 @@
-'use client';
-
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import LegalPageLayout, { LegalH2, LegalP, LegalUl } from '@/components/legal/LegalPageLayout';
+import { LEGAL_ENTITY, PRIVACY_EMAIL, SUPABASE_REGION_LABEL } from '@/lib/config';
+import { APP_NAME } from '@/lib/brand';
 
 export default function PrivacyPage() {
     return (
-        <div className="min-h-[100dvh] bg-white">
-            <div className="max-w-[700px] mx-auto px-6 py-12 md:py-24">
-                <Link href="/" className="inline-flex items-center gap-2 text-[#6b7280] hover:text-[#1a1a2e] transition-colors mb-12 font-medium">
-                    <ArrowLeft size={20} />
-                    Back to The Perfect Trader
-                </Link>
+        <LegalPageLayout title="Privacy Policy" lastUpdated="May 21, 2026">
+            <LegalP>
+                {LEGAL_ENTITY} operates {APP_NAME} (&quot;we&quot;, &quot;us&quot;, &quot;the Service&quot;). This policy
+                explains what we collect, why, and your rights. By using the Service you agree to this policy.
+            </LegalP>
 
-                <h1 className="text-[32px] md:text-[48px] font-bold text-[#1a1a2e] mb-6 leading-tight">
-                    Privacy Policy
-                </h1>
-                
-                <div className="text-[#6b7280] flex flex-col gap-6 text-[15px] leading-relaxed">
-                    <p>Last updated: October 2023</p>
+            <LegalH2>1. What data we collect</LegalH2>
+            <LegalUl
+                items={[
+                    'Account: email, display name, authentication identifiers (passwords are hashed by Supabase Auth — we never store plain text passwords).',
+                    'Work data: trades, rules, session state, daily discipline logs, analytics aggregates.',
+                    'Thoughts data: diary scan metadata, observations, pre/post-session notes, AI coaching memory (user model).',
+                    'Usage: app opens, feature usage (if you accept analytics cookies).',
+                    'Device: browser type, approximate region from IP (standard web logs via hosting).',
+                    'Optional uploads: trade chart images or journal scans when you use capture features.',
+                ]}
+            />
 
-                    <h2 className="text-xl font-bold text-[#1a1a2e] mt-4">1. Data Collection</h2>
-                    <p>The Perfect Trader is designed as a privacy-first application. Currently, all your trading data, rules, journal entries, and AI insights are stored entirely <strong>locally on your device</strong> within your browser's local storage.</p>
+            <LegalH2>2. Why we collect it</LegalH2>
+            <LegalUl
+                items={[
+                    'Provide the trading discipline journal and sync across devices.',
+                    'Calculate compliance grades, streaks, and performance views.',
+                    'Deliver optional AI coaching and diary parsing when you trigger those features.',
+                    'Improve reliability and security of the Service.',
+                    'Send product emails only with your consent.',
+                ]}
+            />
 
-                    <h2 className="text-xl font-bold text-[#1a1a2e] mt-4">2. Use of Data</h2>
-                    <p>Since your data is stored locally, we do not have access to your trading history, rules, or journal entries. The AI agents (Pattern Analyst, Discipline Coach, and Risk Sentinel) run entirely on your client device and do not transmit your data to our servers.</p>
+            <LegalH2>3. How we store it</LegalH2>
+            <LegalP>
+                Data is stored in Supabase (PostgreSQL on AWS infrastructure), region {SUPABASE_REGION_LABEL}.
+                Each user&apos;s data is isolated with Row Level Security — you can only access your own rows.
+                Data in transit uses TLS. Passwords are managed by Supabase Auth (bcrypt). Diary images may use
+                Supabase Storage when that feature is enabled.
+            </LegalP>
+            <LegalP>
+                We logically separate <strong>app</strong> (account/settings), <strong>work</strong> (trades, rules,
+                grades), and <strong>thoughts</strong> (journal psychology, diary, AI memory) in our data model.
+            </LegalP>
 
-                    <h2 className="text-xl font-bold text-[#1a1a2e] mt-4">3. Analytics and Tracking</h2>
-                    <p>We may collect anonymous, aggregated usage data (such as page views or feature usage frequency) to help us improve the The Perfect Trader experience. This data cannot be linked back to your individual account or trading activity.</p>
+            <LegalH2>4. Who we share it with</LegalH2>
+            <LegalUl
+                items={[
+                    'We do not sell your personal data.',
+                    'Supabase — hosting, authentication, database (processor).',
+                    'Vercel — application hosting (processor).',
+                    'Google (Gemini) — only when you use AI parse/scan features; limited to content you submit.',
+                    'Analytics (e.g. PostHog) — only if you accept analytics cookies; anonymized usage where possible.',
+                    'Legal authorities — only if required by valid law and proper process.',
+                ]}
+            />
 
-                    <h2 className="text-xl font-bold text-[#1a1a2e] mt-4">4. Your Rights</h2>
-                    <p>You have full control over your data. You can export your data at any time from the Settings page. You can also permanently clear all your data by using the "Log Out" function, which wipes the local storage environment completely.</p>
+            <LegalH2>5. Your rights</LegalH2>
+            <LegalUl
+                items={[
+                    'Access and export: download your data from Settings (JSON export).',
+                    'Delete: log out and request account deletion via support; we delete cloud rows within 30 days.',
+                    'Correction: edit profile and journal entries in the app.',
+                    'Opt out: reject analytics cookies; disable optional AI features.',
+                    'India (DPDP), EU (GDPR), California (CCPA): contact us to exercise rights — we respond within 72 hours.',
+                ]}
+            />
 
-                    <p className="mt-8 text-sm opacity-70">
-                        This is a placeholder for demonstration purposes. The Perfect Trader is a conceptual application.
-                    </p>
-                </div>
-            </div>
-        </div>
+            <LegalH2>6. Retention</LegalH2>
+            <LegalP>
+                Active accounts: data retained while the account exists. Deleted accounts: primary data removed
+                within 30 days; backups purged within 90 days where applicable.
+            </LegalP>
+
+            <LegalH2>7. Children</LegalH2>
+            <LegalP>
+                The Service is not intended for users under 18. We do not knowingly collect data from minors.
+            </LegalP>
+
+            <LegalH2>8. Security</LegalH2>
+            <LegalUl
+                items={[
+                    'TLS for data in transit',
+                    'Row Level Security on user tables',
+                    'Hashed credentials via Supabase Auth',
+                    'Session tokens with expiry',
+                ]}
+            />
+
+            <LegalH2>9. Beta notice</LegalH2>
+            <LegalP>
+                The Service is in beta. Features and this policy may change. Material changes will be posted here
+                with an updated date.
+            </LegalP>
+
+            <LegalH2>10. Contact</LegalH2>
+            <LegalP>
+                Privacy: <a href={`mailto:${PRIVACY_EMAIL}`} className="text-[#2563eb] font-bold">{PRIVACY_EMAIL}</a>
+            </LegalP>
+        </LegalPageLayout>
     );
 }

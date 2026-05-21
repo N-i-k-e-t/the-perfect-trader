@@ -111,6 +111,7 @@ THE-PERFECT-TRADER/                    # Git repo root (rename local folder from
 │   ├── MASTER_AI_PROMPT.md            # ← THIS FILE
 │   ├── PROJECT_STRUCTURE.md
 │   ├── guides/LOCAL_DEVELOPMENT.md, CLOUD_DEPLOYMENT.md
+│   ├── mobile/                        # Flutter iOS+Android: setup, master questions, GTM
 │   ├── production/                    # 01–10 specs
 │   ├── supabase/                      # credentials docs
 │   └── assets/                        # PDFs

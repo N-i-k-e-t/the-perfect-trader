@@ -755,10 +755,11 @@ export default function LandingPage() {
                     <div>
                         <h5 className="text-[11px] font-black text-white uppercase tracking-[0.3em] mb-8">Resources</h5>
                         <ul className="flex flex-col gap-5 text-[14px] font-bold">
-                            <li className="hover:text-white cursor-pointer transition-colors">Psychology Blog</li>
-                            <li className="hover:text-white cursor-pointer transition-colors">Rule Library</li>
-                            <li className="hover:text-white cursor-pointer transition-colors">Trader Community</li>
-                            <li className="hover:text-white cursor-pointer transition-colors">Contact Support</li>
+                            <li><Link href="/blog" className="hover:text-white transition-colors">Psychology Blog</Link></li>
+                            <li><Link href="/features" className="hover:text-white transition-colors">Features</Link></li>
+                            <li><Link href="/beta" className="hover:text-white transition-colors">Beta Program</Link></li>
+                            <li><Link href="/contact" className="hover:text-white transition-colors">Contact Support</Link></li>
+                            <li><Link href="/resources" className="hover:text-white transition-colors">Resource Dashboard</Link></li>
                         </ul>
                     </div>
 
@@ -789,9 +790,11 @@ export default function LandingPage() {
 
                 <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 text-[11px] font-black uppercase tracking-[0.2em] border-t border-white/5 pt-12">
                     <div className="flex items-center gap-8">
-                        <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-                        <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                        <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+                        <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
                         <Link href="/cookies" className="hover:text-white transition-colors">Cookies</Link>
+                        <Link href="/refund" className="hover:text-white transition-colors">Refunds</Link>
+                        <Link href="/about" className="hover:text-white transition-colors">About</Link>
                     </div>
                     <span className="text-white/20">© 2026 The Perfect Trader. Engineered for Discipline.</span>
                 </div>

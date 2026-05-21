@@ -16,16 +16,16 @@ Keys, service role, JWT JWKS, and connection strings are in:
 
 Environment variables for the app: **`.env.local`** (gitignored)
 
-## CLI (from ``)
+## Connect & schema
+
+Step-by-step: **[CONNECT.md](./CONNECT.md)**
+
+One-shot SQL (dashboard): **[APPLY_SCHEMA.sql](./APPLY_SCHEMA.sql)**
 
 ```bash
 supabase login
 supabase link --project-ref firqlsjixojnrofycwbs
 npm run db:push
 ```
-
-## Schema
-
-Edit `supabase/migrations/*.sql` → `npm run db:push`
 
 See [DATABASE.md](../DATABASE.md) for full workflow.

@@ -9,8 +9,9 @@ import InstallPrompt from './InstallPrompt';
 import CaptureHub from './capture/CaptureHub';
 import DailyStateCheck from './DailyStateCheck';
 import SettingsSheet from './SettingsSheet';
-import { Target, Flame } from 'lucide-react';
+import { Target, Flame, Sparkles } from 'lucide-react';
 import { useMemo } from 'react';
+import { IS_BETA } from '@/lib/config';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
     const { labMode, user, isCheckingAuth, dailyLogs, analytics } = usePerfectTrader();
@@ -56,7 +57,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         if (!user) return;
-        if (user.isPro) return;
+        if (IS_BETA || user.isPro) return;
 
         if (user.trialStartDate) {
             const start = new Date(user.trialStartDate).getTime();
@@ -81,7 +82,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         return null;
     }
 
-    if (isTrialExpired) {
+    if (!IS_BETA && isTrialExpired) {
         return (
             <div className="min-h-[100dvh] flex flex-col items-center justify-center px-5 bg-[#f8f9fa] text-center">
                 <div className="w-full max-w-[360px] bg-white p-6 rounded-[24px] shadow-xl">
@@ -134,16 +135,23 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 }}
             >
                 <div className="w-full max-w-[430px] mx-auto min-h-full">
-                    {!user?.isPro && user?.trialStartDate && !labMode && (
+                    {IS_BETA && !labMode && (
+                        <div className="mx-6 mt-6 mb-2 p-4 bg-gradient-to-r from-[#1a1a2e] to-[#2d2d4a] text-white rounded-[20px] flex items-center gap-3 border border-yellow-500/20">
+                            <Sparkles size={18} className="text-yellow-500 shrink-0" />
+                            <p className="text-[12px] font-bold text-white/80 leading-snug">
+                                <span className="text-yellow-500 font-black uppercase tracking-wider text-[10px] block mb-0.5">Beta</span>
+                                All features free — help us improve before Pro launches.
+                            </p>
+                        </div>
+                    )}
+                    {!IS_BETA && !user?.isPro && user?.trialStartDate && !labMode && (
                         <div className="mx-6 mt-6 mb-2 p-5 bg-[#1a1a2e] text-white rounded-[24px] flex items-center justify-between shadow-2xl shadow-yellow-100/20 relative overflow-hidden group">
                             <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                             <div className="flex flex-col relative z-5">
-                                <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest mb-0.5">Trial Architecture</span>
-                                <span className="text-[14px] font-bold text-gray-300">
-                                    {daysLeft} days remaining
-                                </span>
+                                <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest mb-0.5">Trial</span>
+                                <span className="text-[14px] font-bold text-gray-300">{daysLeft} days remaining</span>
                             </div>
-                            <button 
+                            <button
                                 onClick={() => router.push('/pricing')}
                                 className="relative z-5 h-10 px-5 bg-yellow-500 text-[#1a1a2e] font-black text-[12px] rounded-full uppercase tracking-wider shadow-lg active:scale-95 transition-all"
                             >

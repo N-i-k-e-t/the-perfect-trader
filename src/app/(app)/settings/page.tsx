@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePerfectTrader } from '@/lib/context';
 import PersonaSheet from '@/components/settings/PersonaSheet';
+import { IS_BETA } from '@/lib/config';
+import { STORAGE_KEY } from '@/lib/brand';
 import { 
     ChevronRight, 
     LogOut, 
@@ -38,6 +40,22 @@ export default function ProfilePage() {
     const handleLogout = () => {
         logout();
         router.push('/login');
+    };
+
+    const handleExport = () => {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+            showToast('No data to export', 'info');
+            return;
+        }
+        const blob = new Blob([raw], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `perfect-trader-export-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Data exported', 'success');
     };
 
     const SectionLabel = ({ text }: { text: string }) => (
@@ -78,8 +96,8 @@ export default function ProfilePage() {
                 <h1 className="text-[18px] font-black text-[#1a1a2e] mb-0.5">{user?.name || 'Trader'}</h1>
                 <p className="text-[13px] font-bold text-gray-400 mb-4">{user?.email}</p>
                 
-                <div className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest ${user?.isPro ? 'bg-orange-100 text-orange-600' : 'bg-[#1a1a2e]/5 text-[#1a1a2e]/60'}`}>
-                    {user?.isPro ? 'Pro Member' : 'Trial Active'}
+                <div className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest ${user?.isPro ? 'bg-orange-100 text-orange-600' : IS_BETA ? 'bg-yellow-100 text-yellow-700' : 'bg-[#1a1a2e]/5 text-[#1a1a2e]/60'}`}>
+                    {user?.isPro ? 'Pro Member' : IS_BETA ? 'Beta — Full access' : 'Trial Active'}
                 </div>
 
                 {/* 3-COLUMN STATS */}
@@ -152,8 +170,9 @@ export default function ProfilePage() {
                         <SectionLabel text="Account" />
                         <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
                             <MenuItem icon={Edit3} label="Edit Profile" />
-                            <MenuItem icon={CreditCard} label="Subscription" value={user?.isPro ? 'Pro' : '3-Day Trial'} iconColor="text-blue-500" onClick={() => router.push('/pricing')} />
-                            <MenuItem icon={Download} label="Export Data" value="CSV / MD" isLast iconColor="text-orange-500" />
+                            <MenuItem icon={CreditCard} label="Subscription" value={user?.isPro ? 'Pro' : IS_BETA ? 'Beta free' : '3-Day Trial'} iconColor="text-blue-500" onClick={() => router.push('/pricing')} />
+                            <MenuItem icon={Download} label="Export Data" value="JSON" onClick={handleExport} iconColor="text-orange-500" />
+                            <MenuItem icon={ShieldCheck} label="Privacy Policy" onClick={() => router.push('/privacy')} isLast />
                         </div>
                     </section>
 
@@ -172,7 +191,7 @@ export default function ProfilePage() {
                         <SectionLabel text="Help & Feedback" />
                         <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
                             <MenuItem icon={HelpCircle} label="How It Works" />
-                            <MenuItem icon={Mail} label="Contact Support" />
+                            <MenuItem icon={Mail} label="Contact Support" onClick={() => router.push('/contact')} />
                             <MenuItem icon={Star} label="Rate The Perfect Trader" value="v1.0.0" isLast iconColor="text-orange-500" />
                         </div>
                     </section>

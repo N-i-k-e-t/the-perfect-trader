@@ -1,0 +1,11 @@
+﻿# Cursor must not read these — secrets stay local and encrypted.
+.env.local
+.env
+.env.*
+!.env.local.example
+!.env.example
+mobile/.env
+secrets/
+secrets/**
+**/SUPABASE_PROJECT.local.md
+docs/supabase/SUPABASE_PROJECT.local.md
