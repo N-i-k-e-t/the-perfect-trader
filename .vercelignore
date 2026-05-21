@@ -1,2 +1,13 @@
-legacy/
-docs/assets/
+# Keep Vercel uploads under 100MB — Next.js app only
+legacy/**
+mobile/**
+node_modules/**
+.git/**
+docs/**
+prompt-13-my.md
+*.md
+!README.md
+supabase/.branches
+supabase/.temp
+.cursor
+agent-transcripts
