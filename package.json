@@ -27,7 +27,8 @@
     "db:types": "supabase gen types typescript --local > src/types/database.ts",
     "db:env": "powershell -ExecutionPolicy Bypass -File ./scripts/sync-env-local.ps1",
     "docker:dev": "docker compose --profile dev up dev",
-    "docker:build": "docker compose up app --build"
+    "docker:build": "docker compose up app --build",
+    "deploy:live": "powershell -ExecutionPolicy Bypass -File ./scripts/deploy-live.ps1"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
