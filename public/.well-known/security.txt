@@ -1,0 +1,5 @@
+Contact: mailto:support@theperfecttrader.app
+Expires: 2027-05-21T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://the-perfect-trader.vercel.app/.well-known/security.txt
+Policy: https://the-perfect-trader.vercel.app/security

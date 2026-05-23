@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { PerfectTraderProvider } from "@/lib/context";
 import { APP_NAME, APP_NAME_SHORT } from "@/lib/brand";
+import { SITE_URL } from "@/lib/config";
 import ToastContainer from "@/components/Toast";
 import CookieConsent from "@/components/CookieConsent";
 import TrackingProvider from "@/components/analytics/TrackingProvider";
@@ -24,7 +25,24 @@ export const viewport = {
 
 export const metadata: Metadata = {
   title: `${APP_NAME} — Ambient Trading Discipline`,
-  description: 'Proactive habit architecture for modern traders.',
+  description: 'Trade your plan. Every session. Rules, grades, AI coach.',
+  metadataBase: new URL(SITE_URL),
+  openGraph: {
+    title: APP_NAME,
+    description: 'Trade your plan. Every session. Rules, grades, AI coach.',
+    url: SITE_URL,
+    siteName: APP_NAME,
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: APP_NAME,
+    description: 'Trade your plan. Every session.',
+    creator: '@ThePerfectTrader',
+  },
+  alternates: {
+    canonical: SITE_URL,
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',

@@ -1,0 +1,36 @@
+User-agent: *
+Allow: /
+Allow: /beta
+Allow: /pricing
+Allow: /about
+Allow: /faq
+Allow: /help
+Allow: /changelog
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Allow: /cookies
+Allow: /refund
+Allow: /security
+Allow: /blog
+Allow: /features
+Allow: /resources
+Allow: /download
+
+Disallow: /admin
+Disallow: /api/
+Disallow: /today
+Disallow: /rules
+Disallow: /journal
+Disallow: /stats
+Disallow: /calendar
+Disallow: /diary
+Disallow: /settings
+Disallow: /onboarding
+Disallow: /login
+Disallow: /signup
+Disallow: /auth/
+Disallow: /dashboard
+Disallow: /welcome
+
+Sitemap: https://the-perfect-trader.vercel.app/sitemap.xml

@@ -1,68 +1,58 @@
-'use client';
-
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Target, Shield, Brain, Heart } from 'lucide-react';
+import MarketingDocLayout from '@/components/marketing/MarketingDocLayout';
 import { APP_NAME } from '@/lib/brand';
 import { IS_BETA } from '@/lib/config';
 
 export default function AboutPage() {
     return (
-        <div className="min-h-[100dvh] bg-white text-[#1a1a2e]">
-            <header className="max-w-4xl mx-auto px-6 py-8 flex items-center justify-between">
-                <Link href="/" className="inline-flex items-center gap-2 text-gray-400 hover:text-[#1a1a2e] font-bold text-[14px]">
-                    <ArrowLeft size={18} />
-                    Home
-                </Link>
-                <Link href="/signup" className="h-11 px-6 bg-[#1a1a2e] text-white rounded-full font-black text-[13px] flex items-center">
-                    {IS_BETA ? 'Join beta' : 'Get started'}
-                </Link>
-            </header>
+        <MarketingDocLayout
+            title="Built by a trader. For traders."
+            subtitle="The Perfect Trader started as a personal obsession — why do I know the rules but keep breaking them?"
+        >
+            <section>
+                <h2 className="text-[20px] font-black text-white mb-3">The problem</h2>
+                <p>
+                    Most trading journals track P&amp;L, not discipline. They celebrate wins and hide the pattern behind
+                    losses. The real cost of a bad day isn&apos;t always the money — it&apos;s breaking the same rule
+                    again, trading when you said you wouldn&apos;t, and waking up tomorrow with less trust in yourself.
+                </p>
+                <p className="mt-4">
+                    I built this because I needed something that held me accountable before the market opened — not
+                    after I&apos;d already revenge-traded.
+                </p>
+            </section>
 
-            <main className="max-w-4xl mx-auto px-6 pb-24">
-                <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-                    <div className="w-14 h-14 bg-[#1a1a2e] text-white rounded-2xl flex items-center justify-center mb-8">
-                        <Target size={28} strokeWidth={2.5} />
-                    </div>
-                    <h1 className="text-[40px] md:text-[56px] font-black tracking-tighter mb-6 leading-[1.05]">
-                        Built for discipline,<br />not dopamine.
-                    </h1>
-                    <p className="text-[18px] font-medium text-gray-500 leading-relaxed max-w-2xl mb-12">
-                        {APP_NAME} is a psychology-first trading journal. We help active traders measure rule
-                        adherence, emotional baseline, and daily grades — so P&amp;L becomes a byproduct of process.
+            <section>
+                <h2 className="text-[20px] font-black text-white mb-3">The solution</h2>
+                <p>
+                    {APP_NAME} is a daily discipline OS: rules you set, trades you log, grades you earn. Pre-session
+                    checks lock your plan. Post-trade reflection catches tilt early. AI coaching reads your actual
+                    patterns — not generic motivational quotes.
+                </p>
+            </section>
+
+            <section>
+                <h2 className="text-[20px] font-black text-white mb-3">About Niket</h2>
+                <p>
+                    I&apos;m Niket — a trader from Nagpur, India, building this solo. Every piece of feedback goes
+                    directly to me. No support queue, no corporate layer. I use this app every session myself; if it
+                    doesn&apos;t help my discipline, it doesn&apos;t ship.
+                </p>
+            </section>
+
+            {IS_BETA && (
+                <section className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-6">
+                    <p className="text-white font-bold mb-4">
+                        We&apos;re in beta — a small group of traders with a direct feedback loop. Spots are limited.
                     </p>
-                </motion.div>
-
-                <div className="grid md:grid-cols-3 gap-6 mb-16">
-                    {[
-                        { icon: Brain, title: 'Psychology first', desc: 'Pre-session mood, tilt awareness, and coaching memory — not buy/sell signals.' },
-                        { icon: Shield, title: 'Your data', desc: 'Cloud sync with row-level security. Work data (trades) separated from thoughts (diary, notes).' },
-                        { icon: Heart, title: 'Beta now', desc: IS_BETA ? 'All features free while we learn from real traders. Pricing comes after validation.' : 'Pro plans available on web and mobile.' },
-                    ].map(({ icon: Icon, title, desc }) => (
-                        <div key={title} className="p-8 rounded-[32px] border border-gray-100 bg-gray-50/50">
-                            <Icon className="text-[#f59e0b] mb-4" size={28} />
-                            <h2 className="text-[18px] font-black mb-2">{title}</h2>
-                            <p className="text-[14px] font-medium text-gray-500 leading-relaxed">{desc}</p>
-                        </div>
-                    ))}
-                </div>
-
-                <section className="bg-[#1a1a2e] text-white rounded-[40px] p-10 md:p-14">
-                    <h2 className="text-[13px] font-black uppercase tracking-[0.3em] text-yellow-500 mb-4">Mission</h2>
-                    <p className="text-[20px] font-bold leading-relaxed text-white/90 mb-8">
-                        We are not a broker, signal service, or financial advisor. We are a behavioral operating system
-                        for traders who already know what to do — but need architecture to do it under stress.
-                    </p>
-                    <div className="flex flex-wrap gap-4">
-                        <Link href="/features" className="h-12 px-6 rounded-full bg-white/10 font-black text-[13px] flex items-center hover:bg-white/20">
-                            See features
-                        </Link>
-                        <Link href="/blog" className="h-12 px-6 rounded-full bg-yellow-500 text-[#1a1a2e] font-black text-[13px] flex items-center">
-                            Read the blog
-                        </Link>
-                    </div>
+                    <Link
+                        href="/beta"
+                        className="inline-flex h-12 items-center px-6 rounded-xl bg-emerald-500 text-[#1a1a2e] font-black text-[15px] hover:bg-emerald-400"
+                    >
+                        Join Beta →
+                    </Link>
                 </section>
-            </main>
-        </div>
+            )}
+        </MarketingDocLayout>
     );
 }

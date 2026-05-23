@@ -14,5 +14,13 @@ export function createAdminClient(): SupabaseClient {
 }
 
 export function isFounderAdminEmail(email: string | null | undefined): boolean {
-    return email?.toLowerCase() === 'niketpatil1624@gmail.com';
+    if (!email) return false;
+    const normalized = email.toLowerCase();
+    const fromEnv = process.env.ADMIN_EMAILS?.split(',')
+        .map((e) => e.trim().toLowerCase())
+        .filter(Boolean);
+    if (fromEnv && fromEnv.length > 0) {
+        return fromEnv.includes(normalized);
+    }
+    return normalized === 'niketpatil1624@gmail.com';
 }
