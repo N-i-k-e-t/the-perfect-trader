@@ -92,3 +92,10 @@ mobile/android/app/debug/
 mobile/android/app/profile/
 mobile/android/app/release/
 mobile/.env
+
+.env.observability
+.env.observability.local
+COPY_PASTE_FINISH_SETUP.txt
+docs/supabase/APPLY_CRON_NOW.sql
+.fix-vercel-prod.env
+

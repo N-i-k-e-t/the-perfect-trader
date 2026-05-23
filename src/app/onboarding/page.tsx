@@ -1,17 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePerfectTrader } from '@/lib/context';
 import { createClient } from '@/utils/supabase/client';
+import { isSupabaseConfigured } from '@/lib/supabase-data';
+import { userFromSupabaseAuthUser } from '@/lib/auth-user';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { track } from '@/lib/analytics';
+import { ONBOARDING_STEPS } from '@/lib/analytics/constants';
+import { waitForSession } from '@/lib/auth-session';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Plus, Minus, Check, Loader2, Sparkles, TrendingUp, ShieldCheck, Zap, Target, Lock, Brain, Globe, Clock, Award } from 'lucide-react';
-import Image from 'next/image';
+import { ArrowLeft, Plus, Minus, Check, Loader2, Sparkles, ShieldCheck, Target, Lock, Award } from 'lucide-react';
 
 export default function OnboardingPage() {
-    const { user, showToast, updateUserModel, updateSession } = usePerfectTrader();
+    const { user, isCheckingAuth, showToast, updateUserModel, updateSession, setUser } = usePerfectTrader();
     const router = useRouter();
     const supabase = createClient();
+    const [authReady, setAuthReady] = useState(() => Boolean(user));
     const [currentStep, setCurrentStep] = useState(0);
     const [answers, setAnswers] = useState<any>({
         style: '',
@@ -28,11 +34,68 @@ export default function OnboardingPage() {
         systemType: ''
     });
     const [isGenerating, setIsGenerating] = useState(false);
-    const [isHydrated, setIsHydrated] = useState(false);
+    const stepEnteredAt = useRef(Date.now());
 
     useEffect(() => {
-        setIsHydrated(true);
-    }, []);
+        const stepName = ONBOARDING_STEPS[currentStep] ?? `step_${currentStep}`;
+        const elapsed = Date.now() - stepEnteredAt.current;
+        track('onboarding_step_viewed', 'onboarding', {
+            step_index: currentStep,
+            step_name: stepName,
+            time_on_prev_step_ms: currentStep > 0 ? elapsed : 0,
+        });
+        stepEnteredAt.current = Date.now();
+    }, [currentStep]);
+
+    useEffect(() => {
+        if (!isSupabaseConfigured()) {
+            setAuthReady(true);
+            return;
+        }
+
+        if (user) {
+            setAuthReady(true);
+            return;
+        }
+
+        let cancelled = false;
+
+        const finish = (authUser: SupabaseUser) => {
+            if (cancelled) return;
+            setUser(userFromSupabaseAuthUser(authUser));
+            setAuthReady(true);
+        };
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (session?.user) finish(session.user);
+        });
+
+        (async () => {
+            const { data: { user: authUser } } = await supabase.auth.getUser();
+            if (authUser) {
+                finish(authUser);
+                return;
+            }
+            const session = await waitForSession(supabase, 5, 120);
+            if (session?.user) {
+                finish(session.user);
+                return;
+            }
+            if (!cancelled) router.replace('/signup?error=session');
+        })();
+
+        return () => {
+            cancelled = true;
+            subscription.unsubscribe();
+        };
+    }, [supabase, router, setUser, user]);
+
+    useEffect(() => {
+        if (!isSupabaseConfigured() || isCheckingAuth) return;
+        if (!user && authReady) {
+            router.replace('/signup?error=session');
+        }
+    }, [isCheckingAuth, user, authReady, router]);
 
     // Auto-advance Step 9 (Architecture Generation)
     useEffect(() => {
@@ -44,8 +107,21 @@ export default function OnboardingPage() {
         }
     }, [currentStep]);
 
-    const nextStep = () => setCurrentStep(prev => prev + 1);
-    const prevStep = () => setCurrentStep(prev => prev - 1);
+    const nextStep = () => {
+        const stepName = ONBOARDING_STEPS[currentStep] ?? `step_${currentStep}`;
+        track('onboarding_step_completed', 'onboarding', {
+            step_index: currentStep,
+            step_name: stepName,
+        });
+        setCurrentStep((prev) => prev + 1);
+    };
+    const prevStep = () => {
+        track('onboarding_step_back', 'onboarding', {
+            from_step: currentStep,
+            to_step: Math.max(0, currentStep - 1),
+        });
+        setCurrentStep((prev) => prev - 1);
+    };
 
     const handleSingleSelect = (key: string, value: string, autoAdvance = true) => {
         setAnswers({ ...answers, [key]: value });
@@ -78,13 +154,30 @@ export default function OnboardingPage() {
             });
         }
 
+        track('onboarding_quiz_completed', 'onboarding', {
+            trading_style: answers.style,
+            experience: answers.experience,
+            primary_market: answers.assetClass,
+            primary_constraint: answers.primaryConstraint,
+            goal_level: answers.goalLevel,
+            risk_per_trade: answers.riskPerTrade,
+            time_window: answers.timeWindow,
+        });
+
         setTimeout(() => {
             setIsGenerating(false);
             nextStep(); // Final Welcome
         }, 4000);
     };
 
-    if (!isHydrated) return <div className="min-h-[100dvh] bg-white flex items-center justify-center"><Loader2 className="animate-spin text-blue-500" /></div>;
+    if (!authReady) {
+        return (
+            <div className="min-h-[100dvh] bg-white flex flex-col items-center justify-center gap-3">
+                <Loader2 className="animate-spin text-blue-500" size={32} />
+                <p className="text-[12px] font-bold text-gray-400">Setting up your account…</p>
+            </div>
+        );
+    }
 
     const totalSteps = 11; // 0-10
     const progress = ((currentStep + 1) / totalSteps) * 100;
@@ -145,14 +238,11 @@ export default function OnboardingPage() {
                     {/* STEP 0: THE SPLASH - PREMIUM CAL AI STYLE */}
                     {currentStep === 0 && (
                         <motion.div key="s0" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.1 }} className="flex-1 flex flex-col items-center justify-center text-center px-4">
-                            <div className="relative w-full max-w-[320px] aspect-[4/5] rounded-[60px] overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.25)] border-4 border-white bg-black mb-12">
-                                <Image 
-                                    src="/brain/54a113ee-baac-4c15-b0e6-cd80b556d9d1/The Perfect Trader_dashboard_preview_onboarding_1774010392149.png" 
-                                    alt="The Perfect Trader Preview" 
-                                    fill 
-                                    className="object-cover opacity-80"
-                                />
-                                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black to-transparent" />
+                            <div className="relative w-full max-w-[320px] aspect-[4/5] rounded-[60px] overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.25)] border-4 border-white bg-gradient-to-br from-[#1a1a2e] via-[#2d2d4a] to-blue-900 mb-12 flex flex-col items-center justify-center">
+                                <div className="w-20 h-20 bg-white/10 rounded-[24px] flex items-center justify-center mb-6">
+                                    <Target size={40} className="text-yellow-400" strokeWidth={2.5} />
+                                </div>
+                                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent" />
                                 <div className="absolute bottom-10 left-10 right-10 text-left">
                                     <div className="flex items-center gap-2 mb-2">
                                         <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { track } from '@/lib/analytics';
 
 const CONSENT_KEY = 'perfect_trader_cookie_consent';
 
@@ -11,7 +12,10 @@ export default function CookieConsent() {
     useEffect(() => {
         if (typeof window === 'undefined') return;
         const stored = localStorage.getItem(CONSENT_KEY);
-        if (!stored) setVisible(true);
+        if (!stored) {
+            setVisible(true);
+            track('cookie_consent_shown', 'settings', { is_first_time: true });
+        }
     }, []);
 
     const accept = (analytics: boolean) => {
@@ -19,6 +23,7 @@ export default function CookieConsent() {
             CONSENT_KEY,
             JSON.stringify({ acceptedAt: new Date().toISOString(), analytics })
         );
+        track(analytics ? 'cookie_consent_accepted' : 'cookie_consent_rejected', 'settings', {});
         setVisible(false);
     };
 

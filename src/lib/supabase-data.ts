@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { track } from '@/lib/analytics';
 
 export const DATA_VERSION = '1.1.0';
 
@@ -21,14 +22,27 @@ export async function loadTraderData(
     supabase: SupabaseClient,
     userId: string
 ): Promise<PersistableTraderData | null> {
+    const endpoint = 'supabase/trader_snapshots';
+    const apiCallStart = Date.now();
     const { data, error } = await supabase
         .from('trader_snapshots')
         .select('data, version')
         .eq('user_id', userId)
         .maybeSingle();
 
+    track('api_call_made', 'technical', {
+        endpoint,
+        method: 'SELECT',
+        latency_ms: Date.now() - apiCallStart,
+        status_code: error ? 500 : 200,
+    });
     if (error) {
         console.error('[supabase] load failed', error.message);
+        track('api_call_failed', 'technical', {
+            endpoint,
+            status_code: 500,
+            error_message: error.message?.slice(0, 120),
+        });
         return null;
     }
     if (!data?.data || typeof data.data !== 'object') return null;
@@ -40,6 +54,8 @@ export async function saveTraderData(
     userId: string,
     payload: PersistableTraderData
 ): Promise<boolean> {
+    const endpoint = 'supabase/trader_snapshots';
+    const apiCallStart = Date.now();
     const { error } = await supabase.from('trader_snapshots').upsert(
         {
             user_id: userId,
@@ -50,8 +66,19 @@ export async function saveTraderData(
         { onConflict: 'user_id' }
     );
 
+    track('api_call_made', 'technical', {
+        endpoint,
+        method: 'UPSERT',
+        latency_ms: Date.now() - apiCallStart,
+        status_code: error ? 500 : 200,
+    });
     if (error) {
         console.error('[supabase] save failed', error.message);
+        track('api_call_failed', 'technical', {
+            endpoint,
+            status_code: 500,
+            error_message: error.message?.slice(0, 120),
+        });
         return false;
     }
     return true;

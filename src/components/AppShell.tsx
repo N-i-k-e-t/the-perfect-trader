@@ -9,6 +9,7 @@ import InstallPrompt from './InstallPrompt';
 import CaptureHub from './capture/CaptureHub';
 import DailyStateCheck from './DailyStateCheck';
 import SettingsSheet from './SettingsSheet';
+import RetentionEffects from './retention/RetentionEffects';
 import { Target, Flame, Sparkles } from 'lucide-react';
 import { useMemo } from 'react';
 import { IS_BETA } from '@/lib/config';
@@ -179,6 +180,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <InstallPrompt />
             <CaptureHub />
             <DailyStateCheck />
+            <RetentionEffects />
             <SettingsSheet isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
         </div>
     );

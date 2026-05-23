@@ -95,14 +95,14 @@ npm run build
 
 ---
 
-## Phase 3 — Optional services
+## Phase 3 — Observability & staging
 
-| Service | When |
-|---------|------|
-| Custom domain | Vercel → Domains |
-| Sentry | Error tracking — not configured yet |
-| Stripe | Payments — not configured yet |
-| Staging Supabase | Separate project before high traffic |
+| Service | Status | Doc |
+|---------|--------|-----|
+| **Sentry** | Wired in app; add DSN on Vercel | [docs/observability/SENTRY.md](../observability/SENTRY.md) |
+| **Staging Supabase** | Separate project + env mapping | [docs/supabase/STAGING_PROJECT.md](../supabase/STAGING_PROJECT.md) |
+| Custom domain | Vercel → Domains | — |
+| Stripe | Payments — not configured yet | — |
 
 ---
 

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, TrendingUp, ShieldCheck, Zap, AlertCircle, ShoppingCart, Activity, Brain, Calendar, Check } from 'lucide-react';
 import { format } from 'date-fns';
 import { DailyLog, Trade, MarketEvent } from '@/types/trading';
+import { useModalTracking } from '@/lib/analytics';
 
 interface CalendarDetailSheetProps {
     isOpen: boolean;
@@ -13,6 +14,7 @@ interface CalendarDetailSheetProps {
 }
 
 export default function CalendarDetailSheet({ isOpen, onClose, date, data }: CalendarDetailSheetProps) {
+    useModalTracking('calendar_detail_sheet', isOpen);
     if (!date) return null;
 
     const trades: Trade[] = []; // This would come from context in a real app or be passed in

@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     X, 
@@ -12,11 +13,17 @@ import {
     HelpCircle 
 } from 'lucide-react';
 import { usePerfectTrader } from '@/lib/context';
+import { useModalTracking } from '@/lib/analytics';
+import SetPasswordSheet from '@/components/settings/SetPasswordSheet';
 
 export default function SettingsSheet({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
     const { logout, user } = usePerfectTrader();
+    const [isPasswordOpen, setIsPasswordOpen] = useState(false);
+    useModalTracking('settings_sheet', isOpen);
 
     return (
+        <>
+        <SetPasswordSheet isOpen={isPasswordOpen} onClose={() => setIsPasswordOpen(false)} />
         <AnimatePresence>
             {isOpen && (
                 <>
@@ -64,7 +71,11 @@ export default function SettingsSheet({ isOpen, onClose }: { isOpen: boolean; on
                                     <h5 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4 ml-2">Account & Security</h5>
                                     <div className="flex flex-col gap-2">
                                         <SettingItem icon={<User size={18}/>} label="Personal Information" />
-                                        <SettingItem icon={<ShieldCheck size={18}/>} label="Security & Password" />
+                                        <SettingItem
+                                            icon={<ShieldCheck size={18}/>}
+                                            label="Email & password login"
+                                            onClick={() => setIsPasswordOpen(true)}
+                                        />
                                     </div>
                                 </section>
 
@@ -142,12 +153,17 @@ export default function SettingsSheet({ isOpen, onClose }: { isOpen: boolean; on
                 </>
             )}
         </AnimatePresence>
+        </>
     );
 }
 
-function SettingItem({ icon, label, value }: { icon: any, label: string, value?: string }) {
+function SettingItem({ icon, label, value, onClick }: { icon: React.ReactNode; label: string; value?: string; onClick?: () => void }) {
     return (
-        <button className="w-full h-14 bg-white border border-gray-100/50 flex items-center justify-between px-5 rounded-2xl active:bg-gray-50 transition-colors">
+        <button
+            type="button"
+            onClick={onClick}
+            className="w-full h-14 bg-white border border-gray-100/50 flex items-center justify-between px-5 rounded-2xl active:bg-gray-50 transition-colors"
+        >
             <div className="flex items-center gap-4 text-[#1a1a2e]">
                 <div className="text-gray-400">{icon}</div>
                 <span className="text-[14px] font-bold">{label}</span>

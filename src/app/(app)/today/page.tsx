@@ -1,6 +1,9 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+export const dynamic = 'force-dynamic';
+
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { track } from '@/lib/analytics';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -35,6 +38,7 @@ export default function DashboardPage() {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [weekOffset, setWeekOffset] = useState(0);
     const [showWelcome, setShowWelcome] = useState(false);
+    const stabilityViewedRef = useRef(false);
 
     const today = new Date().toISOString().split('T')[0];
     const selectedDateStr = selectedDate.toISOString().split('T')[0];
@@ -53,6 +57,15 @@ export default function DashboardPage() {
 
     const activeRules = rules.filter(r => r.isActive !== false);
     const score = calculateRuleChecklistScore(activeRules.length, checkedIds.length);
+
+    useEffect(() => {
+        if (!mounted || stabilityViewedRef.current) return;
+        stabilityViewedRef.current = true;
+        track('session_stability_score_viewed', 'session', {
+            session_date: selectedDateStr,
+            score,
+        });
+    }, [mounted, selectedDateStr, score]);
     const isPerfect = score === 100 && activeRules.length > 0;
 
     const streak = analytics.consistencyDays || 0;
@@ -63,8 +76,14 @@ export default function DashboardPage() {
             return;
         }
         const isChecked = checkedIds.includes(ruleId);
-        const newChecked = isChecked 
-            ? checkedIds.filter(id => id !== ruleId) 
+        if (!isChecked) {
+            track('rule_followed_flagged', 'rules', {
+                rule_id: ruleId,
+                trade_id: null,
+            });
+        }
+        const newChecked = isChecked
+            ? checkedIds.filter(id => id !== ruleId)
             : [...checkedIds, ruleId];
         
         const newScore = calculateRuleChecklistScore(activeRules.length, newChecked.length);

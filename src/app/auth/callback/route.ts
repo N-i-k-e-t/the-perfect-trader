@@ -1,19 +1,36 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { NextResponse, type NextRequest } from 'next/server';
+import { getPostAuthPath } from '@/lib/auth-routes';
+import { createRouteHandlerClient, redirectBase } from '@/utils/supabase/route-handler';
 
-/** Supabase OAuth / magic-link callback — exchanges `code` for a session cookie. */
-export async function GET(request: Request) {
-    const { searchParams, origin } = new URL(request.url);
+export async function GET(request: NextRequest) {
+    const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
-    const next = searchParams.get('next') ?? '/today';
+    const oauthError = searchParams.get('error');
+    const errorDescription = searchParams.get('error_description');
+    const base = redirectBase(request);
 
-    if (code) {
-        const supabase = await createClient();
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (!error) {
-            return NextResponse.redirect(`${origin}${next}`);
-        }
+    if (oauthError) {
+        console.error('[auth/callback] OAuth error:', oauthError, errorDescription);
+        return NextResponse.redirect(
+            `${base}/auth/auth-code-error?error=${encodeURIComponent(oauthError)}&description=${encodeURIComponent(errorDescription ?? '')}`
+        );
     }
 
-    return NextResponse.redirect(`${origin}/login?error=auth_callback`);
+    if (!code) {
+        console.error('[auth/callback] No code in URL');
+        return NextResponse.redirect(`${base}/auth/auth-code-error?error=no_code`);
+    }
+
+    const { supabase, applySessionCookiesTo } = createRouteHandlerClient(request);
+    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (exchangeError || !data.session?.user) {
+        console.error('[auth/callback] exchangeCodeForSession:', exchangeError?.message);
+        return NextResponse.redirect(
+            `${base}/auth/auth-code-error?error=${encodeURIComponent(exchangeError?.message ?? 'exchange_failed')}`
+        );
+    }
+
+    const next = getPostAuthPath(data.session.user);
+    return applySessionCookiesTo(NextResponse.redirect(`${base}${next}`));
 }

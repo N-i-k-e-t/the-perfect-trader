@@ -1,16 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePerfectTrader } from '@/lib/context';
 import PersonaSheet from '@/components/settings/PersonaSheet';
+import SetPasswordSheet from '@/components/settings/SetPasswordSheet';
+import { createClient } from '@/utils/supabase/client';
+import { getAuthLinkStatus } from '@/lib/auth-password';
 import { IS_BETA } from '@/lib/config';
+import { track } from '@/lib/analytics';
 import { STORAGE_KEY, STORAGE_KEY_LEGACY } from '@/lib/brand';
 import { 
     ChevronRight, 
     LogOut, 
-    Settings, 
     CreditCard, 
     Download, 
     Bell, 
@@ -22,13 +25,26 @@ import {
     Edit3,
     Camera,
     Sparkles,
-    Brain
+    Brain,
+    Lock
 } from 'lucide-react';
 
 export default function ProfilePage() {
     const { user, trades, analytics, userModel, logout, showToast, diaryEntries } = usePerfectTrader();
     const router = useRouter();
+    const supabase = createClient();
     const [isPersonaOpen, setIsPersonaOpen] = useState(false);
+    const [isPasswordOpen, setIsPasswordOpen] = useState(false);
+    const [passwordLinked, setPasswordLinked] = useState<boolean | null>(null);
+
+    const refreshPasswordStatus = useCallback(async () => {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        setPasswordLinked(getAuthLinkStatus(authUser).hasEmailPassword);
+    }, [supabase]);
+
+    useEffect(() => {
+        refreshPasswordStatus();
+    }, [refreshPasswordStatus]);
 
     const initials = user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'TR';
     
@@ -46,6 +62,10 @@ export default function ProfilePage() {
         if (!confirm('Delete all local app data on this device? Cloud data remains until you request account deletion from support.')) {
             return;
         }
+        const raw = localStorage.getItem(STORAGE_KEY);
+        track('local_cache_cleared', 'settings', {
+            data_size_estimate_kb: raw ? Math.round(raw.length / 1024) : 0,
+        });
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem(STORAGE_KEY_LEGACY);
         showToast('Local data cleared', 'success');
@@ -53,6 +73,7 @@ export default function ProfilePage() {
     };
 
     const handleExport = () => {
+        track('data_export_requested', 'settings', {});
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) {
             showToast('No data to export', 'info');
@@ -65,6 +86,11 @@ export default function ProfilePage() {
         a.download = `perfect-trader-export-${new Date().toISOString().slice(0, 10)}.json`;
         a.click();
         URL.revokeObjectURL(url);
+        track('analytics_export_completed', 'analytics', {
+            export_type: 'json',
+            record_count: trades.length,
+            file_size_bytes: raw.length,
+        });
         showToast('Data exported', 'success');
     };
 
@@ -97,6 +123,13 @@ export default function ProfilePage() {
         <div className="min-h-[100dvh] bg-[#fcfcfd] flex flex-col pb-[calc(env(safe-area-inset-bottom)+84px)] italic-none">
             {/* PERSONA RECALIBRATION SHEET */}
             <PersonaSheet isOpen={isPersonaOpen} onClose={() => setIsPersonaOpen(false)} />
+            <SetPasswordSheet
+                isOpen={isPasswordOpen}
+                onClose={() => {
+                    setIsPasswordOpen(false);
+                    refreshPasswordStatus();
+                }}
+            />
 
             {/* HEADER / USER CARD */}
             <header className="px-5 pt-12 pb-8 flex flex-col items-center">
@@ -180,6 +213,19 @@ export default function ProfilePage() {
                         <SectionLabel text="Account" />
                         <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
                             <MenuItem icon={Edit3} label="Edit Profile" />
+                            <MenuItem
+                                icon={Lock}
+                                label="Email & password login"
+                                value={
+                                    passwordLinked === null
+                                        ? '…'
+                                        : passwordLinked
+                                          ? 'Enabled'
+                                          : 'Set up'
+                                }
+                                iconColor="text-indigo-500"
+                                onClick={() => setIsPasswordOpen(true)}
+                            />
                             <MenuItem icon={CreditCard} label="Subscription" value={user?.isPro ? 'Pro' : IS_BETA ? 'Beta free' : '3-Day Trial'} iconColor="text-blue-500" onClick={() => router.push('/pricing')} />
                             <MenuItem icon={Download} label="Export Data" value="JSON" onClick={handleExport} iconColor="text-orange-500" />
                             <MenuItem icon={ShieldCheck} label="Privacy Policy" onClick={() => router.push('/privacy')} />

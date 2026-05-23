@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useModalTracking } from '@/lib/analytics';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePerfectTrader } from '@/lib/context';
 import { 
@@ -71,7 +72,8 @@ export default function RulesPage() {
     const [activeTab, setActiveTab] = useState<Tab>('active');
     const [libCategory, setLibCategory] = useState<Category>('All');
     const [isSheetOpen, setIsSheetOpen] = useState(false);
-    
+    useModalTracking('rule_create_modal', isSheetOpen);
+
     // Bottom Sheet Form State
     const [ruleText, setRuleText] = useState('');
     const [ruleEmoji, setRuleEmoji] = useState('🎯');

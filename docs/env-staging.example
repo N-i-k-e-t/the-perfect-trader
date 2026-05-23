@@ -1,0 +1,10 @@
+﻿# Copy to .env.local for staging dev — see docs/supabase/STAGING_PROJECT.md
+
+NEXT_PUBLIC_APP_ENV=staging
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_STAGING_REF.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-staging-anon-jwt
+SUPABASE_PROJECT_REF=YOUR_STAGING_REF
+SUPABASE_REGION=ap-northeast-1
+NEXT_PUBLIC_BETA_MODE=true
+NEXT_PUBLIC_BETA_USER_CAP=100

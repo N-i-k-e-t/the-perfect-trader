@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { track, useModalTracking } from '@/lib/analytics';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePerfectTrader } from '@/lib/context';
 import { X, TrendingUp, TrendingDown, MessageSquare, Target, Activity, ShieldCheck, Wand2, Mic, Camera } from 'lucide-react';
@@ -22,6 +23,9 @@ interface TradeEntryModalProps {
 
 export default function TradeEntryModal({ isOpen, onClose }: TradeEntryModalProps) {
     const { addTrade, rules, playbooks, showToast } = usePerfectTrader();
+    useModalTracking('add_trade_modal', isOpen);
+    const aiParseAcceptedRef = useRef(false);
+    const lastAiParseFieldsRef = useRef<string[]>([]);
 
     const [pair, setPair] = useState('');
     const [direction, setDirection] = useState<'Long' | 'Short'>('Long');
@@ -50,7 +54,25 @@ export default function TradeEntryModal({ isOpen, onClose }: TradeEntryModalProp
             return;
         }
         setIsParsing(true);
-        const { parsedTrade, detectedFollowed, detectedBroken } = await parseRoughNote(roughNote, activeRules);
+        const callStart = Date.now();
+        const { parsedTrade, detectedFollowed, detectedBroken, confidence } = await parseRoughNote(
+            roughNote,
+            activeRules
+        );
+        const latency = Date.now() - callStart;
+        const fieldsExtracted = Object.keys(parsedTrade).filter(
+            (k) =>
+                parsedTrade[k as keyof typeof parsedTrade] != null &&
+                parsedTrade[k as keyof typeof parsedTrade] !== ''
+        );
+        track('trade_ai_parsed', 'ai', {
+            input_method: 'text',
+            note_length: roughNote.length,
+            ai_confidence: confidence ?? null,
+            fields_extracted: fieldsExtracted,
+            latency_ms: latency,
+        });
+        lastAiParseFieldsRef.current = fieldsExtracted;
         setIsParsing(false);
 
         // Populate fields
@@ -67,8 +89,17 @@ export default function TradeEntryModal({ isOpen, onClose }: TradeEntryModalProp
         setRulesFollowed(detectedFollowed);
         setRulesBroken(detectedBroken);
 
+        aiParseAcceptedRef.current = true;
         showToast('AI successfully extracted structured data! Please review.', 'success');
-        setActiveTab('manual'); // Switch to review mode
+        setActiveTab('manual');
+    };
+
+    const handleClose = () => {
+        if (lastAiParseFieldsRef.current.length > 0 && !aiParseAcceptedRef.current) {
+            track('trade_ai_parse_rejected', 'ai', { reason: null });
+            lastAiParseFieldsRef.current = [];
+        }
+        onClose();
     };
 
     const toggleFollowed = (id: string) => {
@@ -77,6 +108,7 @@ export default function TradeEntryModal({ isOpen, onClose }: TradeEntryModalProp
         } else {
             setRulesFollowed(prev => [...prev, id]);
             setRulesBroken(prev => prev.filter(r => r !== id));
+            track('rule_followed_flagged', 'rules', { rule_id: id, trade_id: null });
         }
     };
 
@@ -86,6 +118,11 @@ export default function TradeEntryModal({ isOpen, onClose }: TradeEntryModalProp
         } else {
             setRulesBroken(prev => [...prev, id]);
             setRulesFollowed(prev => prev.filter(r => r !== id));
+            track('rule_violated_flagged', 'rules', {
+                rule_id: id,
+                trade_id: null,
+                session_date: new Date().toISOString().split('T')[0],
+            });
         }
     };
 
@@ -129,6 +166,19 @@ export default function TradeEntryModal({ isOpen, onClose }: TradeEntryModalProp
         };
 
         addTrade(trade);
+        if (aiParseAcceptedRef.current || lastAiParseFieldsRef.current.length > 0) {
+            const overridden = lastAiParseFieldsRef.current.filter((f) => {
+                if (f === 'pair') return trade.pair !== pair.trim().toUpperCase();
+                if (f === 'type') return trade.type !== direction;
+                return false;
+            });
+            track('trade_ai_parse_accepted', 'ai', {
+                trade_id: trade.id,
+                fields_overridden: overridden,
+            });
+            aiParseAcceptedRef.current = false;
+            lastAiParseFieldsRef.current = [];
+        }
         showToast(`${pair.toUpperCase()} ${direction} trade logged!`, 'success');
 
         // Reset form
@@ -156,7 +206,7 @@ export default function TradeEntryModal({ isOpen, onClose }: TradeEntryModalProp
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={onClose}
+                        onClick={handleClose}
                         className="fixed inset-0 bg-black/30 z-[150] backdrop-blur-sm"
                     />
                     {/* Modal */}
@@ -173,7 +223,7 @@ export default function TradeEntryModal({ isOpen, onClose }: TradeEntryModalProp
 
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-xl font-bold text-[#1a1a2e]">Log Trade</h2>
-                                <button onClick={onClose} className="p-2 text-[#9ca3af] hover:text-[#1a1a2e]">
+                                <button onClick={handleClose} className="p-2 text-[#9ca3af] hover:text-[#1a1a2e]">
                                     <X size={20} />
                                 </button>
                             </div>

@@ -5,6 +5,8 @@ import { motion } from 'framer-motion';
 import { usePerfectTrader } from '@/lib/context';
 import { runOrchestrator } from '@/lib/agents/orchestrator';
 import { EmptyState } from '@/components/ui/EmptyState';
+import RiskAlertTrack from '@/components/analytics/RiskAlertTrack';
+import PatternInsightTrack from '@/components/analytics/PatternInsightTrack';
 import {
     Flame,
     Lightbulb,
@@ -115,7 +117,11 @@ export default function StatsPage() {
 
     // AI Insights
     const aiOutput = useMemo(() => {
-        return runOrchestrator(trades, rules, dailyLogs, streak, bestStreak, null, userModel);
+        const output = runOrchestrator(trades, rules, dailyLogs, streak, bestStreak, null, userModel);
+        return {
+            ...output,
+            insights: output.insights.filter((i) => i.confidence >= 0.6),
+        };
     }, [trades, rules, dailyLogs, streak, bestStreak, userModel]);
 
     const streakPercent = bestStreak > 0 ? Math.min((streak / Math.max(bestStreak, 1)) * 100, 100) : (streak > 0 ? 100 : 0);
@@ -284,8 +290,9 @@ export default function StatsPage() {
 
             {/* AI Insights & Alerts */}
             <section className="flex flex-col gap-4">
-                {aiOutput.insights.map(insight => (
-                    <div key={insight.id} className="card-premium !bg-yellow-50/30 !border-yellow-100">
+                {aiOutput.insights.map((insight) => (
+                    <div key={insight.id} className="card-premium !bg-yellow-50/30 !border-yellow-100 relative">
+                        <PatternInsightTrack insight={insight} />
                         <div className="flex items-center gap-2 mb-2">
                             <span className="text-[10px] font-black text-yellow-600 uppercase tracking-widest">Trading Pattern</span>
                             <span className="text-[10px] font-bold text-gray-400">({Math.round(insight.confidence * 100)}% Conf.)</span>
@@ -296,9 +303,10 @@ export default function StatsPage() {
                 ))}
 
                 {aiOutput.riskAlerts.map((alert, i) => (
-                    <div key={i} className={`card-premium flex items-start gap-4 ${
+                    <div key={i} className={`card-premium flex items-start gap-4 relative ${
                         alert.severity === 'critical' ? '!bg-red-50 !border-red-100' : '!bg-yellow-50 !border-yellow-100'
                     }`}>
+                        <RiskAlertTrack alert={alert} alertKey={`${i}-${alert.timestamp}`} />
                         <ShieldAlert size={20} className={alert.severity === 'critical' ? 'text-red-500' : 'text-yellow-600'} />
                         <div>
                             <p className="text-[15px] font-black text-[#1a1a2e]">{alert.alert}</p>

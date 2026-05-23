@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePerfectTrader } from '@/lib/context';
+import { track, useModalTracking } from '@/lib/analytics';
 import { Sparkles, Brain, Check, MessageSquare, Coffee } from 'lucide-react';
 
 interface MentalResetProps {
@@ -9,14 +10,24 @@ interface MentalResetProps {
 }
 
 export default function MentalReset({ isOpen, onClose }: MentalResetProps) {
-    const { trades, showToast } = usePerfectTrader();
+    const { trades, showToast, updateSession } = usePerfectTrader();
     const [step, setStep] = useState(1);
+    const [postNote, setPostNote] = useState('');
+    useModalTracking('mental_reset_modal', isOpen);
     
     const todayTrades = trades.filter(t => t.date.split('T')[0] === new Date().toISOString().split('T')[0]);
     const totalPnl = todayTrades.reduce((acc, t) => acc + (t.pnl || 0), 0);
     const winRate = todayTrades.length > 0 ? (todayTrades.filter(t => (t.pnl || 0) > 0).length / todayTrades.length) * 100 : 0;
 
     const handleFinalize = () => {
+        const todayDate = new Date().toISOString().split('T')[0];
+        if (postNote.trim()) {
+            updateSession({ notes: postNote.trim() });
+            track('session_post_note_added', 'session', {
+                session_date: todayDate,
+                note_length: postNote.trim().length,
+            });
+        }
         showToast('Session Closed. See you tomorrow, Trader.', 'success');
         onClose();
     };
@@ -90,9 +101,11 @@ export default function MentalReset({ isOpen, onClose }: MentalResetProps) {
                                     </div>
                                     Daily Lesson
                                 </h3>
-                                <textarea 
+                                <textarea
                                     autoFocus
                                     placeholder="One lesson you learned today..."
+                                    value={postNote}
+                                    onChange={(e) => setPostNote(e.target.value)}
                                     className="w-full h-40 bg-gray-50 rounded-[32px] p-6 text-[17px] font-bold text-[#1a1a2e] border-none outline-none resize-none shadow-inner"
                                 />
                             </div>

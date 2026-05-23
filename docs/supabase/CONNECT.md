@@ -54,8 +54,11 @@ If you see **IPv6 is not supported**, use `npm run db:push:url` (pooler URL) ins
 
 1. [Authentication → Providers](https://supabase.com/dashboard/project/firqlsjixojnrofycwbs/auth/providers) — enable **Email**.
 2. [URL configuration](https://supabase.com/dashboard/project/firqlsjixojnrofycwbs/auth/url-configuration):
-   - Site URL: `http://localhost:3000` (dev)
-   - Redirect URLs: `http://localhost:3000/auth/callback`, your Vercel production URL + `/auth/callback`
+   - Site URL: `https://the-perfect-trader.vercel.app` (production) or `http://localhost:3000` (dev)
+   - Redirect URLs (add **all**):
+     - `https://the-perfect-trader.vercel.app/auth/callback`
+     - `https://the-perfect-trader.vercel.app/**`
+     - `http://localhost:3000/auth/callback`
 
 ## 4. Verify
 

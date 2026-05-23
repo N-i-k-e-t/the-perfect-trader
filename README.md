@@ -32,7 +32,8 @@ Open http://localhost:3000
 | **Master AI prompt** | [docs/MASTER_AI_PROMPT.md](docs/MASTER_AI_PROMPT.md) |
 | **Production specs** | [docs/production/README.md](docs/production/README.md) |
 | **Database** | [docs/DATABASE.md](docs/DATABASE.md) |
-| **Supabase** | [docs/SUPABASE.md](docs/SUPABASE.md) |
+| **Supabase** | [docs/SUPABASE.md](docs/SUPABASE.md) · [staging](docs/supabase/STAGING_PROJECT.md) |
+| **Sentry** | [docs/observability/SENTRY.md](docs/observability/SENTRY.md) |
 
 ## Rename this folder on your PC (optional)
 

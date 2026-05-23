@@ -16,7 +16,7 @@ export default function PrivacyPage() {
                     'Account: email, display name, authentication identifiers (passwords are hashed by Supabase Auth — we never store plain text passwords).',
                     'Work data: trades, rules, session state, daily discipline logs, analytics aggregates.',
                     'Thoughts data: diary scan metadata, observations, pre/post-session notes, AI coaching memory (user model).',
-                    'Usage: app opens, feature usage (if you accept analytics cookies).',
+                    'Usage: app opens, feature usage, and behavioral events in `user_events` (if you accept analytics cookies for passive metrics; core product events for signed-in users).',
                     'Device: browser type, approximate region from IP (standard web logs via hosting).',
                     'Optional uploads: trade chart images or journal scans when you use capture features.',
                 ]}

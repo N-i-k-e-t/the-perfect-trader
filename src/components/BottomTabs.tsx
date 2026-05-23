@@ -15,6 +15,7 @@ import {
     ListChecks
 } from 'lucide-react';
 import { usePerfectTrader } from '@/lib/context';
+import { track } from '@/lib/analytics';
 
 const navItems = [
     { to: '/today', icon: Home, label: 'Today' },
@@ -100,6 +101,14 @@ export default function BottomTabs() {
                             <Link
                                 key={item.to}
                                 href={item.to!}
+                                onClick={() => {
+                                    if (!isActive) {
+                                        track('tab_switched', 'navigation', {
+                                            from_tab: pathname,
+                                            to_tab: item.to,
+                                        });
+                                    }
+                                }}
                                 className={`flex flex-col items-center justify-center transition-all flex-1 h-full gap-1 ${
                                     isActive ? 'text-[#1a1a2e]' : 'text-gray-300'
                                 }`}

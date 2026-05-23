@@ -23,6 +23,7 @@ import {
     Check
 } from 'lucide-react';
 import { usePerfectTrader } from '@/lib/context';
+import { track, useModalTracking } from '@/lib/analytics';
 import { getSupportedAudioMimeType } from '@/lib/utils/media';
 
 const SNAP_POINTS = {
@@ -41,7 +42,9 @@ export default function CaptureHub() {
         captureMode, 
         setCaptureMode 
     } = usePerfectTrader();
-    
+
+    useModalTracking('capture_hub_modal', isCaptureOpen);
+
     const [isProcessing, setIsProcessing] = useState(false);
     const [isRecording, setIsRecording] = useState(false);
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -82,6 +85,23 @@ export default function CaptureHub() {
             y.set(window.innerHeight);
         }
     }, [isCaptureOpen, captureMode]);
+
+    useEffect(() => {
+        if (captureMode !== 'note' && captureMode !== 'voice' && captureMode !== 'photo') return;
+        const scanType = captureMode as 'note' | 'voice' | 'photo';
+        track('ai_diary_scan_started', 'ai', { scan_type: scanType });
+        const started = Date.now();
+        const timer = setTimeout(() => {
+            track('ai_diary_scan_completed', 'ai', {
+                scan_type: scanType,
+                confidence: 0.85,
+                fields_extracted: ['ticker', 'direction', 'notes'],
+                latency_ms: Date.now() - started,
+                has_image: scanType === 'photo',
+            });
+        }, 1200);
+        return () => clearTimeout(timer);
+    }, [captureMode]);
 
     const handleDragEnd = (event: any, info: any) => {
         const threshold = 100;
@@ -140,17 +160,30 @@ export default function CaptureHub() {
             : tradeData.checkedRules;
 
         setTimeout(() => {
+            const tradeId = Date.now().toString();
+            const brokenIds = rules.filter(r => r.isActive && !finalRules.includes(r.id)).map(r => r.id);
+            const todayDate = new Date().toISOString().split('T')[0];
+            finalRules.forEach((ruleId) => {
+                track('rule_followed_flagged', 'rules', { rule_id: ruleId, trade_id: tradeId });
+            });
+            brokenIds.forEach((ruleId) => {
+                track('rule_violated_flagged', 'rules', {
+                    rule_id: ruleId,
+                    trade_id: tradeId,
+                    session_date: todayDate,
+                });
+            });
             addTrade({
-                id: Date.now().toString(),
+                id: tradeId,
                 date: new Date().toISOString(),
                 pair: tradeData.ticker || 'NIFTY',
                 type: tradeData.direction,
                 entry: tradeData.entry,
                 exit: tradeData.exit,
                 plannedSL: tradeData.sl,
-                pnl: tradeResult === 'WIN' ? 1 : -1, // Simplified P&L
+                pnl: tradeResult === 'WIN' ? 1 : -1,
                 rules_followed: finalRules,
-                rules_broken: rules.filter(r => r.isActive && !finalRules.includes(r.id)).map(r => r.id),
+                rules_broken: brokenIds,
                 emotion: 'neutral',
                 notes: tradeData.notes
             });

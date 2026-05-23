@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Sparkles, Target, Zap, TrendingUp, Brain, Globe } from 'lucide-react';
 import { usePerfectTrader } from '@/lib/context';
+import { useModalTracking } from '@/lib/analytics';
 
 interface PersonaSheetProps {
     isOpen: boolean;
@@ -12,6 +13,7 @@ interface PersonaSheetProps {
 
 export default function PersonaSheet({ isOpen, onClose }: PersonaSheetProps) {
     const { userModel, updateUserModel, showToast } = usePerfectTrader();
+    useModalTracking('persona_sheet', isOpen);
     const [localPersona, setLocalPersona] = useState({
         primary_style: userModel.primary_style || 'Day Trading',
         primary_market: userModel.primary_market || 'Forex',

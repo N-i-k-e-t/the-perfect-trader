@@ -7,6 +7,7 @@ import { ArrowLeft, Sparkles } from 'lucide-react';
 import { APP_NAME } from '@/lib/brand';
 import { BETA_USER_CAP, SUPPORT_EMAIL } from '@/lib/config';
 import { fetchBetaCapacity } from '@/lib/beta-capacity';
+import { track } from '@/lib/analytics';
 
 const WAITLIST_KEY = 'perfect_trader_beta_waitlist';
 
@@ -29,6 +30,7 @@ export default function BetaPage() {
         const list = JSON.parse(localStorage.getItem(WAITLIST_KEY) || '[]') as string[];
         if (!list.includes(email.trim())) list.push(email.trim());
         localStorage.setItem(WAITLIST_KEY, JSON.stringify(list));
+        track('beta_waitlist_joined', 'settings', { submission_method: 'page' });
         setDone(true);
     };
 

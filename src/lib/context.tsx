@@ -1,13 +1,20 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useCallback, useEffect, useRef, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useCallback, useEffect, useRef, useMemo, ReactNode } from 'react';
 import { Rule, Trade, Observation, Session, Analytics, BaselineState, User, DailyLog, PatternInsight, CoachMessage, RiskAlert, Playbook, MarketEvent, UserModel, DiaryEntry } from '@/types/trading';
 import { checkRisks } from '@/lib/agents/riskSentinel';
 import { createClient } from '@/utils/supabase/client';
 import { DATA_VERSION, isSupabaseConfigured, loadTraderData, saveTraderData } from '@/lib/supabase-data';
 import { STORAGE_KEY, STORAGE_KEY_LEGACY } from '@/lib/brand';
+import { clearLocalAuthCache } from '@/lib/clear-auth-state';
+import { track } from '@/lib/analytics';
+import {
+    buildTiltWarningAlert,
+    countSessionViolations,
+    TILT_VIOLATION_THRESHOLD,
+} from '@/lib/retention/tilt-warning';
 
-const ALLOWED_PRO_EMAILS = ['niketpatil1624@gmail.com', 'adityaparerao8@gmail.com'];
+import { userFromAuthSession } from '@/lib/auth-user';
 
 interface AppState {
     sidebarCollapsed: boolean;
@@ -39,6 +46,8 @@ type Action =
     | { type: 'SET_USER'; payload: User | null }
     | { type: 'UPDATE_SESSION'; payload: Partial<Session> }
     | { type: 'ADD_TRADE'; payload: Trade }
+    | { type: 'UPDATE_TRADE'; payload: Trade }
+    | { type: 'REMOVE_TRADE'; payload: string }
     | { type: 'TOGGLE_RULE_VIOLATION'; payload: string }
     | { type: 'ADD_OBSERVATION'; payload: Observation }
     | { type: 'SET_EMOTIONAL_BASELINE'; payload: BaselineState }
@@ -171,6 +180,27 @@ function perfectTraderReducer(state: AppState, action: Action): AppState {
                     tradesTaken: state.session.tradesTaken + 1,
                 },
             };
+        case 'UPDATE_TRADE':
+            return {
+                ...state,
+                trades: state.trades.map((t) =>
+                    t.id === action.payload.id ? action.payload : t
+                ),
+            };
+        case 'REMOVE_TRADE': {
+            const removed = state.trades.find((t) => t.id === action.payload);
+            return {
+                ...state,
+                trades: state.trades.filter((t) => t.id !== action.payload),
+                session: {
+                    ...state.session,
+                    tradesTaken: Math.max(
+                        0,
+                        state.session.tradesTaken - (removed ? 1 : 0)
+                    ),
+                },
+            };
+        }
         case 'TOGGLE_RULE_VIOLATION':
             return {
                 ...state,
@@ -304,6 +334,8 @@ interface PerfectTraderContextType extends AppState {
     logout: () => void;
     updateSession: (data: Partial<Session>) => void;
     addTrade: (trade: Trade) => void;
+    updateTrade: (trade: Trade, changedFields?: string[]) => void;
+    removeTrade: (tradeId: string) => void;
     toggleRuleViolation: (id: string) => void;
     addObservation: (obs: Observation) => void;
     setEmotionalBaseline: (em: BaselineState) => void;
@@ -333,24 +365,41 @@ interface PerfectTraderContextType extends AppState {
 
 const PerfectTraderContext = createContext<PerfectTraderContextType | null>(null);
 
-export function PerfectTraderProvider({ children }: { children: ReactNode }) {
-    const [state, dispatch] = useReducer(perfectTraderReducer, initialState);
+export function PerfectTraderProvider({
+    children,
+    initialUser = null,
+    initialAuthUserId = null,
+}: {
+    children: ReactNode;
+    initialUser?: User | null;
+    initialAuthUserId?: string | null;
+}) {
+    const [state, dispatch] = useReducer(perfectTraderReducer, {
+        ...initialState,
+        user: initialUser ?? initialState.user,
+        isCheckingAuth: initialUser ? false : initialState.isCheckingAuth,
+    });
 
-    const supabase = createClient();
+    const supabase = useMemo(() => createClient(), []);
     const supabaseEnabled = isSupabaseConfigured();
     const authUserIdRef = useRef<string | null>(null);
     const skipCloudSaveRef = useRef(false);
+    const lastActiveAtRef = useRef(Date.now());
+    const sessionRestoredTrackedRef = useRef(false);
 
-    const userFromSession = (session: { user: { id: string; email?: string | null; user_metadata?: { full_name?: string } } }): User => {
-        const email = session.user.email || '';
-        const isPro = ALLOWED_PRO_EMAILS.includes(email.toLowerCase());
-        return {
-            email,
-            name: session.user.user_metadata?.full_name || 'Trader',
-            isPro,
-            isAdmin: isPro && email === 'niketpatil1624@gmail.com',
+    useEffect(() => {
+        const bump = () => {
+            lastActiveAtRef.current = Date.now();
         };
-    };
+        ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach((e) =>
+            window.addEventListener(e, bump, { passive: true })
+        );
+        return () => {
+            ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach((e) =>
+                window.removeEventListener(e, bump)
+            );
+        };
+    }, []);
 
     const hydrateFromStorage = () => {
         const legacy = localStorage.getItem(STORAGE_KEY_LEGACY);
@@ -362,10 +411,11 @@ export function PerfectTraderProvider({ children }: { children: ReactNode }) {
         try {
             const parsed = JSON.parse(savedData);
             if (parsed.version === DATA_VERSION) {
-                if (parsed.user) {
-                    dispatch({ type: 'SET_USER', payload: parsed.user });
-                }
-                dispatch({ type: 'HYDRATE_STATE', payload: { ...initialState, ...parsed } });
+                // With Supabase, never restore `user` from disk — only a live session counts.
+                // Old tabs/incognito windows kept ghost users after OAuth glitches.
+                const { user: _ghostUser, ...rest } = parsed;
+                const payload = supabaseEnabled ? { ...rest, user: null } : parsed;
+                dispatch({ type: 'HYDRATE_STATE', payload: { ...initialState, ...payload } });
             }
         } catch {
             /* ignore corrupt local cache */
@@ -388,7 +438,7 @@ export function PerfectTraderProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         let isMounted = true;
 
-        const applySession = async (userId: string | null, user: User | null) => {
+        const applySession = (userId: string | null, user: User | null) => {
             authUserIdRef.current = userId;
             if (user) {
                 dispatch({ type: 'SET_USER', payload: user });
@@ -396,18 +446,36 @@ export function PerfectTraderProvider({ children }: { children: ReactNode }) {
                 dispatch({ type: 'SET_USER', payload: null });
             }
             if (userId && supabaseEnabled) {
-                await hydrateFromCloud(userId);
+                void hydrateFromCloud(userId);
             }
         };
 
         const syncUser = async () => {
             hydrateFromStorage();
 
+            if (initialUser && initialAuthUserId && isMounted) {
+                authUserIdRef.current = initialAuthUserId;
+                applySession(initialAuthUserId, initialUser);
+                if (!sessionRestoredTrackedRef.current) {
+                    sessionRestoredTrackedRef.current = true;
+                    track('session_restored', 'auth', {
+                        was_offline: typeof navigator !== 'undefined' ? !navigator.onLine : false,
+                    });
+                }
+                dispatch({ type: 'SET_CHECKING_AUTH', payload: false });
+            }
+
             if (supabaseEnabled) {
                 try {
-                    const { data: { session } } = await supabase.auth.getSession();
-                    if (session?.user && isMounted) {
-                        await applySession(session.user.id, userFromSession(session));
+                    const { data: { user: authUser } } = await supabase.auth.getUser();
+                    if (authUser && isMounted) {
+                        applySession(authUser.id, userFromAuthSession({ user: authUser }));
+                        if (!sessionRestoredTrackedRef.current) {
+                            sessionRestoredTrackedRef.current = true;
+                            track('session_restored', 'auth', {
+                                was_offline: typeof navigator !== 'undefined' ? !navigator.onLine : false,
+                            });
+                        }
                     }
                 } catch (e) {
                     console.error('Auth check failed', e);
@@ -427,11 +495,16 @@ export function PerfectTraderProvider({ children }: { children: ReactNode }) {
 
         let subscription: { unsubscribe: () => void } | null = null;
         if (supabaseEnabled) {
-            const res = supabase.auth.onAuthStateChange(async (_event, session) => {
+            const res = supabase.auth.onAuthStateChange((event, session) => {
                 if (!isMounted) return;
                 if (session?.user) {
-                    await applySession(session.user.id, userFromSession(session));
+                    applySession(session.user.id, userFromAuthSession(session));
                 } else {
+                    if (authUserIdRef.current && (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED')) {
+                        track('session_expired', 'auth', {
+                            last_active_ms_ago: Date.now() - lastActiveAtRef.current,
+                        });
+                    }
                     authUserIdRef.current = null;
                     dispatch({ type: 'SET_USER', payload: null });
                 }
@@ -445,7 +518,7 @@ export function PerfectTraderProvider({ children }: { children: ReactNode }) {
             subscription?.unsubscribe();
             clearTimeout(safetyValve);
         };
-    }, [supabase, supabaseEnabled]);
+    }, [supabase, supabaseEnabled, initialUser, initialAuthUserId]);
 
     // Persist to localStorage + Supabase (debounced)
     useEffect(() => {
@@ -460,7 +533,21 @@ export function PerfectTraderProvider({ children }: { children: ReactNode }) {
         if (!userId || !supabaseEnabled || skipCloudSaveRef.current) return;
 
         const timer = window.setTimeout(() => {
-            void saveTraderData(supabase, userId, payload);
+            const started = Date.now();
+            track('cloud_sync_triggered', 'technical', {
+                trigger_source: 'state_change',
+                data_size_bytes: JSON.stringify(payload).length,
+            });
+            void saveTraderData(supabase, userId, payload).then((ok) => {
+                if (ok) {
+                    track('cloud_sync_completed', 'technical', {
+                        latency_ms: Date.now() - started,
+                        schema_version: DATA_VERSION,
+                    });
+                } else {
+                    track('cloud_sync_failed', 'technical', { error_code: 'save_failed' });
+                }
+            });
         }, 1200);
 
         return () => window.clearTimeout(timer);
@@ -501,8 +588,13 @@ export function PerfectTraderProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const logout = useCallback(async () => {
-        await supabase.auth.signOut();
-        localStorage.removeItem(STORAGE_KEY);
+        track('logout_triggered', 'auth', {});
+        try {
+            await supabase.auth.signOut();
+        } catch {
+            /* invalid/expired session */
+        }
+        clearLocalAuthCache();
         dispatch({ type: 'LOGOUT' });
     }, [supabase]);
 
@@ -510,7 +602,26 @@ export function PerfectTraderProvider({ children }: { children: ReactNode }) {
     
     const addTrade = useCallback((trade: Trade) => {
         dispatch({ type: 'ADD_TRADE', payload: trade });
-        
+
+        track('trade_created', 'trades', {
+            trade_id: trade.id,
+            symbol: trade.pair,
+            direction: trade.type,
+            has_pnl: trade.pnl != null,
+            has_emotion: Boolean(trade.emotion),
+            rules_followed_count: trade.rules_followed?.length ?? 0,
+            rules_broken_count: trade.rules_broken?.length ?? 0,
+            session_date: trade.date,
+            r_multiple: trade.pnlR ?? null,
+            mood_before: trade.moodBefore ?? null,
+            mood_after: trade.moodAfter ?? null,
+            emotion: trade.emotion ?? null,
+            entry_price: trade.entry ?? null,
+            exit_price: trade.exit ?? null,
+            planned_sl: trade.plannedSL ?? null,
+            actual_sl: trade.actualSL ?? null,
+        });
+
         // After trade is added, run Risk Sentinel
         // We use state.trades + new trade
         const newTrades = [trade, ...state.trades];
@@ -523,22 +634,116 @@ export function PerfectTraderProvider({ children }: { children: ReactNode }) {
         });
     }, [state.trades, state.rules, state.session.emotionalBaseline]);
 
-    const toggleRuleViolation = useCallback((id: string) => dispatch({ type: 'TOGGLE_RULE_VIOLATION', payload: id }), []);
+    const updateTrade = useCallback(
+        (trade: Trade, changedFields: string[] = ['all']) => {
+            dispatch({ type: 'UPDATE_TRADE', payload: trade });
+            track('trade_edited', 'trades', {
+                trade_id: trade.id,
+                fields_changed: changedFields,
+            });
+        },
+        []
+    );
+
+    const removeTrade = useCallback(
+        (tradeId: string) => {
+            const existing = state.trades.find((t) => t.id === tradeId);
+            const tradeAgeHours = existing?.date
+                ? Math.round(
+                      (Date.now() - new Date(existing.date).getTime()) / (1000 * 60 * 60)
+                  )
+                : 0;
+            dispatch({ type: 'REMOVE_TRADE', payload: tradeId });
+            track('trade_deleted', 'trades', {
+                trade_id: tradeId,
+                trade_age_hours: tradeAgeHours,
+            });
+        },
+        [state.trades]
+    );
+
+    const toggleRuleViolation = useCallback(
+        (id: string) => {
+            const rule = state.rules.find((r) => r.id === id);
+            const willViolate = !rule?.violated;
+            dispatch({ type: 'TOGGLE_RULE_VIOLATION', payload: id });
+            if (willViolate) {
+                track('rule_violated_flagged', 'rules', {
+                    rule_id: id,
+                    trade_id: null,
+                    session_date: state.session.date,
+                });
+                const nextRules = state.rules.map((r) =>
+                    r.id === id ? { ...r, violated: true } : r
+                );
+                const violationCount = countSessionViolations(nextRules, state.session.date);
+                if (violationCount >= TILT_VIOLATION_THRESHOLD) {
+                    dispatch({
+                        type: 'ADD_RISK_ALERT',
+                        payload: buildTiltWarningAlert(violationCount),
+                    });
+                    track('risk_alert_shown', 'ai', {
+                        severity: 'high',
+                        alert_type: 'tilt_warning',
+                        violation_count: violationCount,
+                    });
+                }
+            }
+        },
+        [state.rules, state.session.date]
+    );
     const addObservation = useCallback((obs: Observation) => dispatch({ type: 'ADD_OBSERVATION', payload: obs }), []);
     const setEmotionalBaseline = useCallback((em: BaselineState) => dispatch({ type: 'SET_EMOTIONAL_BASELINE', payload: em }), []);
     const completePreSession = useCallback(() => dispatch({ type: 'COMPLETE_PRE_SESSION' }), []);
 
     // New action dispatchers
-    const addRule = useCallback((rule: Rule) => dispatch({ type: 'ADD_RULE', payload: rule }), []);
-    const removeRule = useCallback((id: string) => dispatch({ type: 'REMOVE_RULE', payload: id }), []);
-    const toggleRuleActive = useCallback((id: string) => dispatch({ type: 'TOGGLE_RULE_ACTIVE', payload: id }), []);
+    const addRule = useCallback((rule: Rule) => {
+        dispatch({ type: 'ADD_RULE', payload: rule });
+        track('rule_created', 'rules', {
+            rule_id: rule.id,
+            rule_category: rule.category ?? null,
+            has_emoji: Boolean(rule.emoji),
+            text_length: rule.text.length,
+        });
+    }, []);
+    const removeRule = useCallback(
+        (id: string) => {
+            const rule = state.rules.find((r) => r.id === id);
+            const tsMatch = rule?.id.match(/(\d{10,})/);
+            const ruleAgeDays = tsMatch
+                ? Math.round((Date.now() - Number(tsMatch[1])) / (1000 * 60 * 60 * 24))
+                : 0;
+            dispatch({ type: 'REMOVE_RULE', payload: id });
+            track('rule_deleted', 'rules', {
+                rule_id: id,
+                rule_age_days: ruleAgeDays,
+            });
+        },
+        [state.rules]
+    );
+    const toggleRuleActive = useCallback(
+        (id: string) => {
+            dispatch({ type: 'TOGGLE_RULE_ACTIVE', payload: id });
+            track('rule_edited', 'rules', {
+                rule_id: id,
+                fields_changed: ['isActive'],
+            });
+        },
+        []
+    );
     const addRuleFromLibrary = useCallback((rule: Rule) => dispatch({ type: 'ADD_RULE_FROM_LIBRARY', payload: rule }), []);
     const logDaily = useCallback((log: DailyLog) => dispatch({ type: 'LOG_DAILY', payload: log }), []);
     const setInsights = useCallback((insights: PatternInsight[]) => dispatch({ type: 'SET_INSIGHTS', payload: insights }), []);
     const setCoachMessages = useCallback((msgs: CoachMessage[]) => dispatch({ type: 'SET_COACH_MESSAGES', payload: msgs }), []);
     const removeCoachMessage = useCallback((id: string) => dispatch({ type: 'REMOVE_COACH_MESSAGE', payload: id }), []);
     const addRiskAlert = useCallback((alert: RiskAlert) => dispatch({ type: 'ADD_RISK_ALERT', payload: alert }), []);
-    const addPlaybook = useCallback((pb: Playbook) => dispatch({ type: 'ADD_PLAYBOOK', payload: pb }), []);
+    const addPlaybook = useCallback((pb: Playbook) => {
+        dispatch({ type: 'ADD_PLAYBOOK', payload: pb });
+        track('playbook_created', 'playbooks', {
+            playbook_id: pb.id,
+            rule_count: pb.rules.length,
+        });
+    }, []);
     const setMarketEvents = useCallback((events: MarketEvent[]) => dispatch({ type: 'SET_MARKET_EVENTS', payload: events }), []);
     const addMarketEvent = useCallback((event: MarketEvent) => dispatch({ type: 'ADD_MARKET_EVENT', payload: event }), []);
     const updateUserModel = useCallback((model: Partial<UserModel>) => dispatch({ type: 'UPDATE_USER_MODEL', payload: model }), []);
@@ -565,6 +770,8 @@ export function PerfectTraderProvider({ children }: { children: ReactNode }) {
         logout,
         updateSession,
         addTrade,
+        updateTrade,
+        removeTrade,
         toggleRuleViolation,
         addObservation,
         setEmotionalBaseline,
@@ -588,7 +795,10 @@ export function PerfectTraderProvider({ children }: { children: ReactNode }) {
         dismissToast,
         setCaptureOpen,
         setCaptureMode,
-        lockRules: () => dispatch({ type: 'LOCK_RULES' }),
+        lockRules: () => {
+            track('rule_locked_for_session', 'rules', { session_date: state.session.date });
+            dispatch({ type: 'LOCK_RULES' });
+        },
     };
 
     return <PerfectTraderContext.Provider value={value}>{children}</PerfectTraderContext.Provider>;

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { usePerfectTrader } from '@/lib/context';
+import { track, useModalTracking } from '@/lib/analytics';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Camera, Upload, Loader2, CheckCircle2, ChevronRight, PenTool, ClipboardList, TrendingUp, Sparkles, ShieldCheck } from 'lucide-react';
 import { scanDiaryPage } from '@/lib/agents/visionScanner';
@@ -11,6 +12,7 @@ import { DiaryEntry } from '@/types/trading';
  */
 export default function DiaryScannerModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
     const { addDiaryEntry, showToast } = usePerfectTrader();
+    useModalTracking('diary_scanner_modal', isOpen);
     const [isScanning, setIsScanning] = useState(false);
     const [scanResult, setScanResult] = useState<Partial<DiaryEntry> | null>(null);
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -22,11 +24,19 @@ export default function DiaryScannerModal({ isOpen, onClose }: { isOpen: boolean
         // Visual simulation of upload
         setUploadedImage(URL.createObjectURL(file));
         setIsScanning(true);
+        const scanStart = Date.now();
+        track('ai_diary_scan_started', 'ai', { scan_type: 'photo' });
 
         try {
-            // Simulated AI Scan
             const result = await scanDiaryPage(file);
             setScanResult(result);
+            track('ai_diary_scan_completed', 'ai', {
+                scan_type: 'photo',
+                confidence: result.confidence ?? null,
+                fields_extracted: Object.keys(result.extractedData ?? {}),
+                latency_ms: Date.now() - scanStart,
+                has_image: true,
+            });
             showToast("Diary page scanned successfully!", "success");
         } catch (err) {
             showToast("Scan failed. Try again.", "error");
