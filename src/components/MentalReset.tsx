@@ -124,7 +124,7 @@ export default function MentalReset({ isOpen, onClose }: MentalResetProps) {
                                         />
                                     </div>
                                     <div className="bg-blue-50/40 rounded-[32px] p-6 border border-blue-100 flex items-start gap-4">
-                                        <Sparkles size={20} className="text-blue-500 mt-0.5 flex-none" />
+                                        <Sparkles size={20} className="text-blue-500 self-start flex-none" />
                                         <p className="text-[13px] font-bold text-blue-900/60 leading-relaxed">
                                             Reflection converts raw data into wisdom. Your next session will benefit from this closure.
                                         </p>

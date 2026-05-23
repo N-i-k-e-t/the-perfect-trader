@@ -284,7 +284,7 @@ export default function SignupPage() {
 
                 {authBanner && (
                     <div className="mb-6 p-5 rounded-[24px] border-2 border-amber-200 bg-amber-50 flex gap-3 text-left">
-                        <AlertCircle className="text-amber-600 shrink-0 mt-0.5" size={22} />
+                        <AlertCircle className="text-amber-600 shrink-0 self-start" size={22} />
                         <div>
                             <p className="text-[14px] font-black text-amber-900">{authBanner.title}</p>
                             <p className="text-[12px] font-bold text-amber-800/80 mt-1 leading-relaxed">{authBanner.hint}</p>

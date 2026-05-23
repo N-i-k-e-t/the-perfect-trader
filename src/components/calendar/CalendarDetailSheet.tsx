@@ -131,7 +131,7 @@ export default function CalendarDetailSheet({ isOpen, onClose, date, data }: Cal
                                         </div>
                                         <div>
                                             <p className="text-[18px] font-black text-white">Stable & Focused</p>
-                                            <p className="text-[12px] font-bold text-orange-400 uppercase tracking-widest mt-0.5">Feeling Good</p>
+                                            <p className="text-[12px] font-bold text-orange-400 uppercase tracking-widest mt-1">Feeling Good</p>
                                         </div>
                                     </div>
                                     <div className="p-5 bg-white/5 rounded-3xl border border-white/5 relative z-10">
@@ -160,7 +160,7 @@ export default function CalendarDetailSheet({ isOpen, onClose, date, data }: Cal
                                                     </div>
                                                     <div>
                                                         <p className="text-[16px] font-black text-[#1a1a2e]">{event.title}</p>
-                                                        <p className="text-[11px] font-bold text-gray-300 uppercase tracking-widest mt-0.5">{event.time} • {event.country}</p>
+                                                        <p className="text-[11px] font-bold text-gray-300 uppercase tracking-widest mt-1">{event.time} • {event.country}</p>
                                                     </div>
                                                 </div>
                                                 <span className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-full ${event.impact === 'critical' ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-orange-50 text-orange-600 border border-orange-100'}`}>

@@ -209,7 +209,7 @@ export default function PnLCalendar() {
                                 <div className={`w-[85%] h-[85%] rounded-full flex flex-col items-center justify-center z-10 duration-300 relative overflow-hidden shadow-sm ${isPerfect ? 'bg-[#22c55e] shadow-[0_4px_15px_rgba(34,197,94,0.4)] scale-110' : log ? 'bg-white border border-gray-100' : 'bg-transparent'} ${isTodayDate && !isPerfect ? 'border-2 border-blue-500 shadow-lg' : ''}`}>
                                     <span className={`text-[13px] font-black ${isPerfect ? 'text-white' : isTodayDate ? 'text-blue-500' : 'text-[#1a1a2e]'}`}>{format(date, 'd')}</span>
                                     {log?.pnl !== undefined && log.pnl !== 0 && !isPerfect && (
-                                        <div className={`w-1 h-1 rounded-full mt-0.5 ${log.pnl > 0 ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : 'bg-red-500 shadow-[0_0_8px_#ef4444]'}`} />
+                                        <div className={`w-1 h-1 rounded-full self-center ${log.pnl > 0 ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : 'bg-red-500 shadow-[0_0_8px_#ef4444]'}`} />
                                     )}
                                 </div>
                                 {events.some(e => e.impact === 'high' || e.impact === 'critical') && (

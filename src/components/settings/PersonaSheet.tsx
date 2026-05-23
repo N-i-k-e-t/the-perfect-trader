@@ -73,7 +73,7 @@ export default function PersonaSheet({ isOpen, onClose }: PersonaSheetProps) {
                         <div className="flex-1 sheet-scroll p-6 flex flex-col gap-8 no-scrollbar">
                             <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50">
                                 <p className="text-[13px] font-bold text-blue-700 leading-relaxed flex items-start gap-2">
-                                    <Sparkles size={16} className="shrink-0 mt-0.5" />
+                                    <Sparkles size={16} className="shrink-0 self-start" />
                                     Your profile helps The Perfect Trader provide better coaching based on your trading style.
                                 </p>
                             </div>

@@ -6,7 +6,7 @@ import { BookMarked, X } from 'lucide-react';
 export default function PlaybookNudgeBanner({ onDismiss }: { onDismiss: () => void }) {
     return (
         <div className="mx-4 mb-4 p-4 rounded-2xl bg-blue-50 border border-blue-100 flex items-start gap-3">
-            <BookMarked className="text-blue-600 shrink-0 mt-0.5" size={20} />
+            <BookMarked className="text-blue-600 shrink-0 self-start" size={20} />
             <div className="flex-1 min-w-0">
                 <p className="text-[13px] font-black text-[#1a1a2e]">Try your first playbook</p>
                 <p className="text-[12px] font-semibold text-gray-500 mt-1">
