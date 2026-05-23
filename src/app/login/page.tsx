@@ -15,7 +15,7 @@ import { track } from '@/lib/analytics';
 import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
 import ClearStuckSessionLink from '@/components/auth/ClearStuckSessionLink';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, Target, ArrowLeft, Loader2, ChevronDown } from 'lucide-react';
+import { Eye, EyeOff, Target, ArrowLeft, Loader2, ChevronDown, AlertCircle } from 'lucide-react';
 import AppScreenLayout from '@/components/layout/AppScreenLayout';
 
 export default function LoginPage() {
@@ -24,7 +24,8 @@ export default function LoginPage() {
     const supabase = createClient();
 
     const [showPassword, setShowPassword] = useState(false);
-    const [showEmailForm, setShowEmailForm] = useState(false);
+    const [showEmailForm, setShowEmailForm] = useState(true);
+    const [authBanner, setAuthBanner] = useState<{ title: string; hint: string } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [oauthLoading, setOauthLoading] = useState<OAuthProvider | null>(null);
     const [formData, setFormData] = useState({ email: '', password: '' });
@@ -92,7 +93,8 @@ export default function LoginPage() {
     };
 
     const handlePasswordReset = async () => {
-        if (!formData.email) {
+        const email = formData.email.trim().toLowerCase();
+        if (!email) {
             showToast('Enter your email first', 'info');
             return;
         }
@@ -101,7 +103,7 @@ export default function LoginPage() {
             return;
         }
         try {
-            const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
                 redirectTo: `${window.location.origin}/login`,
             });
             if (error) throw error;
@@ -115,13 +117,17 @@ export default function LoginPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setAuthBanner(null);
 
         if (isPlaceholderAuth) {
             showToast('Authentication not configured', 'error');
             return;
         }
 
-        if (!formData.email || !formData.password) {
+        const email = formData.email.trim().toLowerCase();
+        const password = formData.password;
+
+        if (!email || !password) {
             showToast('Enter email and password', 'info');
             return;
         }
@@ -131,8 +137,8 @@ export default function LoginPage() {
 
         try {
             const { data, error } = await supabase.auth.signInWithPassword({
-                email: formData.email,
-                password: formData.password,
+                email,
+                password,
             });
 
             if (error) throw error;
@@ -145,6 +151,11 @@ export default function LoginPage() {
                 router.refresh();
                 return;
             }
+
+            setAuthBanner({
+                title: 'Sign-in did not complete',
+                hint: 'Try again or use Google / GitHub above.',
+            });
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'Verification failed';
             const code =
@@ -157,7 +168,9 @@ export default function LoginPage() {
                 error_message: msg.slice(0, 120),
             });
             const formatted = formatAuthError(msg);
+            setAuthBanner(formatted);
             showToast(formatted.title, 'error');
+        } finally {
             setIsLoading(false);
         }
     };
@@ -245,20 +258,32 @@ export default function LoginPage() {
                         </button>
                     </div>
 
+                    {authBanner && (
+                        <div className="mx-10 mb-4 p-5 rounded-[24px] border-2 border-amber-200 bg-amber-50 flex gap-3 text-left">
+                            <AlertCircle className="text-amber-600 shrink-0 mt-0.5" size={22} />
+                            <div>
+                                <p className="text-[14px] font-black text-amber-900">{authBanner.title}</p>
+                                <p className="text-[12px] font-bold text-amber-800/80 mt-1 leading-relaxed">{authBanner.hint}</p>
+                            </div>
+                        </div>
+                    )}
+
                     {showEmailForm && (
                         <form onSubmit={handleSubmit} className="px-10 pb-10 flex flex-col gap-5 border-t border-gray-50 pt-6">
                             <p className="text-[11px] font-bold text-gray-400 text-center leading-relaxed">
-                                For email signup, or if you added a password in Settings after signing up with Google or GitHub.
+                                Use the email and password you signed up with. After email signup, confirm your inbox first.
                             </p>
                             <div className="flex flex-col gap-2">
                                 <label className="text-[11px] font-black text-[#1a1a2e] ml-1 uppercase tracking-[0.2em] opacity-30">Email</label>
                                 <input
                                     type="email"
                                     inputMode="email"
+                                    autoComplete="email"
                                     placeholder="you@email.com"
                                     className="w-full h-[60px] bg-gray-50/50 border-2 border-transparent rounded-[20px] px-6 text-[16px] font-bold text-[#1a1a2e] focus:bg-white focus:border-blue-500/20 transition-all outline-none"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    required
                                 />
                             </div>
                             <div className="flex flex-col gap-2">
@@ -266,10 +291,12 @@ export default function LoginPage() {
                                 <div className="relative">
                                     <input
                                         type={showPassword ? 'text' : 'password'}
+                                        autoComplete="current-password"
                                         placeholder="••••••••"
                                         className="w-full h-[60px] bg-gray-50/50 border-2 border-transparent rounded-[20px] px-6 text-[16px] font-bold text-[#1a1a2e] pr-16 focus:bg-white focus:border-blue-500/20 transition-all outline-none"
                                         value={formData.password}
                                         onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                        required
                                     />
                                     <button
                                         type="button"
@@ -288,6 +315,7 @@ export default function LoginPage() {
                                 Forgot password?
                             </button>
                             <button
+                                type="submit"
                                 disabled={isLoading}
                                 className="w-full h-[60px] btn-primary font-black rounded-[20px] flex items-center justify-center gap-2 disabled:opacity-70"
                             >

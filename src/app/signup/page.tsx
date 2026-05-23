@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { usePerfectTrader } from '@/lib/context';
 import { createClient } from '@/utils/supabase/client';
+import { isSupabaseConfigured } from '@/lib/supabase-data';
 import { fetchBetaCapacity, type BetaCapacity } from '@/lib/beta-capacity';
 import { formatAuthError } from '@/lib/auth-errors';
 import { userFromSupabaseAuthUser } from '@/lib/auth-user';
@@ -23,7 +24,8 @@ export default function SignupPage() {
     const router = useRouter();
     const supabase = createClient();
     const [showPassword, setShowPassword] = useState(false);
-    const [showEmailForm, setShowEmailForm] = useState(false);
+    const [showEmailForm, setShowEmailForm] = useState(true);
+    const [emailPendingConfirmation, setEmailPendingConfirmation] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [oauthLoading, setOauthLoading] = useState<OAuthProvider | null>(null);
     const [capacity, setCapacity] = useState<BetaCapacity | null>(null);
@@ -107,26 +109,64 @@ export default function SignupPage() {
         }
     };
 
+    const handleResendConfirmation = async () => {
+        const email = formData.email.trim().toLowerCase();
+        if (!email) return;
+        setIsLoading(true);
+        try {
+            const { error } = await supabase.auth.resend({
+                type: 'signup',
+                email,
+                options: { emailRedirectTo: oauthCallbackUrl() },
+            });
+            if (error) throw error;
+            showToast('Confirmation email sent again', 'success');
+        } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : 'Could not resend email';
+            showToast(formatAuthError(msg).title, 'error');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setAuthBanner(null);
+
+        if (!isSupabaseConfigured()) {
+            showToast('Authentication not configured', 'error');
+            return;
+        }
         if (!requireTerms()) return;
         if (!(await ensureSlot())) return;
 
-        if (formData.password.length < 8) {
+        const name = formData.name.trim();
+        const email = formData.email.trim().toLowerCase();
+        const password = formData.password;
+
+        if (!name) {
+            showToast('Enter your name', 'info');
+            return;
+        }
+        if (!email) {
+            showToast('Enter your email', 'info');
+            return;
+        }
+        if (password.length < 8) {
             showToast('Password too short (min 8 chars)', 'error');
             return;
         }
 
         setIsLoading(true);
-        setAuthBanner(null);
+        setEmailPendingConfirmation(false);
         track('signup_started', 'auth', { method: 'email' });
 
         try {
             const { data, error } = await supabase.auth.signUp({
-                email: formData.email,
-                password: formData.password,
+                email,
+                password,
                 options: {
-                    data: { full_name: formData.name },
+                    data: { full_name: name },
                     emailRedirectTo: oauthCallbackUrl(),
                 },
             });
@@ -136,22 +176,39 @@ export default function SignupPage() {
             if (data.session?.user) {
                 track('signup_completed', 'auth', {
                     method: 'email',
-                    has_display_name: Boolean(formData.name),
+                    has_display_name: Boolean(name),
                 });
                 setUser(userFromSupabaseAuthUser(data.session.user));
                 showToast('Account created! Welcome to The Perfect Trader.', 'success');
                 router.replace('/onboarding');
                 return;
             }
+
             if (data.user) {
-                showToast('Check your email to confirm, then sign in with email.', 'info');
-                router.push('/login?pending=email');
+                track('signup_completed', 'auth', {
+                    method: 'email',
+                    has_display_name: Boolean(name),
+                    email_confirmation_required: true,
+                });
+                setEmailPendingConfirmation(true);
+                setAuthBanner({
+                    title: 'Confirm your email to continue',
+                    hint: `We sent a link to ${email}. Open it, then sign in below. Check spam if you do not see it.`,
+                });
+                showToast('Check your email for the confirmation link', 'info');
+                return;
             }
+
+            setAuthBanner({
+                title: 'Signup did not complete',
+                hint: 'Try again, or use Google / GitHub above.',
+            });
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'Registration failed';
             const formatted = formatAuthError(msg);
             setAuthBanner(formatted);
             showToast(formatted.title, 'error');
+        } finally {
             setIsLoading(false);
         }
     };
@@ -254,12 +311,34 @@ export default function SignupPage() {
                         </button>
                     </div>
 
-                    {showEmailForm && (
+                    {emailPendingConfirmation && authBanner && (
+                        <div className="mx-10 mb-4 p-5 rounded-[24px] border-2 border-blue-200 bg-blue-50 flex flex-col gap-3 text-left">
+                            <p className="text-[14px] font-black text-blue-900">{authBanner.title}</p>
+                            <p className="text-[12px] font-bold text-blue-800/80 leading-relaxed">{authBanner.hint}</p>
+                            <button
+                                type="button"
+                                onClick={handleResendConfirmation}
+                                disabled={isLoading}
+                                className="h-11 rounded-xl bg-blue-600 text-white font-black text-[12px] uppercase tracking-wider"
+                            >
+                                Resend confirmation email
+                            </button>
+                            <Link
+                                href="/login?pending=email"
+                                className="text-center text-[13px] font-black text-blue-700 underline"
+                            >
+                                Go to login after confirming →
+                            </Link>
+                        </div>
+                    )}
+
+                    {showEmailForm && !emailPendingConfirmation && (
                         <form onSubmit={handleSubmit} className="px-10 pb-10 flex flex-col gap-5 border-t border-gray-50 pt-6">
                             <div className="flex flex-col gap-2">
                                 <label className="text-[11px] font-black text-[#1a1a2e] ml-1 uppercase tracking-[0.2em] opacity-30">Your Name</label>
                                 <input
                                     type="text"
+                                    autoComplete="name"
                                     placeholder="Your trading alias"
                                     className="w-full h-[60px] bg-gray-50/50 border-2 border-transparent rounded-[20px] px-6 text-[16px] font-bold text-[#1a1a2e] focus:bg-white focus:border-blue-500/20 transition-all outline-none"
                                     value={formData.name}
@@ -271,6 +350,7 @@ export default function SignupPage() {
                                 <label className="text-[11px] font-black text-[#1a1a2e] ml-1 uppercase tracking-[0.2em] opacity-30">Email</label>
                                 <input
                                     type="email"
+                                    autoComplete="email"
                                     placeholder="you@email.com"
                                     className="w-full h-[60px] bg-gray-50/50 border-2 border-transparent rounded-[20px] px-6 text-[16px] font-bold text-[#1a1a2e] focus:bg-white focus:border-blue-500/20 transition-all outline-none"
                                     value={formData.email}
@@ -283,6 +363,7 @@ export default function SignupPage() {
                                 <div className="relative">
                                     <input
                                         type={showPassword ? 'text' : 'password'}
+                                        autoComplete="new-password"
                                         placeholder="••••••••"
                                         className="w-full h-[60px] bg-gray-50/50 border-2 border-transparent rounded-[20px] px-6 text-[16px] font-bold text-[#1a1a2e] pr-16 focus:bg-white focus:border-blue-500/20 transition-all outline-none"
                                         value={formData.password}
@@ -315,7 +396,13 @@ export default function SignupPage() {
                                     </div>
                                 )}
                             </div>
+                            {!termsAccepted && (
+                                <p className="text-[12px] font-bold text-amber-700 text-center">
+                                    Accept Terms &amp; Privacy above to enable signup.
+                                </p>
+                            )}
                             <button
+                                type="submit"
                                 disabled={isLoading || !termsAccepted}
                                 className="w-full h-[60px] btn-primary font-black rounded-[20px] flex items-center justify-center gap-2 disabled:opacity-70"
                             >
