@@ -119,20 +119,20 @@ export default function DiaryScannerModal({ isOpen, onClose }: { isOpen: boolean
                                     </div>
                                 </div>
                             </div>
-                            <button onClick={onClose} className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center transition-all active:scale-95 text-gray-400">
+                            <button onClick={onClose} className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center active:scale-95 text-gray-400">
                                 <X size={24} strokeWidth={3} />
                             </button>
                         </header>
 
                         <div className="flex-1 sheet-scroll px-8 pb-8 bg-white">
                             {!uploadedImage ? (
-                                <div className="flex flex-col items-center justify-center py-20 border-4 border-dashed border-gray-50 rounded-[48px] bg-gray-50/30 group hover:border-[#1a1a2e]/10 transition-all cursor-pointer relative shadow-inner">
+                                <div className="flex flex-col items-center justify-center py-20 border-4 border-dashed border-gray-50 rounded-[48px] bg-gray-50/30 group hover:border-[#1a1a2e]/10 cursor-pointer relative shadow-inner">
                                     <input 
                                         type="file" accept="image/*" 
                                         className="absolute inset-0 opacity-0 cursor-pointer"
                                         onChange={handleUpload}
                                     />
-                                    <div className="w-24 h-24 bg-white text-[#1a1a2e] rounded-full flex items-center justify-center mb-8 group-hover:scale-110 transition-transform shadow-xl">
+                                    <div className="w-24 h-24 bg-white text-[#1a1a2e] rounded-full flex items-center justify-center mb-8 group-hover:scale-110 shadow-md">
                                         <Upload size={40} strokeWidth={2.5} />
                                     </div>
                                     <h4 className="text-[22px] font-black text-[#1a1a2e] mb-3 tracking-tight">Scan to Digital</h4>
@@ -164,7 +164,7 @@ export default function DiaryScannerModal({ isOpen, onClose }: { isOpen: boolean
                                             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col gap-6">
                                                 <div className="flex items-center justify-between bg-gray-50 p-6 rounded-[32px] border border-gray-100 shadow-sm">
                                                     <div className="flex items-center gap-4">
-                                                        <div className="w-14 h-14 bg-[#1a1a2e] text-white rounded-full flex items-center justify-center text-xl font-black shadow-xl">
+                                                        <div className="w-14 h-14 bg-[#1a1a2e] text-white rounded-full flex items-center justify-center text-xl font-black shadow-md">
                                                             {Math.round((scanResult.confidence || 0) * 100)}%
                                                         </div>
                                                         <div>
@@ -203,13 +203,13 @@ export default function DiaryScannerModal({ isOpen, onClose }: { isOpen: boolean
                             <footer className="px-8 py-6 border-t border-gray-50 bg-white flex items-center justify-between relative z-10">
                                 <button 
                                     onClick={() => {setUploadedImage(null); setScanResult(null);}}
-                                    className="px-10 h-16 text-[14px] font-black text-gray-300 hover:text-[#1a1a2e] transition-all hover:bg-gray-50 rounded-full"
+                                    className="px-10 h-16 text-[14px] font-black text-gray-300 hover:text-[#1a1a2e] hover:bg-gray-50 rounded-full"
                                 >
                                     Re-scan
                                 </button>
                                 <button 
                                     onClick={handleSave}
-                                    className="h-20 px-12 btn-primary rounded-full text-[17px] font-black shadow-2xl active:scale-95 transition-all flex items-center gap-4"
+                                    className="h-20 px-12 btn-primary rounded-full text-[17px] font-black shadow-2xl active:scale-95 flex items-center gap-4"
                                 >
                                     Save Scan
                                     <ChevronRight size={24} strokeWidth={3} />
@@ -225,7 +225,7 @@ export default function DiaryScannerModal({ isOpen, onClose }: { isOpen: boolean
 
 function DataField({ label, value, onChange, color = "text-[#1a1a2e]" }: { label: string; value: any; onChange: (v: string) => void; color?: string }) {
     return (
-        <div className="p-6 bg-gray-50 rounded-[32px] group hover:shadow-xl transition-all border border-gray-100/50 focus-within:ring-2 focus-within:ring-[#1a1a2e]/10 focus-within:bg-white">
+        <div className="p-6 bg-gray-50 rounded-[32px] group hover:shadow-md border border-gray-100/50 focus-within:ring-2 focus-within:ring-[#1a1a2e]/10 focus-within:bg-white">
             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 group-focus-within:text-[#1a1a2e] px-1">{label}</p>
             <div className="flex items-center justify-between">
                 <input 

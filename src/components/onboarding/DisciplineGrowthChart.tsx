@@ -17,7 +17,7 @@ export default function DisciplineGrowthChart({ experience }: { experience: stri
     };
 
     return (
-        <div className="w-full rounded-[32px] bg-gradient-to-br from-[#1a1a2e] to-[#2d2d4a] p-6 text-white shadow-xl">
+        <div className="w-full rounded-[32px] bg-gradient-to-br from-[#1a1a2e] to-[#2d2d4a] p-6 text-white shadow-md">
             <p className="text-[11px] font-black uppercase tracking-widest text-blue-400 mb-2">
                 Your growth path
             </p>

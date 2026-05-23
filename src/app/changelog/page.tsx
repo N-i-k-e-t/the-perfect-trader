@@ -91,12 +91,12 @@ export default function ChangelogPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="you@email.com"
-                            className="flex-1 h-12 px-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/40 font-medium outline-none focus:border-emerald-500"
+                            className="flex-1 h-12 px-4 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/40 font-medium outline-none focus:border-emerald-500"
                         />
                         <button
                             type="submit"
                             disabled={subStatus === 'loading'}
-                            className="h-12 px-6 rounded-xl bg-emerald-500 text-[#1a1a2e] font-black disabled:opacity-60"
+                            className="h-12 px-6 rounded-lg bg-emerald-500 text-[#1a1a2e] font-black"
                         >
                             Subscribe
                         </button>

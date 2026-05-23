@@ -78,7 +78,7 @@ export default function WelcomeTour() {
 
                     <button
                         onClick={handleNext}
-                        className="w-full h-16 btn-primary font-bold rounded-full shadow-lg hover:shadow-xl hover:translate-y-[-2px] transition-all"
+                        className="w-full h-16 btn-primary font-bold rounded-full shadow-lg hover:shadow-md hover:translate-y-[-2px] "
                     >
                         {currentStep === tourSteps.length - 1 ? "Get Started" : "Next"}
                     </button>
@@ -88,7 +88,7 @@ export default function WelcomeTour() {
                         {tourSteps.map((_, i) => (
                             <div
                                 key={i}
-                                className={`h-1.5 rounded-full transition-all duration-300 ${i === currentStep ? 'w-8 bg-[#2563eb]' : 'w-2 bg-[#1a1a2e]/10'
+                                className={`h-1.5 rounded-full duration-300 ${i === currentStep ? 'w-8 bg-[#2563eb]' : 'w-2 bg-[#1a1a2e]/10'
                                     }`}
                             />
                         ))}

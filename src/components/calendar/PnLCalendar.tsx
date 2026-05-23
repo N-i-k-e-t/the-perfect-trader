@@ -86,8 +86,8 @@ export default function PnLCalendar() {
                             <span className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">Selected Month</span>
                         </div>
                         <h2 className="text-[32px] font-black tracking-[-0.05em] text-[#1a1a2e] leading-none flex items-center gap-2">
-                            {format(currentDate, 'MMMM')} <span className="text-gray-200 group-hover:text-blue-500 transition-colors">{format(currentDate, 'yyyy')}</span>
-                            <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 group-hover:bg-blue-50 group-hover:text-blue-500 transition-all">
+                            {format(currentDate, 'MMMM')} <span className="text-gray-200 group-hover:text-blue-500 ">{format(currentDate, 'yyyy')}</span>
+                            <div className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center text-gray-300 group-hover:bg-blue-50 group-hover:text-blue-500 ">
                                 <Search size={12} strokeWidth={3} />
                             </div>
                         </h2>
@@ -95,12 +95,12 @@ export default function PnLCalendar() {
                 </div>
                 
                 <div className="flex items-center gap-2">
-                    <button onClick={goToToday} className="h-10 px-4 bg-gray-50 border border-gray-100 rounded-full text-[12px] font-black text-[#1a1a2e] active:scale-95 transition-all shadow-sm flex items-center gap-2">
+                    <button onClick={goToToday} className="h-10 px-4 bg-gray-50 border border-gray-100 rounded-full text-[12px] font-black text-[#1a1a2e] active:scale-95 shadow-sm flex items-center gap-2">
                         <Zap size={14} className="text-blue-500" /> Today
                     </button>
                     <div className="flex bg-gray-50 border border-gray-100 rounded-full p-1 shadow-sm">
-                        <button onClick={prevMonth} className="p-2 hover:bg-white rounded-full transition-colors active:scale-90 text-gray-400 hover:text-[#1a1a2e]"><ChevronLeft size={18} /></button>
-                        <button onClick={nextMonth} className="p-2 hover:bg-white rounded-full transition-colors active:scale-90 text-gray-400 hover:text-[#1a1a2e]"><ChevronRight size={18} /></button>
+                        <button onClick={prevMonth} className="p-2 hover:bg-white rounded-full active:scale-90 text-gray-400 hover:text-[#1a1a2e]"><ChevronLeft size={18} /></button>
+                        <button onClick={nextMonth} className="p-2 hover:bg-white rounded-full active:scale-90 text-gray-400 hover:text-[#1a1a2e]"><ChevronRight size={18} /></button>
                     </div>
                 </div>
             </header>
@@ -119,7 +119,7 @@ export default function PnLCalendar() {
                                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">Go to Date</span>
                                     <h3 className="text-2xl font-black text-[#1a1a2e]">Select Date</h3>
                                 </div>
-                                <button onClick={() => setIsAdvancedPickerOpen(false)} className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 font-black active:scale-90 transition-all">
+                                <button onClick={() => setIsAdvancedPickerOpen(false)} className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 font-black active:scale-90 ">
                                     <X size={20} />
                                 </button>
                             </div>
@@ -133,7 +133,7 @@ export default function PnLCalendar() {
                                             <button 
                                                 key={y} 
                                                 onClick={() => setCurrentDate(setYear(currentDate, y))}
-                                                className={`px-6 py-3 rounded-2xl text-sm font-black transition-all flex-none ${currentDate.getFullYear() === y ? 'bg-[#1a1a2e] text-white shadow-xl' : 'bg-gray-50 text-gray-400 border border-gray-100'}`}
+                                                className={`px-6 py-3 rounded-2xl text-sm font-black flex-none ${currentDate.getFullYear() === y ? 'bg-[#1a1a2e] text-white shadow-md' : 'bg-gray-50 text-gray-400 border border-gray-100'}`}
                                             >
                                                 {y}
                                             </button>
@@ -149,7 +149,7 @@ export default function PnLCalendar() {
                                             <button 
                                                 key={i} 
                                                 onClick={() => setCurrentDate(setMonth(currentDate, i))}
-                                                className={`py-3 rounded-[20px] text-[10px] font-bold uppercase tracking-widest transition-all ${currentDate.getMonth() === i ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-gray-50 text-gray-300 border border-gray-100'}`}
+                                                className={`py-3 rounded-[20px] text-[10px] font-bold uppercase tracking-widest ${currentDate.getMonth() === i ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' : 'bg-gray-50 text-gray-300 border border-gray-100'}`}
                                             >
                                                 {format(new Date(2025, i, 1), 'MMM')}
                                             </button>
@@ -159,7 +159,7 @@ export default function PnLCalendar() {
 
                                 <button 
                                     onClick={() => setIsAdvancedPickerOpen(false)}
-                                    className="h-[64px] w-full btn-primary rounded-[28px] font-black text-[16px] shadow-2xl active:scale-95 transition-all mt-4"
+                                    className="h-[64px] w-full btn-primary rounded-[28px] font-black text-[16px] shadow-2xl active:scale-95 mt-4"
                                 >
                                     View Date
                                 </button>
@@ -198,7 +198,7 @@ export default function PnLCalendar() {
                                 layoutId={`date-${date.toISOString()}`}
                                 whileTap={{ scale: 0.85 }} 
                                 onClick={() => setSelectedDate(date)} 
-                                className="relative aspect-square flex items-center justify-center transition-all group"
+                                className="relative aspect-square flex items-center justify-center group"
                             >
                                 {log && !isPerfect && (
                                     <svg className="absolute inset-0 w-full h-full -rotate-90 p-1">
@@ -206,7 +206,7 @@ export default function PnLCalendar() {
                                         <motion.circle initial={{ strokeDashoffset: 100 }} animate={{ strokeDashoffset: 100 - adherencePct }} cx="50%" cy="50%" r="42%" stroke="currentColor" strokeWidth="3" fill="transparent" strokeDasharray="100 100" className={adherencePct > 70 ? "text-blue-500" : "text-orange-400"} strokeLinecap="round" />
                                     </svg>
                                 )}
-                                <div className={`w-[85%] h-[85%] rounded-full flex flex-col items-center justify-center z-10 transition-all duration-300 relative overflow-hidden shadow-sm ${isPerfect ? 'bg-[#22c55e] shadow-[0_4px_15px_rgba(34,197,94,0.4)] scale-110' : log ? 'bg-white border border-gray-100' : 'bg-transparent'} ${isTodayDate && !isPerfect ? 'border-2 border-blue-500 shadow-lg' : ''}`}>
+                                <div className={`w-[85%] h-[85%] rounded-full flex flex-col items-center justify-center z-10 duration-300 relative overflow-hidden shadow-sm ${isPerfect ? 'bg-[#22c55e] shadow-[0_4px_15px_rgba(34,197,94,0.4)] scale-110' : log ? 'bg-white border border-gray-100' : 'bg-transparent'} ${isTodayDate && !isPerfect ? 'border-2 border-blue-500 shadow-lg' : ''}`}>
                                     <span className={`text-[13px] font-black ${isPerfect ? 'text-white' : isTodayDate ? 'text-blue-500' : 'text-[#1a1a2e]'}`}>{format(date, 'd')}</span>
                                     {log?.pnl !== undefined && log.pnl !== 0 && !isPerfect && (
                                         <div className={`w-1 h-1 rounded-full mt-0.5 ${log.pnl > 0 ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' : 'bg-red-500 shadow-[0_0_8px_#ef4444]'}`} />

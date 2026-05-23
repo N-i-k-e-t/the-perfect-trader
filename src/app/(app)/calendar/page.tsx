@@ -64,13 +64,13 @@ export default function CalendarPage() {
                 <div className="flex bg-gray-50 p-1.5 rounded-[24px] border border-gray-100/50 shadow-sm relative self-center">
                     <button 
                         onClick={() => setView('grid')}
-                        className={`relative z-10 flex items-center gap-2 px-6 py-2.5 rounded-[20px] text-[12px] font-black transition-all ${view === 'grid' ? 'text-white' : 'text-gray-400'}`}
+                        className={`relative z-10 flex items-center gap-2 px-6 py-2.5 rounded-[20px] text-[12px] font-black ${view === 'grid' ? 'text-white' : 'text-gray-400'}`}
                     >
                         <CalendarIcon size={14} /> Grid
                     </button>
                     <button 
                         onClick={() => setView('timeline')}
-                        className={`relative z-10 flex items-center gap-2 px-6 py-2.5 rounded-[20px] text-[12px] font-black transition-all ${view === 'timeline' ? 'text-white' : 'text-gray-400'}`}
+                        className={`relative z-10 flex items-center gap-2 px-6 py-2.5 rounded-[20px] text-[12px] font-black ${view === 'timeline' ? 'text-white' : 'text-gray-400'}`}
                     >
                         <Clock size={14} /> Timeline
                     </button>

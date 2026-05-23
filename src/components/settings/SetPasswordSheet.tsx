@@ -205,7 +205,7 @@ export default function SetPasswordSheet({ isOpen, onClose }: SetPasswordSheetPr
                                         type="button"
                                         disabled={saving || !linkStatus?.email}
                                         onClick={handleSave}
-                                        className="w-full h-14 btn-primary font-black rounded-[20px] flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.98] transition-all"
+                                        className="w-full h-14 btn-primary font-black rounded-lg flex items-center justify-center gap-2 active:scale-[0.98] "
                                     >
                                         {saving ? (
                                             <Loader2 className="animate-spin" size={22} />
@@ -248,7 +248,7 @@ function PasswordField({
                     type={show ? 'text' : 'password'}
                     autoComplete={label.includes('Current') ? 'current-password' : 'new-password'}
                     placeholder={placeholder}
-                    className="w-full h-[56px] bg-gray-50 border-2 border-transparent rounded-[18px] px-5 pr-14 text-[16px] font-bold text-[#1a1a2e] focus:bg-white focus:border-blue-500/20 outline-none"
+                    className="w-full h-[56px] bg-gray-50 border-2 border-transparent rounded-lg px-5 pr-14 text-[16px] font-bold text-[#1a1a2e] focus:bg-white focus:border-blue-500/20 outline-none"
                     value={value}
                     onChange={(e) => onChange(e.target.value)}
                 />

@@ -37,7 +37,7 @@ export default function InstallPrompt() {
                 >
                     <button 
                         onClick={dismiss}
-                        className="absolute top-4 right-4 p-2 text-gray-400 hover:text-[#1a1a2e] transition-colors"
+                        className="absolute top-4 right-4 p-2 text-gray-400 hover:text-[#1a1a2e] "
                     >
                         <X size={20} />
                     </button>

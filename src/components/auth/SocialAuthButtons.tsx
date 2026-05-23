@@ -25,7 +25,7 @@ export default function SocialAuthButtons({ mode, onGoogle, onGithub, disabled, 
                 type="button"
                 disabled={disabled || !!loadingProvider}
                 onClick={onGoogle}
-                className="w-full h-[60px] bg-white border-2 border-gray-100 rounded-[22px] flex items-center justify-center gap-3 text-[15px] font-black text-[#1a1a2e] active:scale-[0.98] transition-all shadow-sm hover:border-blue-500/30 disabled:opacity-60"
+                className="w-full h-[60px] bg-white border-2 border-[#f3f4f6] rounded-lg flex items-center justify-center gap-3 text-[15px] font-semibold text-[#111827] active:scale-[0.98] shadow-sm"
                 aria-label={`${label} with Google`}
             >
                 {loadingProvider === 'google' ? (
@@ -41,7 +41,7 @@ export default function SocialAuthButtons({ mode, onGoogle, onGithub, disabled, 
                 type="button"
                 disabled={disabled || !!loadingProvider}
                 onClick={onGithub}
-                className="w-full h-[60px] bg-white border-2 border-gray-100 rounded-[22px] flex items-center justify-center gap-3 text-[15px] font-black text-[#1a1a2e] active:scale-[0.98] transition-all shadow-sm hover:border-gray-800/20 disabled:opacity-60"
+                className="w-full h-[60px] bg-white border-2 border-[#f3f4f6] rounded-lg flex items-center justify-center gap-3 text-[15px] font-semibold text-[#111827] active:scale-[0.98] shadow-sm"
                 aria-label={`${label} with GitHub`}
             >
                 {loadingProvider === 'github' ? (

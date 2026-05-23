@@ -64,7 +64,7 @@ export default function PersonaSheet({ isOpen, onClose }: PersonaSheetProps) {
                                 </div>
                                 <h2 className="text-[17px] font-black text-[#1a1a2e]">My Trading Profile</h2>
                             </div>
-                            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center text-gray-300 bg-gray-50 rounded-full active:scale-90 transition-transform">
+                            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center text-gray-300 bg-gray-50 rounded-full active:scale-90 ">
                                 <X size={18} strokeWidth={3} />
                             </button>
                         </div>
@@ -89,7 +89,7 @@ export default function PersonaSheet({ isOpen, onClose }: PersonaSheetProps) {
                                         <button
                                             key={style}
                                             onClick={() => setLocalPersona({ ...localPersona, primary_style: style })}
-                                            className={`h-11 rounded-xl text-[13px] font-bold border transition-all ${
+                                            className={`h-11 rounded-xl text-[13px] font-bold border ${
                                                 localPersona.primary_style === style 
                                                     ? 'bg-[#1a1a2e] text-white border-[#1a1a2e] shadow-lg shadow-[#1a1a2e]/10' 
                                                     : 'bg-white text-gray-400 border-gray-100 hover:border-gray-200'
@@ -112,7 +112,7 @@ export default function PersonaSheet({ isOpen, onClose }: PersonaSheetProps) {
                                         <button
                                             key={m}
                                             onClick={() => setLocalPersona({ ...localPersona, primary_market: m })}
-                                            className={`h-11 rounded-xl text-[13px] font-bold border transition-all ${
+                                            className={`h-11 rounded-xl text-[13px] font-bold border ${
                                                 localPersona.primary_market === m 
                                                     ? 'bg-[#1a1a2e] text-white border-[#1a1a2e] shadow-lg shadow-[#1a1a2e]/10' 
                                                     : 'bg-white text-gray-400 border-gray-100'
@@ -135,7 +135,7 @@ export default function PersonaSheet({ isOpen, onClose }: PersonaSheetProps) {
                                         <button
                                             key={w}
                                             onClick={() => setLocalPersona({ ...localPersona, dominant_weakness: w })}
-                                            className={`px-4 h-10 rounded-xl text-[12px] font-bold border transition-all ${
+                                            className={`px-4 h-10 rounded-xl text-[12px] font-bold border ${
                                                 localPersona.dominant_weakness === w 
                                                     ? 'bg-red-500 text-white border-red-500 shadow-lg shadow-red-500/10' 
                                                     : 'bg-white text-gray-400 border-gray-100'
@@ -158,7 +158,7 @@ export default function PersonaSheet({ isOpen, onClose }: PersonaSheetProps) {
                                         <button
                                             key={g}
                                             onClick={() => setLocalPersona({ ...localPersona, goal: g })}
-                                            className={`w-full h-12 px-4 rounded-xl flex items-center justify-between text-[14px] font-bold border transition-all ${
+                                            className={`w-full h-12 px-4 rounded-xl flex items-center justify-between text-[14px] font-bold border ${
                                                 localPersona.goal === g 
                                                     ? 'bg-[#1a1a2e] text-white border-[#1a1a2e]' 
                                                     : 'bg-white text-gray-400 border-gray-100'
@@ -176,7 +176,7 @@ export default function PersonaSheet({ isOpen, onClose }: PersonaSheetProps) {
                         <div className="p-6 bg-white border-t border-gray-50 pb-[calc(env(safe-area-inset-bottom)+24px)]">
                             <button
                                 onClick={handleSave}
-                                className="w-full h-14 btn-primary font-black rounded-xl shadow-xl shadow-emerald-200/50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                className="w-full h-14 btn-primary font-black rounded-xl shadow-md shadow-emerald-200/50 active:scale-[0.98] flex items-center justify-center gap-2"
                             >
                                 Save Profile
                             </button>

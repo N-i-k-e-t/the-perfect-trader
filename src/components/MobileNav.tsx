@@ -31,11 +31,11 @@ export default function MobileNav() {
                     <Link
                         key={item.to}
                         href={item.to}
-                        className={`flex flex-col items-center gap-1 transition-all ${
+                        className={`flex flex-col items-center gap-1 ${
                             isActive ? 'text-[#f59e0b]' : 'text-gray-400'
                         }`}
                     >
-                        <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-[#f59e0b]/10' : ''}`}>
+                        <div className={`p-1.5 rounded-xl ${isActive ? 'bg-[#f59e0b]/10' : ''}`}>
                             <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
                         </div>
                         <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>

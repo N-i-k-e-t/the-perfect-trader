@@ -46,10 +46,10 @@ export default function WeekStrip() {
                     <h3 className="text-sm font-bold text-[#1a1a2e] uppercase tracking-wider">Weekly Performance</h3>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={prevWeek} className="p-1.5 hover:bg-[#1a1a2e]/5 rounded-lg transition-all text-[#9ca3af]">
+                    <button onClick={prevWeek} className="p-1.5 hover:bg-[#1a1a2e]/5 rounded-lg text-[#9ca3af]">
                         <ChevronLeft size={16} />
                     </button>
-                    <button onClick={nextWeek} className="p-1.5 hover:bg-[#1a1a2e]/5 rounded-lg transition-all text-[#9ca3af]">
+                    <button onClick={nextWeek} className="p-1.5 hover:bg-[#1a1a2e]/5 rounded-lg text-[#9ca3af]">
                         <ChevronRight size={16} />
                     </button>
                 </div>
@@ -69,7 +69,7 @@ export default function WeekStrip() {
                         <motion.div
                             key={dateStr}
                             whileTap={{ scale: 0.95 }}
-                            className={`flex flex-col items-center gap-3 flex-1 py-4 rounded-2xl transition-all relative ${
+                            className={`flex flex-col items-center gap-3 flex-1 py-4 rounded-2xl relative ${
                                 isToday ? 'bg-[#1a1a2e] text-white shadow-lg' : 'bg-[#1a1a2e]/[0.02] hover:bg-[#1a1a2e]/[0.05]'
                             }`}
                         >

@@ -34,7 +34,7 @@ export default function DiaryHistoryPage() {
                     <h1 className="text-[20px] font-black text-[#1a1a2e]">Diary Scans</h1>
                     <button 
                         onClick={() => setIsScannerOpen(true)}
-                        className="w-10 h-10 btn-primary rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all"
+                        className="w-10 h-10 btn-primary rounded-full flex items-center justify-center shadow-lg active:scale-95 "
                     >
                         <Camera size={20} />
                     </button>
@@ -86,7 +86,7 @@ export default function DiaryHistoryPage() {
                             type="button"
                             disabled={mode.soon}
                             onClick={mode.onClick}
-                            className={`relative p-5 rounded-[24px] border text-left flex flex-col gap-2 min-h-[100px] active:scale-[0.98] transition-all ${
+                            className={`relative p-5 rounded-[24px] border text-left flex flex-col gap-2 min-h-[100px] active:scale-[0.98] ${
                                 mode.soon ? 'bg-gray-50 border-gray-100 opacity-60' : 'bg-white border-gray-100 shadow-sm'
                             }`}
                         >
@@ -131,10 +131,10 @@ export default function DiaryHistoryPage() {
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ delay: idx * 0.05 }}
-                                    className="bg-white rounded-[24px] overflow-hidden border border-gray-100 shadow-sm flex flex-col group active:scale-[0.98] transition-all"
+                                    className="bg-white rounded-[24px] overflow-hidden border border-gray-100 shadow-sm flex flex-col group active:scale-[0.98] "
                                 >
                                     <div className="aspect-[4/5] bg-gray-100 relative overflow-hidden">
-                                        <img src={entry.imagePath} alt="Scan" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                        <img src={entry.imagePath} alt="Scan" className="w-full h-full object-cover group-hover:scale-110" />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                                         <div className="absolute top-3 left-3 px-2 py-1 bg-white/90 backdrop-blur-sm rounded-lg text-[9px] font-black uppercase tracking-widest text-[#1a1a2e]">
                                             {entry.type.replace('_', ' ')}

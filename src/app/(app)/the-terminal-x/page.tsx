@@ -82,13 +82,13 @@ export default function SecretAdminPage() {
     };
 
     if (isLoading) return (
-        <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+        <div className="min-h-[100dvh] bg-[#0a0a0f] flex items-center justify-center">
             <Loader size={32} />
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-[#0a0a0f] text-white p-8 selection:bg-blue-500/30 selection:text-white">
+        <div className="min-h-[100dvh] bg-[#0a0a0f] text-white p-8 selection:bg-blue-500/30 selection:text-white">
             {/* TERMINAL HEADER */}
             <header className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
                 <div className="flex items-center gap-4">
@@ -111,7 +111,7 @@ export default function SecretAdminPage() {
                     </div>
                     <button 
                         onClick={toggleSystem}
-                        className={`h-12 px-6 rounded-2xl flex items-center gap-2 text-[13px] font-black uppercase tracking-wider transition-all active:scale-95 ${
+                        className={`h-12 px-6 rounded-2xl flex items-center gap-2 text-[13px] font-black uppercase tracking-wider active:scale-95 ${
                             isSystemActive ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-green-500/10 text-green-500 border border-green-500/20'
                         }`}
                     >
@@ -188,7 +188,7 @@ export default function SecretAdminPage() {
                                     
                                     <div className="space-y-4">
                                         {[1, 2, 3, 4].map(i => (
-                                            <div key={i} className="flex items-center gap-6 p-4 rounded-3xl bg-white/5 border border-transparent hover:border-white/5 transition-all">
+                                            <div key={i} className="flex items-center gap-6 p-4 rounded-3xl bg-white/5 border border-transparent hover:border-white/5 ">
                                                 <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-500">
                                                     <Activity size={20} />
                                                 </div>
@@ -224,8 +224,8 @@ export default function SecretAdminPage() {
 
                                 <div className="space-y-3">
                                     {users.map(u => (
-                                        <div key={u.id} className="group p-5 bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 rounded-3xl flex items-center gap-6 transition-all">
-                                            <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center text-lg font-black text-blue-500 group-hover:scale-110 transition-transform">
+                                        <div key={u.id} className="group p-5 bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 rounded-3xl flex items-center gap-6 ">
+                                            <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center text-lg font-black text-blue-500 group-hover:scale-110 ">
                                                 {u.name[0]}
                                             </div>
                                             <div className="flex-1">
@@ -288,7 +288,7 @@ export default function SecretAdminPage() {
 
 function StatCard({ label, value, icon: Icon, color }: { label: string, value: string, icon: any, color: string }) {
     return (
-        <div className="bg-[#16161a] border border-white/5 rounded-[40px] p-8 flex flex-col gap-4 group hover:border-white/10 transition-all">
+        <div className="bg-[#16161a] border border-white/5 rounded-[40px] p-8 flex flex-col gap-4 group hover:border-white/10 ">
             <div className={`w-12 h-12 rounded-2xl bg-white/[0.03] flex items-center justify-center ${color}`}>
                 <Icon size={24} />
             </div>
@@ -304,7 +304,7 @@ function AdminNavItem({ active, onClick, icon: Icon, label }: { active: boolean,
     return (
         <button 
             onClick={onClick}
-            className={`flex items-center gap-4 px-6 h-14 rounded-2xl text-[14px] font-black uppercase tracking-wider transition-all ${
+            className={`flex items-center gap-4 px-6 h-14 rounded-2xl text-[14px] font-black uppercase tracking-wider ${
                 active ? 'bg-blue-600 text-white shadow-[0_4px_20px_rgba(37,99,235,0.3)]' : 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
             }`}
         >
@@ -321,8 +321,8 @@ function ConfigToggle({ label, description, active }: { label: string, descripti
                 <span className="text-[15px] font-black text-white">{label}</span>
                 <span className="text-[12px] text-gray-500 font-bold">{description}</span>
             </div>
-            <div className={`w-12 h-7 rounded-full p-1 transition-colors ${active ? 'bg-blue-600' : 'bg-gray-800'}`}>
-                <div className={`w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${active ? 'translate-x-5' : 'translate-x-0'}`} />
+            <div className={`w-12 h-7 rounded-full p-1 ${active ? 'bg-blue-600' : 'bg-gray-800'}`}>
+                <div className={`w-5 h-5 bg-white rounded-full shadow-sm ${active ? 'translate-x-5' : 'translate-x-0'}`} />
             </div>
         </div>
     );

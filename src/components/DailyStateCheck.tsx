@@ -52,7 +52,7 @@ export default function DailyStateCheck() {
             </div>
 
             <header className="mb-12 pt-12">
-                <div className="w-16 h-16 bg-[#1a1a2e] text-white rounded-full flex items-center justify-center mb-8 shadow-xl">
+                <div className="w-16 h-16 bg-[#1a1a2e] text-white rounded-full flex items-center justify-center mb-8 shadow-md">
                     <Shield size={28} strokeWidth={2.5} />
                 </div>
                 <h1 className="text-[36px] font-black text-[#1a1a2e] leading-[0.9] tracking-tighter mb-4">
@@ -83,7 +83,7 @@ export default function DailyStateCheck() {
                                         <button
                                             key={val}
                                             onClick={() => setSleepScore(val)}
-                                            className={`flex-1 h-16 rounded-full font-black text-[18px] transition-all ${sleepScore === val ? 'bg-[#1a1a2e] text-white scale-105 shadow-2xl' : 'bg-gray-50 text-gray-300'}`}
+                                            className={`flex-1 h-16 rounded-full font-black text-[18px] ${sleepScore === val ? 'bg-[#1a1a2e] text-white scale-105 shadow-2xl' : 'bg-gray-50 text-gray-300'}`}
                                         >
                                             {val}
                                         </button>
@@ -105,7 +105,7 @@ export default function DailyStateCheck() {
                                         <button
                                             key={val}
                                             onClick={() => setEnergyLevel(val)}
-                                            className={`flex-1 h-16 rounded-full font-black text-[18px] transition-all ${energyLevel === val ? 'bg-[#1a1a2e] text-white scale-105 shadow-2xl' : 'bg-gray-50 text-gray-300'}`}
+                                            className={`flex-1 h-16 rounded-full font-black text-[18px] ${energyLevel === val ? 'bg-[#1a1a2e] text-white scale-105 shadow-2xl' : 'bg-gray-50 text-gray-300'}`}
                                         >
                                             {val}
                                         </button>
@@ -140,7 +140,7 @@ export default function DailyStateCheck() {
                                                 onClick={() =>
                                                     setEmotionalBaseline(mood as import('@/types/trading').BaselineState)
                                                 }
-                                                className={`h-16 rounded-[32px] font-black capitalize transition-all border-2 ${session.emotionalBaseline === mood ? 'bg-[#1a1a2e] border-[#1a1a2e] text-white shadow-xl' : 'bg-white border-gray-50 text-gray-300'}`}
+                                                className={`h-16 rounded-[32px] font-black capitalize border-2 ${session.emotionalBaseline === mood ? 'bg-[#1a1a2e] border-[#1a1a2e] text-white shadow-md' : 'bg-white border-gray-50 text-gray-300'}`}
                                             >
                                                 {mood}
                                             </button>
@@ -157,14 +157,14 @@ export default function DailyStateCheck() {
                 {step < 2 ? (
                     <button
                         onClick={() => setStep(step + 1)}
-                        className="w-full h-20 btn-primary rounded-full font-black text-xl flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all"
+                        className="w-full h-20 btn-primary rounded-full font-black text-xl flex items-center justify-center gap-3 shadow-2xl active:scale-95 "
                     >
                         Next Step <ArrowRight size={20} strokeWidth={3} />
                     </button>
                 ) : (
                     <button
                         onClick={handleComplete}
-                        className="w-full h-20 btn-primary rounded-full font-black text-xl flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all"
+                        className="w-full h-20 btn-primary rounded-full font-black text-xl flex items-center justify-center gap-3 shadow-2xl active:scale-95 "
                     >
                         Start My Session <Check size={24} strokeWidth={4} />
                     </button>

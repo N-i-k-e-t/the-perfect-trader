@@ -6,19 +6,16 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { track } from '@/lib/analytics';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { usePerfectTrader } from '@/lib/context';
-import { 
-    Plus, 
-    Flame, 
-    Check, 
-    ChevronRight, 
+import {
+    Plus,
+    Flame,
+    Check,
+    ChevronRight,
     Shield,
     Zap,
     TrendingUp,
-    ShieldCheck,
     X,
-    Info
 } from 'lucide-react';
 import MentalReset from '@/components/MentalReset';
 import InsightCards from '@/components/InsightCards';
@@ -55,7 +52,6 @@ export default function DashboardPage() {
         refreshData,
         toggleRuleViolation,
     } = usePerfectTrader();
-    const router = useRouter();
     const [mounted, setMounted] = useState(false);
     const [isResetOpen, setIsResetOpen] = useState(false);
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -70,8 +66,11 @@ export default function DashboardPage() {
 
     const today = new Date().toISOString().split('T')[0];
     const selectedDateStr = selectedDate.toISOString().split('T')[0];
-    const targetTrades = useMemo(() => trades.filter(t => t.date?.split('T')[0] === selectedDateStr), [trades, selectedDateStr]);
-    const targetLog = dailyLogs.find(d => d.date === selectedDateStr);
+    const targetTrades = useMemo(
+        () => trades.filter((t) => t.date?.split('T')[0] === selectedDateStr),
+        [trades, selectedDateStr]
+    );
+    const targetLog = dailyLogs.find((d) => d.date === selectedDateStr);
     const checkedIds = targetLog?.rulesChecked || [];
 
     useEffect(() => {
@@ -97,7 +96,7 @@ export default function DashboardPage() {
         track('feature_first_use', 'engagement', { feature_name: 'welcome_card_shown' });
     }, [mounted, showWelcome]);
 
-    const activeRules = rules.filter(r => r.isActive !== false);
+    const activeRules = rules.filter((r) => r.isActive !== false);
     const score = calculateRuleChecklistScore(activeRules.length, checkedIds.length);
 
     useEffect(() => {
@@ -128,8 +127,7 @@ export default function DashboardPage() {
     }, [mounted, trades, rules, dailyLogs, streak, userModel, targetLog?.mood, setCoachMessages]);
 
     const showPostSession =
-        selectedDateStr === today &&
-        (targetTrades.length >= 1 || isAfterSessionEnd());
+        selectedDateStr === today && (targetTrades.length >= 1 || isAfterSessionEnd());
 
     useEffect(() => {
         if (!mounted || selectedDateStr !== today || !session.preSessionComplete) return;
@@ -199,22 +197,20 @@ export default function DashboardPage() {
                 trade_id: null,
             });
         }
-        const newChecked = isChecked
-            ? checkedIds.filter(id => id !== ruleId)
-            : [...checkedIds, ruleId];
-        
-        const newScore = calculateRuleChecklistScore(activeRules.length, newChecked.length);
-        const grade = scoreToGrade(newScore);
+        const newChecked = isChecked ? checkedIds.filter((id) => id !== ruleId) : [...checkedIds, ruleId];
 
-        logDaily({ 
-            date: selectedDateStr, 
+        const newScore = calculateRuleChecklistScore(activeRules.length, newChecked.length);
+        const nextGrade = scoreToGrade(newScore);
+
+        logDaily({
+            date: selectedDateStr,
             rulesChecked: newChecked,
             complianceScore: newScore,
-            grade,
+            grade: nextGrade,
             mood: targetLog?.mood || 'neutral',
             tradesLogged: targetTrades.length,
             rulesFollowed: newChecked.length,
-            rulesBroken: targetTrades.reduce((acc, t) => acc + (t.rules_broken?.length || 0), 0)
+            rulesBroken: targetTrades.reduce((acc, t) => acc + (t.rules_broken?.length || 0), 0),
         });
     };
 
@@ -227,7 +223,7 @@ export default function DashboardPage() {
             mood,
             tradesLogged: targetTrades.length,
             rulesFollowed: checkedIds.length,
-            rulesBroken: targetTrades.reduce((acc, t) => acc + (t.rules_broken?.length || 0), 0)
+            rulesBroken: targetTrades.reduce((acc, t) => acc + (t.rules_broken?.length || 0), 0),
         });
         showToast('Mood updated', 'success');
     };
@@ -239,7 +235,7 @@ export default function DashboardPage() {
 
     if (!mounted) {
         return (
-            <div className="min-h-screen bg-[#fafafa]">
+            <div className="min-h-[100dvh] bg-white">
                 <TodayPageSkeleton />
             </div>
         );
@@ -248,154 +244,188 @@ export default function DashboardPage() {
     const phases = [
         { name: 'Pre-Session Rules', icon: '⚡', category: 'Pre-Session Rules' },
         { name: 'Entry/Exit Rules', icon: '🎯', category: 'Entry/Exit Rules' },
-        { name: 'Mindset Rules', icon: '🧠', category: 'Mindset Rules' }
+        { name: 'Mindset Rules', icon: '🧠', category: 'Mindset Rules' },
     ];
 
+    // IMPROVED: spring pathLength for score ring per identity brief
+    const SCORE_RING_R = 96;
+    const SCORE_RING_C = 2 * Math.PI * SCORE_RING_R;
+
+    const openLogTrade = () => {
+        setCaptureMode('checklist');
+        setCaptureOpen(true);
+    };
+
     return (
-        <div className="min-h-[100dvh] bg-[#fafafa] pb-[calc(env(safe-area-inset-bottom)+120px)] md:pb-8 selection:bg-blue-100 italic-none overflow-x-hidden w-full">
+        <div className="min-h-[100dvh] bg-white pb-[calc(env(safe-area-inset-bottom)+120px)] selection:bg-emerald-100 overflow-x-hidden w-full max-w-[390px] mx-auto">
             <PullToRefresh onRefresh={refreshData} className="w-full">
-            <main className="px-5 md:px-0 pt-4 flex flex-col items-center md:items-stretch w-full max-w-none">
-                {riskAlerts.length > 0 && (
-                    <RiskAlertBanner
-                        alert={riskAlerts[0]}
-                        onDismiss={() => dismissRiskAlert(riskAlerts[0].timestamp)}
-                        onAction={() => setIsResetOpen(true)}
-                    />
-                )}
-
-                {selectedDateStr === today && <MarketHoursBanner />}
-
-                <header className="w-full mb-6 flex flex-col items-center md:items-stretch">
-                    <div className="w-full flex justify-between items-center mb-6 md:mb-8 px-2">
-                        <div className="flex flex-col">
-                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Account Level</span>
-                            <span className="text-[13px] font-black text-[#1a1a2e]">MY TRADING PLAN</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 bg-green-50 px-3 py-1.5 rounded-full border border-green-100">
-                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                            <span className="text-[10px] font-black text-green-600 uppercase tracking-widest">Plan Active</span>
-                        </div>
-                    </div>
-
-                    <div className="w-full md:grid md:grid-cols-[1fr_auto] md:gap-10 md:items-start mb-6 md:mb-8">
-                    <div className="flex flex-col items-center md:items-start gap-1 mb-8 md:mb-0">
-                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                            <span className="text-[28px] md:text-[32px] font-black text-[#1a1a2e] tracking-tight">
-                                {selectedDate.toLocaleDateString('en-US', { day: 'numeric', month: 'long' })}
-                            </span>
-                            <div className="flex items-center gap-1 bg-orange-50 px-3 py-1 rounded-full border border-orange-100">
-                                <Flame size={14} className="text-orange-500 fill-orange-500" />
-                                <span className="text-[13px] font-black text-orange-600">{streak} Day Streak</span>
-                            </div>
-                        </div>
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{selectedDate.getFullYear()}</span>
-                        {sessionElapsed && selectedDateStr === today && (
-                            <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest mt-1">
-                                Session · {sessionElapsed}
-                            </span>
-                        )}
-                    </div>
-
-                    {/* DISCIPLINE SCORE — hero above the fold */}
-                    <div className="w-full flex flex-col items-center md:items-end mb-8 md:mb-0">
-                        <div className="relative w-56 h-56 shrink-0">
-                            <motion.div 
-                                animate={{ scale: [1, 1.05, 1], opacity: [0.05, 0.1, 0.05] }}
-                                transition={{ duration: 4, repeat: Infinity }}
-                                className={`absolute inset-0 rounded-full blur-3xl -z-10 ${isPerfect ? 'bg-green-400' : 'bg-blue-400'}`}
-                            />
-                            <svg className="w-full h-full transform -rotate-90">
-                                <circle cx="112" cy="112" r="96" stroke="#f1f5f9" strokeWidth="16" fill="transparent" />
-                                <motion.circle 
-                                    cx="112" cy="112" r="96" 
-                                    stroke={ringColor} 
-                                    strokeWidth="16"
-                                    strokeDasharray={603}
-                                    strokeDashoffset={603 - (603 * score / 100)}
-                                    strokeLinecap="round" 
-                                    fill="transparent"
-                                    className="transition-all duration-[1000ms] ease-out"
+                <main className="px-4 pt-2 flex flex-col w-full">
+                    {/* IMPROVED: score ring is the first visual element */}
+                    <motion.section
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="w-full flex flex-col items-center mb-4"
+                    >
+                        <div className="w-full flex flex-col items-center">
+                            <div className="relative w-56 h-56 shrink-0">
+                                <motion.div
+                                    animate={{ scale: [1, 1.04, 1], opacity: [0.04, 0.08, 0.04] }}
+                                    transition={{ duration: 4, repeat: Infinity }}
+                                    className="absolute inset-0 rounded-full blur-3xl -z-10"
+                                    style={{ backgroundColor: ringColor }}
                                 />
-                            </svg>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                <span className="text-[44px] font-black text-[#1a1a2e] tracking-tighter tabular-nums leading-none">
-                                    {score}<span className="text-[16px] font-bold text-gray-300 ml-0.5">%</span>
-                                </span>
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">Discipline</span>
-                                <span className="text-[22px] font-black mt-1" style={{ color: ringColor }}>
-                                    {grade}
-                                </span>
+                                <svg className="w-full h-full -rotate-90" viewBox="0 0 224 224" aria-hidden>
+                                    <circle
+                                        cx="112"
+                                        cy="112"
+                                        r={SCORE_RING_R}
+                                        stroke="#f3f4f6"
+                                        strokeWidth="14"
+                                        fill="transparent"
+                                    />
+                                    <motion.circle
+                                        cx="112"
+                                        cy="112"
+                                        r={SCORE_RING_R}
+                                        stroke={ringColor}
+                                        strokeWidth="14"
+                                        strokeDasharray={SCORE_RING_C}
+                                        initial={{ strokeDashoffset: SCORE_RING_C }}
+                                        animate={{ strokeDashoffset: SCORE_RING_C - (SCORE_RING_C * score) / 100 }}
+                                        transition={{ type: 'spring', stiffness: 60, damping: 20 }}
+                                        strokeLinecap="round"
+                                        fill="transparent"
+                                    />
+                                </svg>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                                    <span className="text-[56px] font-bold text-[#111827] tracking-tight tabular-nums leading-none">
+                                        {score}
+                                        <span className="text-[18px] font-semibold text-[#9ca3af] ml-1">%</span>
+                                    </span>
+                                    <span className="text-[12px] font-medium text-[#6b7280] uppercase tracking-widest mt-1">
+                                        Discipline
+                                    </span>
+                                    <span className="text-[28px] font-bold mt-1 tabular-nums" style={{ color: ringColor }}>
+                                        {grade}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {selectedDateStr === today && (
+                                <div className="mt-4 w-full max-w-[280px]">
+                                    <DisciplineTrend dailyLogs={dailyLogs} today={today} todayScore={score} />
+                                </div>
+                            )}
+
+                            <div className="w-full max-w-[320px] grid grid-cols-2 gap-3 mt-6">
+                                <div className="bg-white rounded-2xl p-4 shadow-sm border border-[#f3f4f6] flex flex-col items-end gap-2">
+                                    <span className="text-[12px] font-medium text-[#6b7280] flex items-center gap-2">
+                                        <Zap size={12} /> Rules followed
+                                    </span>
+                                    <span className="text-[18px] font-semibold text-[#111827] tabular-nums text-right">
+                                        {checkedIds.length}/{activeRules.length}
+                                    </span>
+                                </div>
+                                <div className="bg-white rounded-2xl p-4 shadow-sm border border-[#f3f4f6] flex flex-col items-end gap-2">
+                                    <span className="text-[12px] font-medium text-[#6b7280] flex items-center gap-2">
+                                        <TrendingUp size={12} /> Trades today
+                                    </span>
+                                    <span className="text-[18px] font-semibold text-[#111827] tabular-nums text-right">
+                                        {targetTrades.length}/{session.tradesAllowed}
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                        {selectedDateStr === today && (
-                            <DisciplineTrend
-                                dailyLogs={dailyLogs}
-                                today={today}
-                                todayScore={score}
+                    </motion.section>
+
+                    {/* IMPROVED: alerts + primary actions stay visible when scrolling */}
+                    <div className="sticky top-0 z-20 -mx-4 px-4 py-3 bg-white/95 backdrop-blur-md border-b border-[#f3f4f6] mb-4 flex flex-col gap-3">
+                        {riskAlerts.length > 0 && (
+                            <RiskAlertBanner
+                                alert={riskAlerts[0]}
+                                onDismiss={() => dismissRiskAlert(riskAlerts[0].timestamp)}
+                                onAction={() => setIsResetOpen(true)}
                             />
                         )}
-                        <div className="w-full max-w-[280px] md:max-w-none grid grid-cols-2 gap-3 mt-6">
-                            <div className="bg-white rounded-[24px] p-4 shadow-sm border border-gray-50 flex flex-col items-center gap-1">
-                                <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest flex items-center gap-1">
-                                    <Zap size={10} /> Rules Followed
-                                </span>
-                                <span className="text-[16px] font-black text-[#1a1a2e]">{checkedIds.length}/{activeRules.length}</span>
-                            </div>
-                            <div className="bg-white rounded-[24px] p-4 shadow-sm border border-gray-50 flex flex-col items-center gap-1">
-                                <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest flex items-center gap-1">
-                                    <TrendingUp size={10} /> Trades Today
-                                </span>
-                                <span className="text-[16px] font-black text-[#1a1a2e]">{targetTrades.length}/{session.tradesAllowed}</span>
+                        {selectedDateStr === today && <MarketHoursBanner />}
+                        {!session.preSessionComplete && selectedDateStr === today && (
+                            <button
+                                type="button"
+                                onClick={openPreSessionCheck}
+                                className="w-full flex items-center justify-between gap-3 px-5 py-4 min-h-[52px] bg-[#1a1a2e] text-white rounded-2xl active:scale-[0.97]"
+                            >
+                                <span className="text-[15px] font-semibold text-left">Start pre-session check-in</span>
+                                <ChevronRight size={18} className="shrink-0 opacity-80" />
+                            </button>
+                        )}
+                        {selectedDateStr === today && (
+                            <button
+                                type="button"
+                                onClick={openLogTrade}
+                                className="w-full min-h-[52px] btn-primary rounded-2xl font-semibold text-[16px] flex items-center justify-center gap-2 shadow-sm active:scale-[0.97]"
+                            >
+                                <Plus size={20} strokeWidth={2.5} />
+                                Log trade
+                            </button>
+                        )}
+                    </div>
+
+                    <header className="w-full mb-6">
+                        <div className="flex items-center justify-between mb-2">
+                            <p className="text-[12px] font-medium text-[#9ca3af] uppercase tracking-wide">Today</p>
+                            <div className="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100 min-h-[44px]">
+                                <div className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse" />
+                                <span className="text-[12px] font-medium text-[#10b981]">Plan active</span>
                             </div>
                         </div>
-                    </div>
-                    </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <h1 className="text-[20px] font-semibold text-[#111827] tracking-tight">
+                                {selectedDate.toLocaleDateString('en-US', { day: 'numeric', month: 'long' })}
+                            </h1>
+                            {streak > 0 && (
+                                <div className="flex items-center gap-2 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-100 min-h-[44px]">
+                                    <Flame size={14} className="text-[#f59e0b] fill-[#f59e0b]" />
+                                    <span className="text-[12px] font-semibold text-[#f59e0b] tabular-nums">
+                                        {streak}d streak
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+                        {sessionElapsed && selectedDateStr === today && (
+                            <p className="text-[12px] font-medium text-[#6b7280] mt-2">Session · {sessionElapsed}</p>
+                        )}
+                    </header>
 
-                    {!session.preSessionComplete && selectedDateStr === today && (
-                        <button
-                            type="button"
-                            onClick={openPreSessionCheck}
-                            className="w-full mb-6 flex items-center justify-between gap-3 px-5 py-4 min-h-[52px] bg-blue-50 border border-blue-100 rounded-[24px] active:scale-[0.98] transition-transform"
-                        >
-                            <span className="text-[14px] font-black text-[#1a1a2e] text-left">
-                                📋 Start your pre-session check-in →
-                            </span>
-                            <ChevronRight size={18} className="text-blue-500 shrink-0" />
-                        </button>
-                    )}
-
-                    {/* First-session welcome — beta onboarding */}
                     <AnimatePresence>
                         {showWelcome && (
-                            <motion.div 
-                                initial={{ opacity: 0, y: -20 }}
+                            <motion.div
+                                initial={{ opacity: 0, y: -12 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
-                                className="w-full bg-[#1a1a2e] text-white rounded-[32px] p-7 mb-8 shadow-2xl relative overflow-hidden"
+                                exit={{ opacity: 0, scale: 0.96 }}
+                                transition={{ duration: 0.3 }}
+                                className="w-full bg-[#1a1a2e] text-white rounded-2xl p-6 mb-8 shadow-md relative overflow-hidden"
                             >
                                 <button
                                     type="button"
-                                    className="absolute top-3 right-3 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/10 rounded-full"
+                                    className="absolute top-2 right-2 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full active:bg-white/10"
                                     onClick={handleDismissWelcome}
                                     aria-label="Dismiss welcome"
                                 >
-                                    <X size={16} className="text-white" />
+                                    <X size={18} className="text-white" />
                                 </button>
-                                <h3 className="text-xl font-black mb-5 pr-10 leading-tight">
-                                    Welcome — let&apos;s make today count.
-                                </h3>
-                                <div className="space-y-3.5 mb-5 text-[14px] font-bold text-gray-200 leading-snug">
+                                <h2 className="text-[18px] font-semibold mb-4 pr-10 leading-snug text-center">
+                                    Welcome — let&apos;s make today count
+                                </h2>
+                                <div className="space-y-2.5 mb-5 text-[14px] text-white/80 leading-snug">
                                     <p>① Finish your 2-min profile setup.</p>
-                                    <p>② Add your top 3 rules (the ones you break when it hurts).</p>
-                                    <p>③ Log your next trade — win or loss, just be honest.</p>
+                                    <p>② Add your top 3 rules.</p>
+                                    <p>③ Log your next trade honestly.</p>
                                 </div>
-                                <p className="text-[12px] font-bold text-gray-400 mb-5 leading-relaxed">
-                                    Discipline score updates when you check rules. That&apos;s the game.
-                                </p>
-                                <button 
+                                <button
                                     type="button"
                                     onClick={handleDismissWelcome}
-                                    className="w-full h-12 bg-white text-[#1a1a2e] font-black text-[13px] rounded-full active:scale-95 transition-all shadow-xl"
+                                    className="w-full min-h-[52px] bg-[#10b981] text-white font-semibold text-[15px] rounded-xl active:scale-[0.97]"
                                 >
                                     Got it, let&apos;s go
                                 </button>
@@ -403,199 +433,226 @@ export default function DashboardPage() {
                         )}
                     </AnimatePresence>
 
-                    {/* WEEK NAVIGATION */}
-                    <div className="w-full flex flex-col gap-4 mb-8">
-                        <div className="flex items-center justify-between px-2">
-                            <button type="button" onClick={() => setWeekOffset(weekOffset - 1)} className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-gray-50 border border-gray-100 rounded-full text-gray-400 active:scale-90 transition-all">
-                                <ChevronRight size={14} className="rotate-180" />
-                            </button>
-                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">This Week</span>
-                            <button type="button" onClick={() => setWeekOffset(weekOffset + 1)} className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-gray-50 border border-gray-100 rounded-full text-gray-400 active:scale-90 transition-all">
-                                <ChevronRight size={14} />
-                            </button>
-                        </div>
-                        
-                        <div className="w-full relative">
-                            <div className="flex gap-4 overflow-x-auto px-5 pb-4 scrollbar-hide snap-x snap-mandatory">
-                                {Array.from({ length: 31 }).map((_, i) => {
-                                    const date = new Date();
-                                    date.setDate(date.getDate() + (i - 15) + (weekOffset * 7));
-                                    const isSelected = selectedDate.toDateString() === date.toDateString();
-                                    const isToday = new Date().toDateString() === date.toDateString();
-                                    
-                                    return (
-                                        <motion.button 
-                                            key={i}
-                                            onClick={() => setSelectedDate(date)}
-                                            whileTap={{ scale: 0.9 }}
-                                            className="flex flex-col items-center gap-2 flex-none snap-center"
-                                        >
-                                            <span className={`text-[9px] font-black uppercase tracking-widest ${isSelected ? 'text-[#1a1a2e]' : 'text-gray-300'}`}>
-                                                {date.toLocaleDateString('en-US', { weekday: 'short' })}
-                                            </span>
-                                            <div className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition-all ${isSelected ? 'bg-[#1a1a2e] text-white shadow-xl scale-110' : 'text-gray-400 bg-white border border-gray-100 shadow-sm'}`}>
-                                                <span className="text-[15px] font-black leading-none">{date.getDate()}</span>
-                                                {isToday && (
-                                                    <div className={`w-1 h-1 rounded-full mt-1 ${isSelected ? 'bg-blue-400' : 'bg-blue-500'}`} />
-                                                )}
-                                            </div>
-                                        </motion.button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </div>
-                </header>
-
-                {/* MORNING CHECK-IN */}
-                <section className="w-full mb-10">
-                    <div className="flex items-center gap-3 mb-4 px-2">
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Morning Check-In</span>
-                        <div className="h-[1px] flex-1 bg-gray-100" />
-                    </div>
-                    <div className="grid grid-cols-4 gap-3">
-                        {[
-                            { e: '🧘', m: 'flow', l: 'Flow' },
-                            { e: '🔋', m: 'charged', l: 'Ready' },
-                            { e: '🛡️', m: 'defensive', l: 'Defend' },
-                            { e: '⚠️', m: 'tilt', l: 'Focus' }
-                        ].map((item) => (
+                    <motion.section
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.05 }}
+                        className="w-full mb-8"
+                    >
+                        <div className="flex items-center justify-between mb-3">
                             <button
-                                key={item.m}
-                                onClick={() => handleSetMood(item.m)}
-                                className={`flex flex-col items-center justify-center gap-1.5 h-24 rounded-[32px] transition-all border-2 ${
-                                    targetLog?.mood === item.m
-                                    ? 'bg-[#1a1a2e] border-[#1a1a2e] text-white shadow-xl scale-105 z-10' 
-                                    : 'bg-white border-transparent text-gray-300 hover:border-gray-100 shadow-sm'
-                                }`}
+                                type="button"
+                                onClick={() => setWeekOffset(weekOffset - 1)}
+                                aria-label="Previous week"
+                                className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-white border border-[#f3f4f6] rounded-xl text-[#9ca3af] active:scale-95 "
                             >
-                                <span className="text-2xl">{item.e}</span>
-                                <span className="text-[9px] font-black uppercase tracking-widest">{item.l}</span>
+                                <ChevronRight size={16} className="rotate-180" />
                             </button>
-                        ))}
-                    </div>
-                </section>
+                            <span className="text-[12px] font-medium text-[#9ca3af] uppercase tracking-wide">This week</span>
+                            <button
+                                type="button"
+                                onClick={() => setWeekOffset(weekOffset + 1)}
+                                aria-label="Next week"
+                                className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-white border border-[#f3f4f6] rounded-xl text-[#9ca3af] active:scale-95 "
+                            >
+                                <ChevronRight size={16} />
+                            </button>
+                        </div>
+                        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory -mx-1 px-1">
+                            {Array.from({ length: 31 }).map((_, i) => {
+                                const date = new Date();
+                                date.setDate(date.getDate() + (i - 15) + weekOffset * 7);
+                                const isSelected = selectedDate.toDateString() === date.toDateString();
+                                const isToday = new Date().toDateString() === date.toDateString();
 
-                <InsightCards />
-
-                {/* TODAY'S RULES */}
-                <section className="w-full flex flex-col gap-6 mb-12">
-                    <div className="flex items-center gap-3 px-2">
-                        <span className="text-[10px] font-black text-[#1a1a2e] uppercase tracking-widest">My Rules</span>
-                        <div className="h-[1.5px] flex-1 bg-blue-100" />
-                        <Link href="/rules" className="text-[10px] font-black text-blue-500 uppercase tracking-widest flex items-center gap-1">
-                            Edit <ChevronRight size={10} strokeWidth={4} />
-                        </Link>
-                    </div>
-
-                    <div className="flex flex-col gap-3">
-                        {activeRules.length > 0 ? (
-                            activeRules.map((rule) => {
-                                const phase = phases.find(p => p.category === rule.category) || phases[0];
                                 return (
-                                    <motion.button
-                                        key={rule.id}
-                                        onClick={() => handleToggleRule(rule.id)}
-                                        onPointerDown={() => startRuleLongPress(rule.id)}
-                                        onPointerUp={cancelRuleLongPress}
-                                        onPointerLeave={cancelRuleLongPress}
-                                        onPointerCancel={cancelRuleLongPress}
-                                        whileTap={{ scale: 0.98 }}
-                                        className={`w-full p-4 rounded-[24px] border-2 transition-all flex items-center justify-between group ${
-                                            rule.violated ? 'border-red-200 bg-red-50/40' : ''
-                                        } ${
-                                            checkedIds.includes(rule.id) 
-                                            ? 'bg-blue-50/30 border-blue-50' 
-                                            : 'bg-white border-transparent shadow-sm'
-                                        }`}
+                                    <button
+                                        key={i}
+                                        type="button"
+                                        onClick={() => setSelectedDate(date)}
+                                        className="flex flex-col items-center gap-2 flex-none snap-center min-w-[44px] active:scale-[0.97]"
                                     >
-                                        <div className="flex items-center gap-4 text-left">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg shrink-0 ${
-                                                checkedIds.includes(rule.id) ? 'bg-blue-100/50' : 'bg-gray-50'
-                                            }`}>
-                                                {rule.emoji || '🛡️'}
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className={`text-[15px] font-black text-[#1a1a2e] leading-tight ${checkedIds.includes(rule.id) ? 'opacity-30 line-through' : ''}`}>
-                                                    {rule.text}
-                                                </span>
-                                                <span className="text-[9px] font-bold text-gray-400 mt-0.5 uppercase tracking-widest">
-                                                    {phase.name} • {checkedIds.includes(rule.id) ? 'Followed' : 'Not checked yet'}
-                                                    {rule.violated ? ' · Violated' : ''}
-                                                </span>
-                                                <span className="text-[8px] font-bold text-gray-300 mt-0.5">Long-press to flag violation</span>
-                                            </div>
-                                        </div>
-
-                                        <motion.div
-                                            key={checkedIds.includes(rule.id) ? `on-${rule.id}` : `off-${rule.id}`}
-                                            initial={{ scale: 0.75 }}
-                                            animate={{ scale: 1 }}
-                                            transition={{ type: 'spring', stiffness: 520, damping: 16 }}
-                                            className={`min-w-[44px] min-h-[44px] rounded-full border-2 shrink-0 flex items-center justify-center transition-colors ${
-                                                checkedIds.includes(rule.id)
-                                                ? 'bg-cta border-cta text-white shadow-lg'
-                                                : 'border-gray-100'
+                                        <span
+                                            className={`text-[12px] font-medium uppercase ${
+                                                isSelected ? 'text-[#111827]' : 'text-[#9ca3af]'
                                             }`}
                                         >
-                                            {checkedIds.includes(rule.id) && <Check size={16} strokeWidth={4} />}
-                                        </motion.div>
-                                    </motion.button>
+                                            {date.toLocaleDateString('en-US', { weekday: 'short' })}
+                                        </span>
+                                        <div
+                                            className={`w-11 h-11 rounded-xl flex flex-col items-center justify-center ${
+                                                isSelected
+                                                    ? 'bg-[#1a1a2e] text-white shadow-sm'
+                                                    : 'text-[#6b7280] bg-white border border-[#f3f4f6]'
+                                            }`}
+                                        >
+                                            <span className="text-[15px] font-semibold leading-none tabular-nums">
+                                                {date.getDate()}
+                                            </span>
+                                            {isToday && (
+                                                <div className="w-1 h-1 rounded-full mt-1 bg-[#10b981]" />
+                                            )}
+                                        </div>
+                                    </button>
                                 );
-                            })
-                        ) : (
-                            <Link href="/onboarding" className="p-10 border-2 border-dashed border-gray-200 rounded-[32px] flex flex-col items-center gap-3 text-center">
-                                <Shield className="text-gray-300" size={32} />
-                                <span className="text-[13px] font-bold text-gray-400">No rules set up yet.<br/>Tap to architect your plan.</span>
-                            </Link>
-                        )}
-                    </div>
-                </section>
-
-                {/* TRADE COUNTER & ACTION */}
-                <section className="w-full flex flex-col items-center gap-6 mb-14">
-                    <div className="flex flex-col items-center gap-1">
-                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em]">Trades Today</span>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-5xl font-black text-[#1a1a2e] leading-none">{targetTrades.length}</span>
-                            <span className="text-xl font-bold text-gray-300">/ {session.tradesAllowed}</span>
+                            })}
                         </div>
-                    </div>
+                    </motion.section>
 
-                    <button 
-                        onClick={() => {
-                            setCaptureMode('checklist');
-                            setCaptureOpen(true);
-                        }}
-                        className="w-full h-18 btn-primary rounded-[32px] font-black text-[16px] flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(16,185,129,0.25)] active:scale-95 transition-all py-5"
+                    <motion.section
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.1 }}
+                        className="w-full mb-8"
                     >
-                        <Plus size={20} strokeWidth={4} />
-                        Log Trade
-                    </button>
-                </section>
-
-                {showPostSession && (
-                    <section className="w-full mb-10">
-                        <div className="flex items-center gap-3 mb-4 px-2">
-                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Post-Session Notes</span>
-                            <div className="h-[1px] flex-1 bg-gray-100" />
+                        <h2 className="text-[18px] font-semibold text-[#111827] mb-4">Morning check-in</h2>
+                        <div className="grid grid-cols-4 gap-2">
+                            {[
+                                { e: '🧘', m: 'flow', l: 'Flow' },
+                                { e: '🔋', m: 'charged', l: 'Ready' },
+                                { e: '🛡️', m: 'defensive', l: 'Defend' },
+                                { e: '⚠️', m: 'tilt', l: 'Focus' },
+                            ].map((item) => (
+                                <button
+                                    key={item.m}
+                                    type="button"
+                                    onClick={() => handleSetMood(item.m)}
+                                    className={`flex flex-col items-center justify-center gap-2 min-h-[88px] rounded-2xl border-2 active:scale-[0.97] ${
+                                        targetLog?.mood === item.m
+                                            ? 'bg-[#1a1a2e] border-[#1a1a2e] text-white shadow-md'
+                                            : 'bg-white border-[#f3f4f6] text-[#6b7280]'
+                                    }`}
+                                >
+                                    <span className="text-2xl">{item.e}</span>
+                                    <span className="text-[12px] font-medium">{item.l}</span>
+                                </button>
+                            ))}
                         </div>
-                        <textarea
-                            placeholder="How did the session go? Lessons for tomorrow..."
-                            rows={3}
-                            defaultValue={session.notes ?? ''}
-                            onBlur={(e) => {
-                                updateSession({ notes: e.target.value });
-                                showToast('Session notes saved', 'success');
-                            }}
-                            className="w-full bg-white rounded-[28px] p-5 font-bold text-[#1a1a2e] border border-gray-100 resize-none shadow-sm"
-                        />
-                    </section>
-                )}
-            </main>
+                    </motion.section>
+
+                    <InsightCards />
+
+                    <motion.section
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.15 }}
+                        className="w-full flex flex-col gap-4 mb-8 mt-8"
+                    >
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-[18px] font-semibold text-[#111827]">My rules</h2>
+                            <Link
+                                href="/rules"
+                                className="min-h-[44px] px-2 flex items-center gap-1 text-[12px] font-medium text-[#10b981] active:opacity-70"
+                            >
+                                Edit <ChevronRight size={14} />
+                            </Link>
+                        </div>
+
+                        <div className="flex flex-col gap-3">
+                            {activeRules.length > 0 ? (
+                                activeRules.map((rule) => {
+                                    const phase = phases.find((p) => p.category === rule.category) || phases[0];
+                                    const isRuleChecked = checkedIds.includes(rule.id);
+                                    return (
+                                        <motion.button
+                                            key={rule.id}
+                                            type="button"
+                                            onClick={() => handleToggleRule(rule.id)}
+                                            onPointerDown={() => startRuleLongPress(rule.id)}
+                                            onPointerUp={cancelRuleLongPress}
+                                            onPointerLeave={cancelRuleLongPress}
+                                            onPointerCancel={cancelRuleLongPress}
+                                            whileTap={{ scale: 0.98 }}
+                                            className={`w-full p-4 rounded-2xl border flex items-center justify-between gap-3 ${
+                                                rule.violated ? 'border-[#ef4444]/30 bg-red-50/50' : 'border-[#f3f4f6] bg-white shadow-sm'
+                                            } ${isRuleChecked ? 'bg-emerald-50/40' : ''}`}
+                                        >
+                                            <div className="flex items-center gap-3 text-left min-w-0">
+                                                <div
+                                                    className={`w-11 h-11 rounded-xl flex items-center justify-center text-lg shrink-0 ${
+                                                        isRuleChecked ? 'bg-emerald-100/60' : 'bg-[#f3f4f6]'
+                                                    }`}
+                                                >
+                                                    {rule.emoji || '🛡️'}
+                                                </div>
+                                                <div className="flex flex-col min-w-0">
+                                                    <span
+                                                        className={`text-[15px] font-semibold text-[#111827] leading-snug ${
+                                                            isRuleChecked ? 'opacity-40 line-through' : ''
+                                                        }`}
+                                                    >
+                                                        {rule.text}
+                                                    </span>
+                                                    <span className="text-[12px] font-medium text-[#6b7280] mt-1">
+                                                        {phase.name} · {isRuleChecked ? 'Followed' : 'Not checked'}
+                                                        {rule.violated ? ' · Violated' : ''}
+                                                    </span>
+                                                    <span className="text-[12px] text-[#6b7280] mt-1">
+                                                        Long-press to flag violation
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            {/* IMPROVED: rule check bounce animation */}
+                                            <motion.div
+                                                key={isRuleChecked ? `on-${rule.id}` : `off-${rule.id}`}
+                                                initial={{ scale: 0.8 }}
+                                                animate={{ scale: isRuleChecked ? [1, 1.15, 1] : 1 }}
+                                                transition={{ type: 'spring', stiffness: 520, damping: 16 }}
+                                                className={`min-w-[44px] min-h-[44px] rounded-full border-2 shrink-0 flex items-center justify-center ${
+                                                    isRuleChecked
+                                                        ? 'bg-[#10b981] border-[#10b981] text-white'
+                                                        : 'border-[#f3f4f6] bg-white'
+                                                }`}
+                                            >
+                                                {isRuleChecked && <Check size={18} strokeWidth={3} />}
+                                            </motion.div>
+                                        </motion.button>
+                                    );
+                                })
+                            ) : (
+                                <div className="p-6 border-2 border-dashed border-[#f3f4f6] rounded-2xl flex flex-col items-center gap-2 text-center bg-white">
+                                    <Shield className="text-[#9ca3af]" size={32} />
+                                    <div>
+                                        <p className="text-[16px] font-semibold text-[#111827]">No rules yet</p>
+                                        <p className="text-[14px] text-[#6b7280] mt-1">
+                                            Add the rules you break when it hurts most.
+                                        </p>
+                                    </div>
+                                    <Link
+                                        href="/onboarding"
+                                        className="min-h-[44px] px-6 btn-primary rounded-xl font-semibold text-[14px] flex items-center"
+                                    >
+                                        Set up my plan
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+                    </motion.section>
+
+                    {showPostSession && (
+                        <motion.section
+                            initial={{ opacity: 0, y: 16 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3, delay: 0.2 }}
+                            className="w-full mb-8"
+                        >
+                            <h2 className="text-[18px] font-semibold text-[#111827] mb-4">Post-session notes</h2>
+                            <textarea
+                                placeholder="How did the session go? Lessons for tomorrow..."
+                                rows={3}
+                                defaultValue={session.notes ?? ''}
+                                onBlur={(e) => {
+                                    updateSession({ notes: e.target.value });
+                                    showToast('Session notes saved', 'success');
+                                }}
+                                className="w-full bg-white rounded-lg p-4 text-[16px] font-medium text-[#111827] border border-[#f3f4f6] resize-none shadow-sm min-h-[120px]"
+                            />
+                        </motion.section>
+                    )}
+                </main>
             </PullToRefresh>
             <MentalReset isOpen={isResetOpen} onClose={() => setIsResetOpen(false)} />
         </div>
     );
 }
-

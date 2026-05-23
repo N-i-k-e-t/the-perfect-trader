@@ -57,7 +57,7 @@ function CoachMessageCard({
             exit={{ opacity: 0, x: -80, scale: 0.85, transition: { duration: 0.2 } }}
             className="flex-shrink-0 w-[280px] snap-center touch-pan-y"
         >
-            <div className="bg-white rounded-3xl p-5 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#1a1a2e]/5 relative overflow-hidden">
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#f3f4f6] relative overflow-hidden">
                 <div
                     className={`absolute -top-10 -right-10 w-24 h-24 blur-3xl opacity-10 rounded-full ${
                         msg.tone === 'warning' ? 'bg-red-500' : 'bg-blue-500'
@@ -67,7 +67,7 @@ function CoachMessageCard({
                 <button
                     type="button"
                     onClick={handleDismiss}
-                    className="absolute top-3 right-3 min-w-[44px] min-h-[44px] flex items-center justify-center bg-[#1a1a2e]/5 rounded-full text-[#9ca3af] active:scale-90 transition-all z-10"
+                    className="absolute top-3 right-3 min-w-[44px] min-h-[44px] flex items-center justify-center bg-[#1a1a2e]/5 rounded-full text-[#9ca3af] active:scale-90 z-10"
                     aria-label="Dismiss"
                 >
                     <X size={16} />
@@ -87,14 +87,14 @@ function CoachMessageCard({
                             <Lightbulb size={18} />
                         )}
                     </div>
-                    <span className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest">
+                    <span className="text-[12px] font-medium text-[#9ca3af] uppercase tracking-wide">
                         {msg.type === 'weekly_review' ? 'Weekly Insight' : 'System Alert'}
                     </span>
                 </div>
 
                 <p className="text-[13px] font-semibold text-[#1a1a2e] leading-relaxed mb-4">{msg.message}</p>
 
-                <p className="text-[10px] font-bold text-[#9ca3af]">
+                <p className="text-[12px] font-medium text-[#9ca3af]">
                     Swipe left to dismiss ·{' '}
                     {new Date(msg.timestamp).toLocaleDateString(undefined, {
                         month: 'short',
@@ -109,7 +109,17 @@ function CoachMessageCard({
 export default function InsightCards() {
     const { coachMessages, removeCoachMessage } = usePerfectTrader();
 
-    if (!coachMessages || coachMessages.length === 0) return null;
+    if (!coachMessages || coachMessages.length === 0) {
+        return (
+            <section className="w-full mb-8 p-6 rounded-2xl border border-dashed border-[#f3f4f6] bg-white text-center">
+                <Lightbulb size={28} className="mx-auto text-[#9ca3af] mb-3" />
+                <p className="text-[16px] font-semibold text-[#111827]">No coach nudges yet</p>
+                <p className="text-[14px] text-[#6b7280] mt-1">
+                    Log trades and check rules — your AI coach will chime in here.
+                </p>
+            </section>
+        );
+    }
 
     return (
         <section className="relative overflow-hidden py-2 w-full mb-8">

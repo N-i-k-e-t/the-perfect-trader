@@ -65,15 +65,16 @@ export const PERFECT_COMPLIANCE_SCORE = 100;
 export function gradeRingColor(grade: DisciplineGrade): string {
     switch (grade) {
         case 'A':
-            return '#22c55e';
+            return '#10b981';
         case 'B':
-            return '#eab308';
+            return '#84cc16';
         case 'C':
+            return '#f59e0b';
         case 'D':
             return '#f97316';
         case 'F':
             return '#ef4444';
         default:
-            return '#3b82f6';
+            return '#9ca3af';
     }
 }

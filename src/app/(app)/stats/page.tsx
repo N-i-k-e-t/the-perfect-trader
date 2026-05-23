@@ -181,7 +181,7 @@ export default function StatsPage() {
                         <Lightbulb size={120} />
                     </div>
                     <div className="flex items-center gap-5 mb-6 relative z-10">
-                        <div className="w-16 h-16 bg-white text-[#1a1a2e] rounded-full flex items-center justify-center shadow-xl">
+                        <div className="w-16 h-16 bg-white text-[#1a1a2e] rounded-full flex items-center justify-center shadow-md">
                             <Lightbulb size={32} strokeWidth={2.5} />
                         </div>
                         <div>
@@ -200,12 +200,12 @@ export default function StatsPage() {
                 <section className="bg-white rounded-[32px] p-6 border border-gray-100 shadow-sm flex flex-col items-center">
                     <div className="relative w-28 h-28 flex items-center justify-center">
                         <svg className="w-full h-full transform -rotate-90">
-                            <circle cx="56" cy="56" r="50" stroke="#f8fafc" strokeWidth="10" fill="transparent" />
+                            <circle cx="56" cy="56" r="50" stroke="#f3f4f6" strokeWidth="10" fill="transparent" />
                             <motion.circle cx="56" cy="56" r="50" stroke="#1a1a2e" strokeWidth="10"
                                 strokeDasharray={314}
                                 strokeDashoffset={314 - (314 * streakPercent / 100)}
                                 strokeLinecap="round" fill="transparent"
-                                className="transition-all duration-1000"
+                                className=" duration-1000"
                             />
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -302,7 +302,7 @@ export default function StatsPage() {
                             <button
                                 key={p}
                                 onClick={() => setPeriod(p)}
-                                className={`px-5 h-10 rounded-[15px] text-[11px] font-black uppercase tracking-widest transition-all ${period ===p ? 'bg-white text-[#1a1a2e] shadow-sm' : 'text-gray-400'}`}
+                                className={`px-5 h-10 rounded-[15px] text-[11px] font-black uppercase tracking-widest ${period ===p ? 'bg-white text-[#1a1a2e] shadow-sm' : 'text-gray-400'}`}
                             >
                                 {p}
                             </button>

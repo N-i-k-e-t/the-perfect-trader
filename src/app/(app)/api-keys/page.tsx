@@ -21,7 +21,7 @@ export default function ApiKeysPage() {
                 </div>
                 <h1 className="text-2xl font-black text-[#1a1a2e]">Pro Connection Required</h1>
                 <p className="text-[#6b7280] mt-2 mb-8 max-w-[320px]">Real-time broker synchronization and AI Agent orchestration require a Pro subscription.</p>
-                <button className="px-8 py-4 bg-[#1a1a2e] text-white rounded-2xl font-bold text-sm shadow-xl shadow-[#1a1a2e]/20 hover:scale-[1.05] transition-all">Upgrade to Pro</button>
+                <button className="px-8 py-4 bg-[#1a1a2e] text-white rounded-2xl font-bold text-sm shadow-md shadow-[#1a1a2e]/20 hover:scale-[1.05] ">Upgrade to Pro</button>
             </div>
         );
     }
@@ -38,7 +38,7 @@ export default function ApiKeysPage() {
                     <p className="text-base text-[#6b7280]">Connect your brokers and AI for live-syncing intelligence.</p>
                 </div>
                 <div className="flex items-center gap-2 group">
-                    <span className="p-3 bg-green-50 text-green-600 rounded-xl transition-all group-hover:scale-110">
+                    <span className="p-3 bg-green-50 text-green-600 rounded-xl group-hover:scale-110">
                         <ShieldCheck size={20} />
                     </span>
                     <div className="text-right">
@@ -52,7 +52,7 @@ export default function ApiKeysPage() {
             <section className="flex flex-col gap-6">
                 <div className="flex items-center justify-between">
                     <h3 className="text-sm font-bold text-[#6b7280] uppercase tracking-wider">Trading Brokers</h3>
-                    <button className="text-[11px] font-bold text-[#2563eb] hover:bg-blue-50 px-3 py-1.5 rounded-lg transition-all">Support Request</button>
+                    <button className="text-[11px] font-bold text-[#2563eb] hover:bg-blue-50 px-3 py-1.5 rounded-lg ">Support Request</button>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -74,7 +74,7 @@ export default function ApiKeysPage() {
                             <p className="text-sm text-[#6b7280]">Powers AI signals, charting, and coaching.</p>
                         </div>
                     </div>
-                    <button className="h-11 px-6 bg-[#1a1a2e] text-white rounded-[18px] text-[13px] font-bold shadow-xl shadow-[#1a1a2e]/20 hover:scale-[1.05] active:scale-95 transition-all flex items-center gap-2">
+                    <button className="h-11 px-6 bg-[#1a1a2e] text-white rounded-[18px] text-[13px] font-bold shadow-md shadow-[#1a1a2e]/20 hover:scale-[1.05] active:scale-95 flex items-center gap-2">
                         <Plus size={16} />
                         Add New Token
                     </button>
@@ -104,8 +104,8 @@ export default function ApiKeysPage() {
 
 function BrokerCard({ name, icon, active = false, disabled = false }: { name: string; icon: any; active?: boolean; disabled?: boolean }) {
     return (
-        <div className={`group relative bg-white p-7 rounded-[32px] border border-[#1a1a2e]/5 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col items-center text-center transition-all ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-2xl hover:border-blue-500/20 cursor-pointer'}`}>
-            <div className={`w-16 h-16 rounded-[24px] bg-[#1a1a2e]/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform ${active ? 'ring-2 ring-blue-500 ring-offset-4' : ''}`}>
+        <div className={`group relative bg-white p-7 rounded-[32px] border border-[#1a1a2e]/5 shadow-[0_2px_12px_rgba(0,0,0,0.03)] flex flex-col items-center text-center ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-2xl hover:border-blue-500/20 cursor-pointer'}`}>
+            <div className={`w-16 h-16 rounded-[24px] bg-[#1a1a2e]/5 flex items-center justify-center mb-6 group-hover:scale-110 ${active ? 'ring-2 ring-blue-500 ring-offset-4' : ''}`}>
                 {typeof icon === 'string' ? <div className="w-10 h-10 bg-[#1a1a2e]/10 rounded-lg" /> : icon}
             </div>
             <h4 className="text-[17px] font-bold text-[#1a1a2e] mb-1">{name}</h4>
@@ -113,7 +113,7 @@ function BrokerCard({ name, icon, active = false, disabled = false }: { name: st
                 {active ? 'Synced 2h ago' : disabled ? 'Coming Soon' : 'Not Connected'}
             </p>
             {!disabled && (
-                <button className={`w-full h-11 text-[13px] font-bold rounded-xl transition-all ${active ? 'bg-blue-50 text-blue-600' : 'bg-[#1a1a2e]/5 text-[#6b7280]'}`}>
+                <button className={`w-full h-11 text-[13px] font-bold rounded-xl ${active ? 'bg-blue-50 text-blue-600' : 'bg-[#1a1a2e]/5 text-[#6b7280]'}`}>
                     {active ? 'Configuration' : 'Auto Sync'}
                 </button>
             )}
@@ -124,7 +124,7 @@ function BrokerCard({ name, icon, active = false, disabled = false }: { name: st
 
 function ApiKeyRow({ name, status, keyMask }: { name: string; status: string; keyMask: string }) {
     return (
-        <div className="px-8 py-5 flex items-center justify-between group hover:bg-gray-50/50 transition-all">
+        <div className="px-8 py-5 flex items-center justify-between group hover:bg-gray-50/50 ">
             <div className="flex items-center gap-4">
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${status === 'Active' ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-[#9ca3af]'}`}>
                     <Key size={18} />
@@ -140,7 +140,7 @@ function ApiKeyRow({ name, status, keyMask }: { name: string; status: string; ke
                     {status}
                 </span>
                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button className="p-2 hover:bg-red-50 hover:text-red-500 rounded-lg text-[#9ca3af] transition-all">
+                    <button className="p-2 hover:bg-red-50 hover:text-red-500 rounded-lg text-[#9ca3af] ">
                         <Trash2 size={16} />
                     </button>
                     <button className="p-2 hover:bg-[#1a1a2e]/5 text-[#9ca3af] rounded-lg">

@@ -50,7 +50,7 @@ export default function ContactForm({ compact = false }: { compact?: boolean }) 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your name"
-                className="w-full h-12 px-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/40 font-medium text-[15px] outline-none focus:border-emerald-500"
+                className="w-full h-12 px-4 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/40 font-medium text-[15px] outline-none focus:border-emerald-500"
             />
             <input
                 required
@@ -58,7 +58,7 @@ export default function ContactForm({ compact = false }: { compact?: boolean }) 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email"
-                className="w-full h-12 px-4 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/40 font-medium text-[15px] outline-none focus:border-emerald-500"
+                className="w-full h-12 px-4 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/40 font-medium text-[15px] outline-none focus:border-emerald-500"
             />
             <textarea
                 required
@@ -67,7 +67,7 @@ export default function ContactForm({ compact = false }: { compact?: boolean }) 
                 onChange={(e) => setMessage(e.target.value)}
                 placeholder="Your message (min 10 characters)"
                 rows={compact ? 4 : 6}
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/40 font-medium text-[15px] outline-none focus:border-emerald-500 resize-none"
+                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder:text-white/40 font-medium text-[15px] outline-none focus:border-emerald-500 resize-none"
             />
             {status === 'error' && (
                 <p className="text-red-400 text-[14px] font-bold">{errorMsg}</p>
@@ -75,7 +75,7 @@ export default function ContactForm({ compact = false }: { compact?: boolean }) 
             <button
                 type="submit"
                 disabled={status === 'loading'}
-                className="h-12 rounded-xl bg-emerald-500 text-[#1a1a2e] font-black text-[15px] hover:bg-emerald-400 disabled:opacity-60 transition-colors"
+                className="h-12 rounded-lg bg-emerald-500 text-[#1a1a2e] font-black text-[15px] hover:bg-emerald-400 "
             >
                 {status === 'loading' ? 'Sending…' : 'Send message'}
             </button>

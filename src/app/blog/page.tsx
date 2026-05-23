@@ -18,7 +18,7 @@ export default function BlogIndexPage() {
                         <Link
                             key={post.slug}
                             href={`/blog/${post.slug}`}
-                            className="block p-8 rounded-[28px] border border-gray-100 hover:border-[#1a1a2e]/20 hover:shadow-lg transition-all"
+                            className="block p-8 rounded-[28px] border border-gray-100 hover:border-[#1a1a2e]/20 hover:shadow-lg "
                         >
                             <span className="text-[11px] font-black uppercase tracking-widest text-[#f59e0b]">
                                 {post.category}

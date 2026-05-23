@@ -22,13 +22,15 @@ export default function MarketHoursBanner() {
 
     const styles =
         status === 'live'
-            ? 'bg-green-50 border-green-200 text-green-800'
+            ? 'bg-emerald-50 border-[#10b981]/30 text-[#10b981]'
             : status === 'pre_open'
-              ? 'bg-amber-50 border-amber-200 text-amber-900'
-              : 'bg-gray-50 border-gray-200 text-gray-600';
+              ? 'bg-amber-50 border-[#f59e0b]/30 text-[#f59e0b]'
+              : 'bg-[#f3f4f6] border-[#f3f4f6] text-[#6b7280]';
 
     return (
-        <div className={`w-full mb-4 px-4 py-2.5 rounded-2xl border text-[11px] font-black uppercase tracking-widest text-center ${styles}`}>
+        <div
+            className={`w-full mb-4 px-4 py-3 rounded-2xl border text-[12px] font-medium uppercase tracking-wide text-center min-h-[44px] flex items-center justify-center ${styles}`}
+        >
             {label}
         </div>
     );

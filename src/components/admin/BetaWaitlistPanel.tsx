@@ -69,7 +69,7 @@ export default function BetaWaitlistPanel() {
                 <button
                     type="button"
                     onClick={() => void load()}
-                    className="p-3 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                    className="p-3 rounded-2xl bg-gray-50 hover:bg-gray-100 min-w-[44px] min-h-[44px] flex items-center justify-center"
                     aria-label="Refresh waitlist"
                 >
                     <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
@@ -103,7 +103,7 @@ export default function BetaWaitlistPanel() {
                                 type="button"
                                 disabled={inviting === row.email}
                                 onClick={() => void invite(row.email)}
-                                className="shrink-0 min-h-[44px] px-4 rounded-full bg-[#1a1a2e] text-white text-[11px] font-black uppercase tracking-wider disabled:opacity-50"
+                                className="shrink-0 min-h-[44px] px-4 rounded-full bg-[#1a1a2e] text-white text-[11px] font-black uppercase tracking-wider"
                             >
                                 {inviting === row.email ? '…' : 'Invite'}
                             </button>

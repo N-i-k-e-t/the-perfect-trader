@@ -56,7 +56,7 @@ export default function CalendarDetailSheet({ isOpen, onClose, date, data }: Cal
                             </div>
                             <button 
                                 onClick={onClose}
-                                className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-[#1a1a2e] active:scale-90 transition-all border border-gray-100"
+                                className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-[#1a1a2e] active:scale-90 border border-gray-100"
                             >
                                 <X size={24} strokeWidth={3} />
                             </button>
@@ -65,7 +65,7 @@ export default function CalendarDetailSheet({ isOpen, onClose, date, data }: Cal
                         <div className="px-8 pb-12 flex flex-col gap-10">
                             {/* PERFORMANCE OVERVIEW */}
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-[#1a1a2e] rounded-[35px] p-6 border border-white/5 flex flex-col gap-4 shadow-xl">
+                                <div className="bg-[#1a1a2e] rounded-[35px] p-6 border border-white/5 flex flex-col gap-4 shadow-md">
                                     <div className="flex items-center gap-2">
                                         <TrendingUp size={14} className="text-green-500" />
                                         <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Profit/Loss</span>
@@ -125,8 +125,8 @@ export default function CalendarDetailSheet({ isOpen, onClose, date, data }: Cal
                                 </div>
                                 <div className="bg-[#1a1a2e] rounded-[40px] p-8 flex flex-col gap-6 relative overflow-hidden shadow-2xl">
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/10 blur-3xl rounded-full -mr-16 -mt-16" />
-                                    <div className="flex items-center gap-5 relative z-10 transition-transform hover:scale-[1.02]">
-                                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-4xl shadow-xl border border-white/5">
+                                    <div className="flex items-center gap-5 relative z-10 hover:scale-[1.02]">
+                                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-4xl shadow-md border border-white/5">
                                             🧘
                                         </div>
                                         <div>
@@ -153,7 +153,7 @@ export default function CalendarDetailSheet({ isOpen, onClose, date, data }: Cal
                                     </div>
                                     <div className="flex flex-col gap-3">
                                         {events.map(event => (
-                                            <div key={event.id} className="bg-white border border-gray-100 rounded-[35px] p-6 flex items-center justify-between shadow-sm hover:shadow-md transition-all">
+                                            <div key={event.id} className="bg-white border border-gray-100 rounded-[35px] p-6 flex items-center justify-between shadow-sm hover:shadow-md ">
                                                 <div className="flex items-center gap-5">
                                                     <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm ${event.impact === 'critical' ? 'bg-red-50 text-red-500' : 'bg-orange-50 text-orange-500'}`}>
                                                         <AlertCircle size={24} />

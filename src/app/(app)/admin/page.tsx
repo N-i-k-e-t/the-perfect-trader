@@ -51,7 +51,7 @@ export default function AdminPage() {
     if (!user?.isAdmin) {
         return (
             <div className="flex flex-col items-center justify-center py-40 text-center">
-                <div className="w-20 h-20 bg-red-50 text-red-500 rounded-[32px] flex items-center justify-center mb-6 shadow-red-500/10 shadow-xl">
+                <div className="w-20 h-20 bg-red-50 text-red-500 rounded-[32px] flex items-center justify-center mb-6 shadow-red-500/10 shadow-md">
                     <ShieldAlert size={32} />
                 </div>
                 <h1 className="text-2xl font-black text-[#1a1a2e]">Root Access Denied</h1>
@@ -67,7 +67,7 @@ export default function AdminPage() {
             <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 p-8 bg-white rounded-[40px] border border-[#1a1a2e]/5 shadow-sm">
                 <div className="flex items-center gap-5">
                     <div className="relative">
-                        <div className="w-16 h-16 bg-purple-600 text-white rounded-[24px] flex items-center justify-center shadow-xl shadow-purple-200">
+                        <div className="w-16 h-16 bg-purple-600 text-white rounded-[24px] flex items-center justify-center shadow-md shadow-purple-200">
                             <ShieldCheck size={32} />
                         </div>
                         <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-4 border-white rounded-full flex items-center justify-center">
@@ -98,7 +98,7 @@ export default function AdminPage() {
                             <span className="text-xs font-bold text-[#1a1a2e]">32%</span>
                         </div>
                     </div>
-                    <button className="h-14 px-8 bg-[#1a1a2e] text-white rounded-[20px] text-sm font-bold flex items-center gap-3 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-[#1a1a2e]/20">
+                    <button className="h-14 px-8 bg-[#1a1a2e] text-white rounded-[20px] text-sm font-bold flex items-center gap-3 hover:scale-[1.02] active:scale-95 shadow-md shadow-[#1a1a2e]/20">
                         <Lock size={18} />
                         Security Lockdown
                     </button>
@@ -160,7 +160,7 @@ export default function AdminPage() {
                                         <motion.div 
                                             key={log.id} 
                                             initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                                            className="text-[10px] leading-relaxed flex gap-3 border-l border-white/5 pl-3 hover:bg-white/5 transition-colors cursor-default"
+                                            className="text-[10px] leading-relaxed flex gap-3 border-l border-white/5 pl-3 hover:bg-white/5 cursor-default"
                                         >
                                             <span className="text-blue-500/50 whitespace-nowrap">0x{Math.floor(Math.random()*1000)}</span>
                                             <span className={`${
@@ -207,7 +207,7 @@ export default function AdminPage() {
                             <div className="bg-white rounded-[40px] border border-[#1a1a2e]/5 shadow-sm overflow-hidden">
                                 <div className="p-8 border-b border-gray-50 flex items-center justify-between">
                                     <h3 className="text-lg font-bold text-[#1a1a2e]">Vanguard Traders</h3>
-                                    <button className="p-2 hover:bg-gray-50 rounded-xl text-blue-600 transition-all"><ChevronRight size={20} /></button>
+                                    <button className="p-2 hover:bg-gray-50 rounded-xl text-blue-600 "><ChevronRight size={20} /></button>
                                 </div>
                                 <div className="divide-y divide-gray-50">
                                     <MiniUserRow name="Niket Patil" status="Pro" discipline={94} modelConf="98%" />
@@ -274,7 +274,7 @@ function TabButton({ active, onClick, label, icon }: { active: boolean, onClick:
     return (
         <button 
             onClick={onClick}
-            className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold transition-all ${
+            className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-sm font-bold ${
                 active 
                 ? 'bg-white text-[#1a1a2e] shadow-[0_4px_12px_rgba(0,0,0,0.06)] scale-100' 
                 : 'text-[#6b7280] hover:text-[#1a1a2e] scale-95 opacity-70'
@@ -288,9 +288,9 @@ function TabButton({ active, onClick, label, icon }: { active: boolean, onClick:
 
 function KPICloudCard({ label, value, trend, icon, chartColor }: any) {
     return (
-        <div className="bg-white rounded-[40px] p-8 border border-[#1a1a2e]/5 shadow-sm group hover:shadow-xl transition-all">
+        <div className="bg-white rounded-[40px] p-8 border border-[#1a1a2e]/5 shadow-sm group hover:shadow-md ">
             <div className="flex items-center justify-between mb-6">
-                <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-blue-600 transition-transform group-hover:scale-110">
+                <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:scale-110">
                     {icon}
                 </div>
                 <div className="px-3 py-1 bg-green-50 text-green-600 text-[11px] font-black rounded-full flex items-center gap-1">
@@ -315,7 +315,7 @@ function KPICloudCard({ label, value, trend, icon, chartColor }: any) {
 
 function StatBox({ icon, label, value, sub }: any) {
     return (
-        <div className="bg-white rounded-[32px] p-6 border border-[#1a1a2e]/5 flex items-center gap-5 hover:bg-gray-50/50 transition-colors">
+        <div className="bg-white rounded-[32px] p-6 border border-[#1a1a2e]/5 flex items-center gap-5 hover:bg-gray-50/50 ">
             <div className="w-12 h-12 bg-[#1a1a2e]/5 text-[#1a1a2e] rounded-xl flex items-center justify-center">{icon}</div>
             <div>
                 <p className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest leading-none mb-1">{label}</p>
@@ -328,7 +328,7 @@ function StatBox({ icon, label, value, sub }: any) {
 
 function MiniUserRow({ name, status, discipline, modelConf }: any) {
     return (
-        <div className="p-6 flex items-center justify-between hover:bg-gray-50 transition-all cursor-pointer group">
+        <div className="p-6 flex items-center justify-between hover:bg-gray-50 cursor-pointer group">
             <div className="flex items-center gap-4">
                 <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center font-bold text-xs">{name.substring(0, 2)}</div>
                 <div>
@@ -345,7 +345,7 @@ function MiniUserRow({ name, status, discipline, modelConf }: any) {
                     <p className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-widest mb-1">Model Conf</p>
                     <p className="text-sm font-bold text-[#1a1a2e]">{modelConf}</p>
                 </div>
-                <ChevronRight size={18} className="text-gray-300 group-hover:text-[#1a1a2e] transition-all" />
+                <ChevronRight size={18} className="text-gray-300 group-hover:text-[#1a1a2e] " />
             </div>
         </div>
     );
@@ -383,7 +383,7 @@ function ConfigCard({ title, icon, description, children }: any) {
 
 function ConfigOption({ active, label, value }: any) {
     return (
-        <div className={`p-4 rounded-2xl border flex items-center justify-between cursor-pointer transition-all ${
+        <div className={`p-4 rounded-2xl border flex items-center justify-between cursor-pointer ${
             active ? 'bg-blue-50 border-blue-100' : 'bg-gray-50 border-transparent hover:border-gray-200'
         }`}>
             <div>
@@ -399,8 +399,8 @@ function ToggleRow({ label, active = false }: any) {
     return (
         <div className="flex items-center justify-between">
             <span className="text-sm font-bold text-[#1a1a2e]">{label}</span>
-            <div className={`w-12 h-6 rounded-full transition-all relative cursor-pointer ${active ? 'bg-blue-600' : 'bg-gray-200'}`}>
-                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${active ? 'left-7' : 'left-1'}`} />
+            <div className={`w-12 h-6 rounded-full relative cursor-pointer ${active ? 'bg-blue-600' : 'bg-gray-200'}`}>
+                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white ${active ? 'left-7' : 'left-1'}`} />
             </div>
         </div>
     );

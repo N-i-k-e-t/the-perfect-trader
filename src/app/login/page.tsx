@@ -30,6 +30,8 @@ export default function LoginPage() {
     const [oauthLoading, setOauthLoading] = useState<OAuthProvider | null>(null);
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [localStats, setLocalStats] = useState<{ streak: number; score: number } | null>(null);
+    const [emailError, setEmailError] = useState<string | null>(null);
+    const [passwordError, setPasswordError] = useState<string | null>(null);
     const isPlaceholderAuth = !isSupabaseConfigured();
     const checkingSession = useRedirectIfAuthenticated(setUser);
 
@@ -95,7 +97,7 @@ export default function LoginPage() {
     const handlePasswordReset = async () => {
         const email = formData.email.trim().toLowerCase();
         if (!email) {
-            showToast('Enter your email first', 'info');
+            setEmailError('Email is required to reset password');
             return;
         }
         if (isPlaceholderAuth) {
@@ -118,6 +120,8 @@ export default function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setAuthBanner(null);
+        setEmailError(null);
+        setPasswordError(null);
 
         if (isPlaceholderAuth) {
             showToast('Authentication not configured', 'error');
@@ -127,10 +131,24 @@ export default function LoginPage() {
         const email = formData.email.trim().toLowerCase();
         const password = formData.password;
 
-        if (!email || !password) {
-            showToast('Enter email and password', 'info');
-            return;
+        let hasError = false;
+        if (!email) {
+            setEmailError('Email is required');
+            hasError = true;
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            setEmailError('Invalid email format');
+            hasError = true;
         }
+
+        if (!password) {
+            setPasswordError('Password is required');
+            hasError = true;
+        } else if (password.length < 6) {
+            setPasswordError('Password too short (min 6 characters)');
+            hasError = true;
+        }
+
+        if (hasError) return;
 
         setIsLoading(true);
         track('login_started', 'auth', { method: 'email' });
@@ -169,7 +187,6 @@ export default function LoginPage() {
             });
             const formatted = formatAuthError(msg);
             setAuthBanner(formatted);
-            showToast(formatted.title, 'error');
         } finally {
             setIsLoading(false);
         }
@@ -222,7 +239,7 @@ export default function LoginPage() {
                         <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="bg-white border border-gray-100 rounded-[32px] p-6 mb-8 flex items-center gap-5 shadow-xl shadow-gray-100/50"
+                            className="bg-white border border-gray-100 rounded-[32px] p-6 mb-8 flex items-center gap-5 shadow-md shadow-gray-100/50"
                         >
                             <div className="w-14 h-14 bg-blue-600 rounded-[20px] flex items-center justify-center text-white text-2xl">🔥</div>
                             <div className="flex flex-col">
@@ -254,7 +271,7 @@ export default function LoginPage() {
                             className="w-full flex items-center justify-center gap-2 text-[11px] font-black text-gray-400 uppercase tracking-[0.15em] py-2 active:opacity-60"
                         >
                             {showEmailForm ? 'Hide email sign-in' : 'Sign in with email & password instead'}
-                            <ChevronDown size={16} className={`transition-transform ${showEmailForm ? 'rotate-180' : ''}`} />
+                            <ChevronDown size={16} className={` ${showEmailForm ? 'rotate-180' : ''}`} />
                         </button>
                     </div>
 
@@ -280,11 +297,21 @@ export default function LoginPage() {
                                     inputMode="email"
                                     autoComplete="email"
                                     placeholder="you@email.com"
-                                    className="w-full h-[60px] bg-gray-50/50 border-2 border-transparent rounded-[20px] px-6 text-[16px] font-bold text-[#1a1a2e] focus:bg-white focus:border-blue-500/20 transition-all outline-none"
+                                    className={`w-full h-[60px] border-2 rounded-lg px-6 text-[16px] font-bold outline-none ${
+                                        emailError
+                                            ? 'border-red-400 bg-red-50 focus:bg-white focus:border-red-400'
+                                            : 'border-transparent bg-gray-50/50 text-[#1a1a2e] focus:bg-white focus:border-blue-500/20'
+                                    }`}
                                     value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, email: e.target.value });
+                                        if (emailError) setEmailError(null);
+                                    }}
                                     required
                                 />
+                                {emailError && (
+                                    <p className="text-sm text-red-500 ml-1">{emailError}</p>
+                                )}
                             </div>
                             <div className="flex flex-col gap-2">
                                 <label className="text-[11px] font-black text-[#1a1a2e] ml-1 uppercase tracking-[0.2em] opacity-30">Password</label>
@@ -293,9 +320,16 @@ export default function LoginPage() {
                                         type={showPassword ? 'text' : 'password'}
                                         autoComplete="current-password"
                                         placeholder="••••••••"
-                                        className="w-full h-[60px] bg-gray-50/50 border-2 border-transparent rounded-[20px] px-6 text-[16px] font-bold text-[#1a1a2e] pr-16 focus:bg-white focus:border-blue-500/20 transition-all outline-none"
+                                        className={`w-full h-[60px] border-2 rounded-lg px-6 text-[16px] font-bold pr-16 outline-none ${
+                                            passwordError
+                                                ? 'border-red-400 bg-red-50 focus:bg-white focus:border-red-400'
+                                                : 'border-transparent bg-gray-50/50 text-[#1a1a2e] focus:bg-white focus:border-blue-500/20'
+                                        }`}
                                         value={formData.password}
-                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, password: e.target.value });
+                                            if (passwordError) setPasswordError(null);
+                                        }}
                                         required
                                     />
                                     <button
@@ -306,6 +340,9 @@ export default function LoginPage() {
                                         {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
                                     </button>
                                 </div>
+                                {passwordError && (
+                                    <p className="text-sm text-red-500 ml-1">{passwordError}</p>
+                                )}
                             </div>
                             <button
                                 type="button"
@@ -317,7 +354,7 @@ export default function LoginPage() {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full h-[60px] btn-primary font-black rounded-[20px] flex items-center justify-center gap-2 disabled:opacity-70"
+                                className="w-full h-[60px] btn-primary font-black rounded-lg flex items-center justify-center gap-2"
                             >
                                 {isLoading ? <Loader2 className="animate-spin" size={22} /> : 'Log in with email'}
                             </button>

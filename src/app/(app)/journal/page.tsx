@@ -165,7 +165,7 @@ export default function JournalPage() {
                                 setIsScannerOpen(true);
                             }
                         }}
-                        className="w-16 h-16 btn-primary rounded-full flex items-center justify-center shadow-2xl active:scale-95 transition-all"
+                        className="w-16 h-16 btn-primary rounded-full flex items-center justify-center shadow-2xl active:scale-95 "
                     >
                         {mode === 'trades' ? <Activity size={28} strokeWidth={2.5} /> : <Camera size={28} strokeWidth={2.5} />}
                     </button>
@@ -208,13 +208,13 @@ export default function JournalPage() {
                 <div className="flex bg-gray-50 p-2 rounded-[32px] mb-8 border border-gray-100/50 shadow-inner">
                     <button 
                         onClick={() => setMode('trades')}
-                        className={`flex-1 h-14 rounded-[24px] text-[15px] font-black transition-all ${mode === 'trades' ? 'bg-[#1a1a2e] shadow-xl text-white' : 'text-gray-300'}`}
+                        className={`flex-1 h-14 rounded-[24px] text-[15px] font-black ${mode === 'trades' ? 'bg-[#1a1a2e] shadow-md text-white' : 'text-gray-300'}`}
                     >
                         Trade Log
                     </button>
                     <button 
                         onClick={() => setMode('scans')}
-                        className={`flex-1 h-14 rounded-[24px] text-[15px] font-black transition-all ${mode === 'scans' ? 'bg-[#1a1a2e] shadow-xl text-white' : 'text-gray-300'}`}
+                        className={`flex-1 h-14 rounded-[24px] text-[15px] font-black ${mode === 'scans' ? 'bg-[#1a1a2e] shadow-md text-white' : 'text-gray-300'}`}
                     >
                         Scan Library
                     </button>
@@ -236,7 +236,7 @@ export default function JournalPage() {
                         <button
                             key={f.value}
                             onClick={() => applyFilter(f.value)}
-                            className={`px-7 h-11 rounded-full whitespace-nowrap text-[13px] font-black transition-all ${
+                            className={`px-7 h-11 rounded-full whitespace-nowrap text-[13px] font-black ${
                                 selectedFilter === f.value 
                                     ? 'bg-[#1a1a2e] text-white shadow-lg' 
                                     : 'bg-gray-100 text-gray-400'
@@ -267,7 +267,7 @@ export default function JournalPage() {
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     onClick={() => router.push(`/journal/${trade.id}`)}
-                                    className="p-6 bg-white rounded-[40px] border border-gray-50 shadow-sm flex flex-col gap-5 text-left group active:scale-[0.98] transition-all"
+                                    className="p-6 bg-white rounded-[40px] border border-gray-50 shadow-sm flex flex-col gap-5 text-left group active:scale-[0.98] "
                                 >
                                     <div className="flex items-center justify-between">
                                         <div className="flex-1">
@@ -338,10 +338,10 @@ export default function JournalPage() {
                                         layout
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
-                                        className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex flex-col group active:scale-[0.98] transition-all"
+                                        className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm flex flex-col group active:scale-[0.98] "
                                     >
                                         <div className="aspect-[3/4] bg-gray-100 relative overflow-hidden">
-                                            <img src={entry.imagePath} alt="Scan" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                                            <img src={entry.imagePath} alt="Scan" className="w-full h-full object-cover group-hover:scale-110" />
                                             <div className="absolute top-2 left-2 px-2 py-1 bg-white/90 backdrop-blur-sm rounded-lg text-[8px] font-black uppercase tracking-widest">
                                                 {entry.type}
                                             </div>

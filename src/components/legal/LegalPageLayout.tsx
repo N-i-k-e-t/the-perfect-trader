@@ -16,7 +16,7 @@ export default function LegalPageLayout({
             <div className="max-w-[720px] mx-auto px-6 py-12 md:py-20">
                 <Link
                     href="/"
-                    className="inline-flex items-center gap-2 text-[#6b7280] hover:text-[#1a1a2e] transition-colors mb-10 font-bold text-[14px]"
+                    className="inline-flex items-center gap-2 text-[#6b7280] hover:text-[#1a1a2e] mb-10 font-bold text-[14px]"
                 >
                     <ArrowLeft size={18} />
                     Back to home

@@ -292,12 +292,11 @@ export default function CaptureHub() {
         }
     };
 
-    if (captureMode === 'none') return null;
-
     return (
-        <div className="fixed inset-0 z-[200] flex items-end justify-center italic-none">
-            {/* Backdrop */}
-            <motion.div 
+        <AnimatePresence>
+            {captureMode !== 'none' && (
+        <div className="fixed inset-0 z-[200] flex items-end justify-center max-w-[390px] left-1/2 -translate-x-1/2 italic-none">
+            <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -305,15 +304,18 @@ export default function CaptureHub() {
                 className="absolute inset-0 bg-black/60 backdrop-blur-md"
             />
 
-            {/* Premium Bottom Sheet */}
             <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 28, stiffness: 220 }}
                 drag="y"
                 dragControls={dragControls}
                 dragListener={false}
-                dragConstraints={{ top: 0, bottom: window.innerHeight }}
+                dragConstraints={{ top: 0, bottom: typeof window !== 'undefined' ? window.innerHeight : 800 }}
                 style={{ y: springY }}
                 onDragEnd={handleDragEnd}
-                className="relative w-full max-w-[390px] h-[92vh] bg-white rounded-t-[40px] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden"
+                className="relative w-full max-w-[390px] h-[92dvh] bg-white rounded-t-2xl shadow-md flex flex-col overflow-hidden"
             >
                 {/* Drag Handle Area */}
                 <div 
@@ -335,20 +337,20 @@ export default function CaptureHub() {
                             <p className="text-[15px] font-bold text-gray-400 mb-10">Choose your entry mode.</p>
                             
                             <div className="grid grid-cols-2 gap-5">
-                                <button onClick={() => setCaptureMode('checklist')} className="aspect-square bg-yellow-50 rounded-[32px] flex flex-col items-center justify-center gap-4 active:scale-95 transition-all text-yellow-600 border border-yellow-100/50 shadow-sm">
+                                <button onClick={() => setCaptureMode('checklist')} className="aspect-square bg-yellow-50 rounded-lg flex flex-col items-center justify-center gap-4 active:scale-95 text-yellow-600 border border-yellow-100/50 shadow-md">
                                     <ListChecks size={36} strokeWidth={2.5} />
                                     <span className="font-black text-[14px] uppercase tracking-widest">Log Trade</span>
                                 </button>
-                                <button onClick={() => setCaptureMode('note')} className="aspect-square bg-orange-50 rounded-[32px] flex flex-col items-center justify-center gap-4 active:scale-95 transition-all text-orange-600 border border-orange-100/50 shadow-sm">
+                                <button onClick={() => setCaptureMode('note')} className="aspect-square bg-orange-50 rounded-lg flex flex-col items-center justify-center gap-4 active:scale-95 text-orange-600 border border-orange-100/50 shadow-md">
                                     <FileText size={36} strokeWidth={2.5} />
                                     <span className="font-black text-[14px] uppercase tracking-widest">Quick Note</span>
                                 </button>
-                                <button type="button" disabled className="relative aspect-square bg-red-50/60 rounded-[32px] flex flex-col items-center justify-center gap-4 text-red-400 border border-red-100/50 opacity-70 cursor-not-allowed">
+                                <button type="button" disabled className="relative aspect-square bg-red-50/60 rounded-lg flex flex-col items-center justify-center gap-4 text-red-400 border border-red-100/50 opacity-70 cursor-not-allowed">
                                     <span className="absolute top-3 right-3 text-[9px] font-black bg-white text-gray-500 px-2 py-0.5 rounded-full border border-gray-100">SOON</span>
                                     <Mic size={36} strokeWidth={2.5} />
                                     <span className="font-black text-[14px] uppercase tracking-widest">Voice</span>
                                 </button>
-                                <button type="button" disabled className="relative aspect-square bg-blue-50/60 rounded-[32px] flex flex-col items-center justify-center gap-4 text-blue-400 border border-blue-100/50 opacity-70 cursor-not-allowed">
+                                <button type="button" disabled className="relative aspect-square bg-blue-50/60 rounded-lg flex flex-col items-center justify-center gap-4 text-blue-400 border border-blue-100/50 opacity-70 cursor-not-allowed">
                                     <span className="absolute top-3 right-3 text-[9px] font-black bg-white text-gray-500 px-2 py-0.5 rounded-full border border-gray-100">SOON</span>
                                     <Camera size={36} strokeWidth={2.5} />
                                     <span className="font-black text-[14px] uppercase tracking-widest">Scan</span>
@@ -376,9 +378,9 @@ export default function CaptureHub() {
                                         <button
                                             type="button"
                                             onClick={() => setTradeData({ ...tradeData, direction: 'Long' })}
-                                            className={`h-32 rounded-[32px] border-2 transition-all flex flex-col items-center justify-center gap-2 ${
+                                            className={`h-32 rounded-lg border-2 flex flex-col items-center justify-center gap-2 ${
                                                 tradeData.direction === 'Long'
-                                                    ? 'bg-green-50 border-green-500 shadow-lg'
+                                                    ? 'bg-green-50 border-green-500 shadow-md'
                                                     : 'bg-green-50/40 border-transparent active:border-green-500'
                                             }`}
                                         >
@@ -388,9 +390,9 @@ export default function CaptureHub() {
                                         <button
                                             type="button"
                                             onClick={() => setTradeData({ ...tradeData, direction: 'Short' })}
-                                            className={`h-32 rounded-[32px] border-2 transition-all flex flex-col items-center justify-center gap-2 ${
+                                            className={`h-32 rounded-lg border-2 flex flex-col items-center justify-center gap-2 ${
                                                 tradeData.direction === 'Short'
-                                                    ? 'bg-red-50 border-red-500 shadow-lg'
+                                                    ? 'bg-red-50 border-red-500 shadow-md'
                                                     : 'bg-red-50/40 border-transparent active:border-red-500'
                                             }`}
                                         >
@@ -404,9 +406,9 @@ export default function CaptureHub() {
                                         <button
                                             type="button"
                                             onClick={() => setTradeResult('WIN')}
-                                            className={`h-24 rounded-[28px] border-2 transition-all flex flex-col items-center justify-center gap-2 ${
+                                            className={`h-24 rounded-lg border-2 flex flex-col items-center justify-center gap-2 ${
                                                 tradeResult === 'WIN'
-                                                    ? 'bg-green-50 border-green-500 shadow-lg'
+                                                    ? 'bg-green-50 border-green-500 shadow-md'
                                                     : 'bg-green-50/40 border-transparent active:border-green-500'
                                             }`}
                                         >
@@ -416,9 +418,9 @@ export default function CaptureHub() {
                                         <button
                                             type="button"
                                             onClick={() => setTradeResult('LOSS')}
-                                            className={`h-24 rounded-[28px] border-2 transition-all flex flex-col items-center justify-center gap-2 ${
+                                            className={`h-24 rounded-lg border-2 flex flex-col items-center justify-center gap-2 ${
                                                 tradeResult === 'LOSS'
-                                                    ? 'bg-red-50 border-red-500 shadow-lg'
+                                                    ? 'bg-red-50 border-red-500 shadow-md'
                                                     : 'bg-red-50/40 border-transparent active:border-red-500'
                                             }`}
                                         >
@@ -431,7 +433,7 @@ export default function CaptureHub() {
                                         type="button"
                                         disabled={!tradeResult}
                                         onClick={() => setTradeStep(2)}
-                                        className="w-full h-16 btn-primary rounded-[24px] font-black text-[14px] uppercase tracking-widest shadow-xl disabled:opacity-40"
+                                        className="w-full h-16 btn-primary rounded-lg font-black text-[14px] uppercase tracking-widest shadow-md"
                                     >
                                         Continue
                                     </button>
@@ -446,12 +448,12 @@ export default function CaptureHub() {
                                         placeholder="Ticker (e.g. NIFTY)"
                                         value={tradeData.ticker}
                                         onChange={(e) => setTradeData({ ...tradeData, ticker: e.target.value.toUpperCase() })}
-                                        className="w-full h-14 bg-gray-50 rounded-2xl px-5 font-bold outline-none border border-gray-100"
+                                        className="w-full h-14 bg-gray-50 rounded-lg px-5 font-bold outline-none border border-gray-100"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setTradeStep(3)}
-                                        className="w-full h-16 btn-primary rounded-[24px] font-black text-[14px] uppercase tracking-widest shadow-xl"
+                                        className="w-full h-16 btn-primary rounded-lg font-black text-[14px] uppercase tracking-widest shadow-md"
                                     >
                                         Continue
                                     </button>
@@ -471,7 +473,7 @@ export default function CaptureHub() {
                                                 placeholder="0"
                                                 value={tradeData.entry}
                                                 onChange={(e) => setTradeData({ ...tradeData, entry: e.target.value })}
-                                                className="w-full h-14 bg-gray-50 rounded-2xl px-4 font-bold outline-none"
+                                                className="w-full h-14 bg-gray-50 rounded-lg px-4 font-bold outline-none"
                                             />
                                         </div>
                                         <div className="flex flex-col gap-2">
@@ -482,7 +484,7 @@ export default function CaptureHub() {
                                                 placeholder="0"
                                                 value={tradeData.exit}
                                                 onChange={(e) => setTradeData({ ...tradeData, exit: e.target.value })}
-                                                className="w-full h-14 bg-gray-50 rounded-2xl px-4 font-bold outline-none"
+                                                className="w-full h-14 bg-gray-50 rounded-lg px-4 font-bold outline-none"
                                             />
                                         </div>
                                     </div>
@@ -494,13 +496,13 @@ export default function CaptureHub() {
                                             placeholder={tradeResult === 'WIN' ? 'e.g. 500' : 'e.g. -200'}
                                             value={tradeData.pnl}
                                             onChange={(e) => setTradeData({ ...tradeData, pnl: e.target.value })}
-                                            className="w-full h-14 bg-gray-50 rounded-2xl px-5 font-bold outline-none"
+                                            className="w-full h-14 bg-gray-50 rounded-lg px-5 font-bold outline-none"
                                         />
                                     </div>
                                     <button
                                         type="button"
                                         onClick={() => setTradeStep(4)}
-                                        className="w-full h-16 btn-primary rounded-[24px] font-black text-[14px] uppercase tracking-widest shadow-xl"
+                                        className="w-full h-16 btn-primary rounded-lg font-black text-[14px] uppercase tracking-widest shadow-md"
                                     >
                                         Continue
                                     </button>
@@ -515,14 +517,14 @@ export default function CaptureHub() {
                                         <button 
                                             type="button"
                                             onClick={() => { setRulesStatus('ALL'); setTradeStep(5); }}
-                                            className="h-28 bg-blue-50 rounded-[28px] border-2 border-transparent active:border-blue-500 transition-all flex flex-col items-center justify-center gap-2 px-4 text-center"
+                                            className="h-28 bg-blue-50 rounded-lg border-2 border-transparent active:border-blue-500 flex flex-col items-center justify-center gap-2 px-4 text-center"
                                         >
                                             <CheckCircle2 size={24} className="text-blue-500" />
                                             <span className="font-black text-blue-600 uppercase tracking-widest text-[11px]">YES, ALL</span>
                                         </button>
                                         <button 
                                             onClick={() => { setRulesStatus('SOME'); }}
-                                            className={`h-28 rounded-[28px] border-2 transition-all flex flex-col items-center justify-center gap-2 px-4 text-center ${rulesStatus === 'SOME' ? 'bg-[#1a1a2e] border-[#1a1a2e] text-white shadow-xl' : 'bg-gray-50 border-transparent text-gray-400'}`}
+                                            className={`h-28 rounded-lg border-2 flex flex-col items-center justify-center gap-2 px-4 text-center ${rulesStatus === 'SOME' ? 'bg-[#1a1a2e] border-[#1a1a2e] text-white shadow-md' : 'bg-gray-50 border-transparent text-gray-400'}`}
                                         >
                                             <AlertCircle size={24} className={rulesStatus === 'SOME' ? 'text-white' : 'text-gray-300'} />
                                             <span className={`font-black uppercase tracking-widest text-[11px] ${rulesStatus === 'SOME' ? 'text-white' : 'text-gray-400'}`}>BROKE SOME</span>
@@ -542,9 +544,9 @@ export default function CaptureHub() {
                                                             checkedRules: current.includes(rule.id) ? current.filter(id => id !== rule.id) : [...current, rule.id]
                                                         });
                                                     }}
-                                                    className={`flex items-center gap-4 p-4 rounded-[24px] border transition-all ${tradeData.checkedRules.includes(rule.id) ? 'bg-green-50/50 border-green-200' : 'bg-white border-gray-100'}`}
+                                                    className={`flex items-center gap-4 p-4 rounded-lg border ${tradeData.checkedRules.includes(rule.id) ? 'bg-green-50/50 border-green-200' : 'bg-white border-gray-100'}`}
                                                 >
-                                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${tradeData.checkedRules.includes(rule.id) ? 'bg-green-500 border-green-500 text-white' : 'border-gray-200'}`}>
+                                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${tradeData.checkedRules.includes(rule.id) ? 'bg-green-500 border-green-500 text-white' : 'border-gray-200'}`}>
                                                         {tradeData.checkedRules.includes(rule.id) && <Check size={14} strokeWidth={4} />}
                                                     </div>
                                                     <span className={`text-[14px] font-bold ${tradeData.checkedRules.includes(rule.id) ? 'text-[#1a1a2e]' : 'text-gray-300'}`}>
@@ -555,7 +557,7 @@ export default function CaptureHub() {
                                             <button 
                                                 type="button"
                                                 onClick={() => setTradeStep(5)}
-                                                className="w-full h-16 btn-primary rounded-[24px] font-black text-[14px] uppercase tracking-widest mt-4 shadow-xl mb-4"
+                                                className="w-full h-16 btn-primary rounded-lg font-black text-[14px] uppercase tracking-widest mt-4 shadow-md mb-4"
                                             >
                                                 Continue
                                             </button>
@@ -574,7 +576,7 @@ export default function CaptureHub() {
                                                 key={item.v}
                                                 type="button"
                                                 onClick={() => setTradeData({ ...tradeData, emotion: item.v })}
-                                                className={`flex flex-col items-center justify-center gap-1 h-24 rounded-[28px] border-2 ${
+                                                className={`flex flex-col items-center justify-center gap-1 h-24 rounded-lg border-2 ${
                                                     tradeData.emotion === item.v
                                                         ? 'bg-[#1a1a2e] border-[#1a1a2e] text-white'
                                                         : 'bg-white border-gray-100 text-gray-400'
@@ -588,7 +590,7 @@ export default function CaptureHub() {
                                     <button
                                         type="button"
                                         onClick={() => setTradeStep(6)}
-                                        className="w-full h-16 btn-primary rounded-[24px] font-black text-[14px] uppercase tracking-widest shadow-xl"
+                                        className="w-full h-16 btn-primary rounded-lg font-black text-[14px] uppercase tracking-widest shadow-md"
                                     >
                                         Continue
                                     </button>
@@ -604,14 +606,14 @@ export default function CaptureHub() {
                                         rows={3}
                                         value={tradeData.notes}
                                         onChange={(e) => setTradeData({ ...tradeData, notes: e.target.value })}
-                                        className="w-full bg-gray-50 rounded-[28px] p-6 font-bold text-[#1a1a2e] outline-none border border-gray-100 resize-none"
+                                        className="w-full bg-gray-50 rounded-lg p-6 font-bold text-[#1a1a2e] outline-none border border-gray-100 resize-none"
                                     />
                                     <div className="flex flex-col gap-4 mt-2">
                                         <button 
                                             type="button"
                                             onClick={handleSaveTrade}
                                             disabled={isProcessing}
-                                            className="w-full h-20 btn-primary rounded-[32px] font-black text-[18px] shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                                            className="w-full h-20 btn-primary rounded-lg font-black text-[18px] shadow-md active:scale-95 flex items-center justify-center gap-3"
                                         >
                                             {isProcessing ? <Loader2 className="animate-spin" /> : <>{editingTrade ? 'UPDATE TRADE' : 'SAVE TRADE'}</>}
                                         </button>
@@ -639,13 +641,13 @@ export default function CaptureHub() {
                                 rows={6}
                                 value={noteText}
                                 onChange={(e) => setNoteText(e.target.value)}
-                                className="w-full bg-gray-50 rounded-[28px] p-6 font-bold text-[#1a1a2e] outline-none border border-gray-100 resize-none"
+                                className="w-full bg-gray-50 rounded-lg p-6 font-bold text-[#1a1a2e] outline-none border border-gray-100 resize-none"
                             />
                             <button
                                 type="button"
                                 onClick={handleParseNote}
                                 disabled={isProcessing}
-                                className="w-full h-16 btn-primary rounded-[28px] font-black text-[15px] flex items-center justify-center gap-2 disabled:opacity-50"
+                                className="w-full h-16 btn-primary rounded-lg font-black text-[15px] flex items-center justify-center gap-2"
                             >
                                 {isProcessing ? <Loader2 className="animate-spin" size={22} /> : <>Parse with AI <Sparkles size={18} /></>}
                             </button>
@@ -661,7 +663,7 @@ export default function CaptureHub() {
 
                     {(captureMode === 'voice' || captureMode === 'photo') && (
                         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="pt-20 flex flex-col items-center text-center gap-8 px-4">
-                            <div className="w-24 h-24 rounded-[32px] bg-gray-100 text-gray-400 flex items-center justify-center">
+                            <div className="w-24 h-24 rounded-lg bg-gray-100 text-gray-400 flex items-center justify-center">
                                 {captureMode === 'voice' ? <Mic size={42} /> : <Camera size={42} />}
                             </div>
                             <div>
@@ -674,7 +676,7 @@ export default function CaptureHub() {
                             <button
                                 type="button"
                                 onClick={() => setCaptureMode('checklist')}
-                                className="w-full h-16 btn-primary rounded-[24px] font-black text-[14px] uppercase tracking-widest active:scale-95"
+                                className="w-full h-16 btn-primary rounded-lg font-black text-[14px] uppercase tracking-widest active:scale-95"
                             >
                                 Log trade manually
                             </button>
@@ -683,5 +685,7 @@ export default function CaptureHub() {
                 </div>
             </motion.div>
         </div>
+            )}
+        </AnimatePresence>
     );
 }

@@ -32,7 +32,7 @@ export function EmptyState({
         <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center justify-center p-10 text-center bg-[#f8fafc] rounded-2xl border border-dashed border-gray-200"
+            className="flex flex-col items-center justify-center p-10 text-center bg-white rounded-2xl border border-dashed border-gray-200"
         >
             <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center text-3xl shadow-sm mb-6">
                 {emoji ? emoji : Icon ? <Icon size={32} className="text-gray-300" /> : '📋'}
@@ -44,7 +44,7 @@ export function EmptyState({
             {handleAction && label && (
                 <button 
                     onClick={handleAction}
-                    className="h-12 px-8 btn-primary rounded-full font-black text-[14px] active:scale-95 transition-all shadow-lg shadow-gray-200"
+                    className="h-12 px-8 btn-primary rounded-full font-black text-[14px] active:scale-95 shadow-lg shadow-gray-200"
                 >
                     {label}
                 </button>

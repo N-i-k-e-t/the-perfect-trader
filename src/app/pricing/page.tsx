@@ -91,7 +91,7 @@ export default function PricingPage() {
                     </div>
 
                     {/* PRO */}
-                    <div className="bg-[#1a1a2e] rounded-[32px] p-8 text-white shadow-xl flex flex-col relative overflow-hidden">
+                    <div className="bg-[#1a1a2e] rounded-[32px] p-8 text-white shadow-md flex flex-col relative overflow-hidden">
                         <p className="text-[11px] font-black uppercase tracking-widest text-emerald-400 mb-2">Post-beta</p>
                         <h2 className="text-[24px] font-black mb-1">Pro</h2>
                         <p className="text-[32px] font-black mb-1">

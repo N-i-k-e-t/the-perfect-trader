@@ -46,7 +46,7 @@ export default function FaqPage() {
                     >
                         <summary className="cursor-pointer list-none px-5 py-4 font-black text-[15px] text-white flex justify-between items-center gap-4">
                             {item.q}
-                            <span className="text-emerald-400 text-[20px] group-open:rotate-45 transition-transform shrink-0">
+                            <span className="text-emerald-400 text-[20px] group-open:rotate-45 shrink-0">
                                 +
                             </span>
                         </summary>

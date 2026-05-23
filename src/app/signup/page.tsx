@@ -32,6 +32,9 @@ export default function SignupPage() {
     const [formData, setFormData] = useState({ name: '', email: '', password: '' });
     const [termsAccepted, setTermsAccepted] = useState(false);
     const [authBanner, setAuthBanner] = useState<{ title: string; hint: string } | null>(null);
+    const [nameError, setNameError] = useState<string | null>(null);
+    const [emailError, setEmailError] = useState<string | null>(null);
+    const [passwordError, setPasswordError] = useState<string | null>(null);
     const checkingSession = useRedirectIfAuthenticated(setUser);
 
     useEffect(() => {
@@ -61,10 +64,10 @@ export default function SignupPage() {
         if (/[0-9]/.test(pass)) score++;
         if (/[^A-Za-z0-9]/.test(pass)) score++;
 
-        if (score <= 1) return { score, color: 'bg-red-500', label: 'Weak' };
-        if (score === 2) return { score, color: 'bg-yellow-500', label: 'Fair' };
-        if (score === 3) return { score, color: 'bg-blue-400', label: 'Good' };
-        return { score, color: 'bg-green-500', label: 'Strong' };
+        if (score <= 1) return { score, color: 'bg-[#ef4444]', label: 'Weak' };
+        if (score === 2) return { score, color: 'bg-[#f59e0b]', label: 'Fair' };
+        if (score === 3) return { score, color: 'bg-[#84cc16]', label: 'Good' };
+        return { score, color: 'bg-[#10b981]', label: 'Strong' };
     }, [formData.password]);
 
     const ensureSlot = async (): Promise<boolean> => {
@@ -131,6 +134,9 @@ export default function SignupPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setNameError(null);
+        setEmailError(null);
+        setPasswordError(null);
         setAuthBanner(null);
 
         if (!isSupabaseConfigured()) {
@@ -144,18 +150,30 @@ export default function SignupPage() {
         const email = formData.email.trim().toLowerCase();
         const password = formData.password;
 
+        let hasError = false;
+
         if (!name) {
-            showToast('Enter your name', 'info');
-            return;
+            setNameError('Name is required');
+            hasError = true;
         }
+
         if (!email) {
-            showToast('Enter your email', 'info');
-            return;
+            setEmailError('Email is required');
+            hasError = true;
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            setEmailError('Invalid email format');
+            hasError = true;
         }
-        if (password.length < 8) {
-            showToast('Password too short (min 8 chars)', 'error');
-            return;
+
+        if (!password) {
+            setPasswordError('Password is required');
+            hasError = true;
+        } else if (password.length < 8) {
+            setPasswordError('Password too short (min 8 characters)');
+            hasError = true;
         }
+
+        if (hasError) return;
 
         setIsLoading(true);
         setEmailPendingConfirmation(false);
@@ -206,8 +224,13 @@ export default function SignupPage() {
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : 'Registration failed';
             const formatted = formatAuthError(msg);
-            setAuthBanner(formatted);
-            showToast(formatted.title, 'error');
+            
+            if (msg.toLowerCase().includes('already in use') || msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('user already exists')) {
+                setEmailError('Email already in use');
+            } else {
+                setAuthBanner(formatted);
+                showToast(formatted.title, 'error');
+            }
         } finally {
             setIsLoading(false);
         }
@@ -275,22 +298,6 @@ export default function SignupPage() {
                     className="bg-white rounded-[40px] shadow-[0_32px_80px_rgba(0,0,0,0.06)] border border-gray-50 overflow-hidden"
                 >
                     <div className="p-10 pb-4 flex flex-col gap-6">
-                        <div className="flex items-start gap-3 px-1">
-                            <button
-                                type="button"
-                                onClick={() => setTermsAccepted(!termsAccepted)}
-                                className={`w-5 h-5 rounded-md border-2 shrink-0 flex items-center justify-center transition-all ${
-                                    termsAccepted ? 'bg-[#1a1a2e] border-[#1a1a2e] text-white' : 'bg-gray-50 border-gray-100'
-                                }`}
-                            >
-                                {termsAccepted && <Check size={14} strokeWidth={4} />}
-                            </button>
-                            <span className="text-[11px] font-bold text-gray-400 leading-tight uppercase tracking-wider">
-                                I accept the <Link href="/terms" className="text-[#1a1a2e] underline">Terms</Link> &{' '}
-                                <Link href="/privacy" className="text-[#1a1a2e] underline">Privacy</Link>
-                            </span>
-                        </div>
-
                         <SocialAuthButtons
                             mode="signup"
                             onGoogle={() => handleSocialSignup('google')}
@@ -298,6 +305,21 @@ export default function SignupPage() {
                             disabled={!termsAccepted}
                             loadingProvider={oauthLoading}
                         />
+                        <div className="flex items-start gap-3 px-1">
+                            <button
+                                type="button"
+                                onClick={() => setTermsAccepted(!termsAccepted)}
+                                className={`min-w-[44px] min-h-[44px] rounded-md border-2 shrink-0 flex items-center justify-center ${
+                                    termsAccepted ? 'bg-[#1a1a2e] border-[#1a1a2e] text-white' : 'bg-[#f3f4f6] border-[#f3f4f6]'
+                                }`}
+                            >
+                                {termsAccepted && <Check size={14} strokeWidth={4} />}
+                            </button>
+                            <span className="text-[12px] font-medium text-[#6b7280] leading-snug">
+                                I accept the <Link href="/terms" className="text-[#111827] underline">Terms</Link> &{' '}
+                                <Link href="/privacy" className="text-[#111827] underline">Privacy</Link>
+                            </span>
+                        </div>
                     </div>
 
                     <div className="px-10 pb-4">
@@ -307,7 +329,7 @@ export default function SignupPage() {
                             className="w-full flex items-center justify-center gap-2 text-[11px] font-black text-gray-400 uppercase tracking-[0.15em] py-2"
                         >
                             {showEmailForm ? 'Hide email signup' : 'Or sign up with email & password'}
-                            <ChevronDown size={16} className={`transition-transform ${showEmailForm ? 'rotate-180' : ''}`} />
+                            <ChevronDown size={16} className={` ${showEmailForm ? 'rotate-180' : ''}`} />
                         </button>
                     </div>
 
@@ -340,11 +362,21 @@ export default function SignupPage() {
                                     type="text"
                                     autoComplete="name"
                                     placeholder="Your trading alias"
-                                    className="w-full h-[60px] bg-gray-50/50 border-2 border-transparent rounded-[20px] px-6 text-[16px] font-bold text-[#1a1a2e] focus:bg-white focus:border-blue-500/20 transition-all outline-none"
+                                    className={`w-full h-[60px] border-2 rounded-lg px-6 text-[16px] font-bold outline-none ${
+                                        nameError
+                                            ? 'border-red-400 bg-red-50 focus:bg-white focus:border-red-400'
+                                            : 'border-transparent bg-gray-50/50 text-[#1a1a2e] focus:bg-white focus:border-blue-500/20'
+                                    }`}
                                     value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, name: e.target.value });
+                                        if (nameError) setNameError(null);
+                                    }}
                                     required
                                 />
+                                {nameError && (
+                                    <p className="text-sm text-red-500 ml-1">{nameError}</p>
+                                )}
                             </div>
                             <div className="flex flex-col gap-2">
                                 <label className="text-[11px] font-black text-[#1a1a2e] ml-1 uppercase tracking-[0.2em] opacity-30">Email</label>
@@ -352,11 +384,21 @@ export default function SignupPage() {
                                     type="email"
                                     autoComplete="email"
                                     placeholder="you@email.com"
-                                    className="w-full h-[60px] bg-gray-50/50 border-2 border-transparent rounded-[20px] px-6 text-[16px] font-bold text-[#1a1a2e] focus:bg-white focus:border-blue-500/20 transition-all outline-none"
+                                    className={`w-full h-[60px] border-2 rounded-lg px-6 text-[16px] font-bold outline-none ${
+                                        emailError
+                                            ? 'border-red-400 bg-red-50 focus:bg-white focus:border-red-400'
+                                            : 'border-transparent bg-gray-50/50 text-[#1a1a2e] focus:bg-white focus:border-blue-500/20'
+                                    }`}
                                     value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    onChange={(e) => {
+                                        setFormData({ ...formData, email: e.target.value });
+                                        if (emailError) setEmailError(null);
+                                    }}
                                     required
                                 />
+                                {emailError && (
+                                    <p className="text-sm text-red-500 ml-1">{emailError}</p>
+                                )}
                             </div>
                             <div className="flex flex-col gap-2">
                                 <label className="text-[11px] font-black text-[#1a1a2e] ml-1 uppercase tracking-[0.2em] opacity-30">Password</label>
@@ -365,9 +407,16 @@ export default function SignupPage() {
                                         type={showPassword ? 'text' : 'password'}
                                         autoComplete="new-password"
                                         placeholder="••••••••"
-                                        className="w-full h-[60px] bg-gray-50/50 border-2 border-transparent rounded-[20px] px-6 text-[16px] font-bold text-[#1a1a2e] pr-16 focus:bg-white focus:border-blue-500/20 transition-all outline-none"
+                                        className={`w-full h-[60px] border-2 rounded-lg px-6 text-[16px] font-bold pr-16 outline-none ${
+                                            passwordError
+                                                ? 'border-red-400 bg-red-50 focus:bg-white focus:border-red-400'
+                                                : 'border-transparent bg-gray-50/50 text-[#1a1a2e] focus:bg-white focus:border-blue-500/20'
+                                        }`}
                                         value={formData.password}
-                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                        onChange={(e) => {
+                                            setFormData({ ...formData, password: e.target.value });
+                                            if (passwordError) setPasswordError(null);
+                                        }}
                                         required
                                     />
                                     <button
@@ -378,13 +427,16 @@ export default function SignupPage() {
                                         {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
                                     </button>
                                 </div>
+                                {passwordError && (
+                                    <p className="text-sm text-red-500 ml-1">{passwordError}</p>
+                                )}
                                 {formData.password && (
                                     <div className="mt-2 px-1">
                                         <div className="flex gap-1.5 mb-2">
                                             {[1, 2, 3, 4].map((step) => (
                                                 <div
                                                     key={step}
-                                                    className={`h-1 flex-1 rounded-full transition-all ${
+                                                    className={`h-1 flex-1 rounded-full ${
                                                         step <= strength.score ? strength.color : 'bg-gray-100'
                                                     }`}
                                                 />
@@ -404,7 +456,7 @@ export default function SignupPage() {
                             <button
                                 type="submit"
                                 disabled={isLoading || !termsAccepted}
-                                className="w-full h-[60px] btn-primary font-black rounded-[20px] flex items-center justify-center gap-2 disabled:opacity-70"
+                                className="w-full h-[60px] btn-primary font-black rounded-lg flex items-center justify-center gap-2"
                             >
                                 {isLoading ? <Loader2 className="animate-spin" size={22} /> : 'Create account with email'}
                             </button>

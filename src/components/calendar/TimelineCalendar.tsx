@@ -42,20 +42,20 @@ export default function TimelineCalendar() {
             <header className="flex flex-col gap-8">
                 <div className="flex items-center justify-between px-2">
                     <button onClick={() => setIsAdvancedPickerOpen(true)} className="flex items-center gap-4 group">
-                        <div className="w-12 h-12 bg-[#1a1a2e] text-white rounded-2xl flex items-center justify-center shadow-xl group-active:scale-95 transition-all">
+                        <div className="w-12 h-12 bg-[#1a1a2e] text-white rounded-2xl flex items-center justify-center shadow-md group-active:scale-95 ">
                             <Clock size={24} />
                         </div>
                         <div className="text-left">
                             <h2 className="text-2xl font-black text-[#1a1a2e] leading-none mb-1 flex items-center gap-2">
                                 {format(selectedDate, 'MMMM')}
-                                <Search size={14} className="text-gray-300 group-hover:text-blue-500 transition-colors" />
+                                <Search size={14} className="text-gray-300 group-hover:text-blue-500 " />
                             </h2>
                             <p className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">Protocol Timeline</p>
                         </div>
                     </button>
                     <div className="flex bg-gray-50 p-1.5 rounded-full border border-gray-100 shadow-sm">
-                        <button onClick={() => setSelectedDate(addDays(selectedDate, -7))} className="p-2 hover:bg-white rounded-full transition-all text-gray-400 hover:text-[#1a1a2e] active:scale-90"><ChevronLeft size={20} /></button>
-                        <button onClick={() => setSelectedDate(addDays(selectedDate, 7))} className="p-2 hover:bg-white rounded-full transition-all text-gray-400 hover:text-[#1a1a2e] active:scale-90"><ChevronRight size={20} /></button>
+                        <button onClick={() => setSelectedDate(addDays(selectedDate, -7))} className="p-2 hover:bg-white rounded-full text-gray-400 hover:text-[#1a1a2e] active:scale-90"><ChevronLeft size={20} /></button>
+                        <button onClick={() => setSelectedDate(addDays(selectedDate, 7))} className="p-2 hover:bg-white rounded-full text-gray-400 hover:text-[#1a1a2e] active:scale-90"><ChevronRight size={20} /></button>
                     </div>
                 </div>
 
@@ -86,7 +86,7 @@ export default function TimelineCalendar() {
                                         <button 
                                             key={i} 
                                             onClick={() => { setSelectedDate(setMonth(selectedDate, i)); setIsAdvancedPickerOpen(false); }}
-                                            className={`py-2 rounded-xl text-[10px] font-bold uppercase transition-all ${selectedDate.getMonth() === i ? 'bg-[#1a1a2e] text-white shadow-lg' : 'bg-gray-50 text-gray-300'}`}
+                                            className={`py-2 rounded-xl text-[10px] font-bold uppercase ${selectedDate.getMonth() === i ? 'bg-[#1a1a2e] text-white shadow-lg' : 'bg-gray-50 text-gray-300'}`}
                                         >
                                             {format(new Date(2025, i, 1), 'MMM')}
                                         </button>
@@ -97,7 +97,7 @@ export default function TimelineCalendar() {
                                         <button 
                                             key={y} 
                                             onClick={() => { setSelectedDate(setYear(selectedDate, y)); setIsAdvancedPickerOpen(false); }}
-                                            className={`py-2 rounded-xl text-[10px] font-bold transition-all ${selectedDate.getFullYear() === y ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-50 text-gray-300'}`}
+                                            className={`py-2 rounded-xl text-[10px] font-bold ${selectedDate.getFullYear() === y ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-50 text-gray-300'}`}
                                         >
                                             {y}
                                         </button>
@@ -114,12 +114,12 @@ export default function TimelineCalendar() {
                             <button
                                 key={date.toISOString()}
                                 onClick={() => setSelectedDate(date)}
-                                className="flex flex-col items-center gap-3 active:scale-90 transition-all z-10"
+                                className="flex flex-col items-center gap-3 active:scale-90 z-10"
                             >
                                 <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isSelected ? 'text-blue-500' : 'text-gray-200'}`}>
                                     {format(date, 'eee')}
                                 </span>
-                                <div className={`w-12 h-12 rounded-full flex flex-col items-center justify-center transition-all duration-500 ${isSelected ? 'bg-[#1a1a2e] text-white shadow-2xl scale-125' : 'text-gray-400 bg-gray-50 border border-transparent'}`}>
+                                <div className={`w-12 h-12 rounded-full flex flex-col items-center justify-center duration-500 ${isSelected ? 'bg-[#1a1a2e] text-white shadow-2xl scale-125' : 'text-gray-400 bg-gray-50 border border-transparent'}`}>
                                     <span className="text-[16px] font-black">{format(date, 'd')}</span>
                                     {hasLog && <div className={`w-1 h-1 rounded-full mt-1 ${isSelected ? 'bg-blue-400' : 'bg-blue-500'}`} />}
                                 </div>
@@ -153,10 +153,10 @@ export default function TimelineCalendar() {
                                             <span className="text-[9px] font-black text-gray-300 uppercase tracking-tighter">Verified</span>
                                         </div>
                                         <div className="flex-1 relative group">
-                                            <div className={`p-6 bg-white rounded-[40px] border border-gray-50 shadow-[0_10px_30px_rgba(0,0,0,0.02)] flex items-center justify-between overflow-hidden relative active:scale-[0.98] transition-all group-hover:shadow-md`}>
+                                            <div className={`p-6 bg-white rounded-[40px] border border-gray-50 shadow-[0_10px_30px_rgba(0,0,0,0.02)] flex items-center justify-between overflow-hidden relative active:scale-[0.98] group-hover:shadow-md`}>
                                                 <div className={`absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r ${gradients[idx % gradients.length]} opacity-60`} />
                                                 <div className="flex items-center gap-4 relative z-10">
-                                                    <div className="w-14 h-14 rounded-full bg-white shadow-sm border border-gray-50 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
+                                                    <div className="w-14 h-14 rounded-full bg-white shadow-sm border border-gray-50 flex items-center justify-center text-2xl group-hover:scale-110 ">
                                                         {rule.emoji}
                                                     </div>
                                                     <div className="flex flex-col">

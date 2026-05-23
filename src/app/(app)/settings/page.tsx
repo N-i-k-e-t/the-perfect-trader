@@ -104,7 +104,7 @@ export default function ProfilePage() {
     const MenuItem = ({ icon: Icon, label, value, color = "text-[#1a1a2e]", iconColor, onClick, isLast = false }: any) => (
         <button 
             onClick={onClick}
-            className={`w-full min-h-[52px] px-5 flex items-center justify-between active:bg-gray-50 transition-colors ${!isLast ? 'border-b border-gray-50' : ''}`}
+            className={`w-full min-h-[52px] px-5 flex items-center justify-between active:bg-gray-50 ${!isLast ? 'border-b border-gray-50' : ''}`}
         >
             <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center bg-gray-50 ${iconColor || color}`}>
@@ -164,7 +164,7 @@ export default function ProfilePage() {
                 {/* TRADING DNA CARD — INTERACTIVE */}
                 <button 
                     onClick={() => setIsPersonaOpen(true)}
-                    className="bg-[#1a1a2e] rounded-3xl p-6 text-white shadow-xl shadow-[#1a1a2e]/10 text-left active:scale-[0.98] transition-all relative overflow-hidden group"
+                    className="bg-[#1a1a2e] rounded-3xl p-6 text-white shadow-md shadow-[#1a1a2e]/10 text-left active:scale-[0.98] relative overflow-hidden group"
                 >
                     <div className="absolute top-0 right-0 p-4 opacity-20 group-active:opacity-40 transition-opacity">
                         <Sparkles size={48} className="text-white" />
@@ -276,7 +276,7 @@ export default function ProfilePage() {
                     {/* LOG OUT */}
                     <button 
                         onClick={handleLogout}
-                        className="w-full h-[60px] bg-red-50 rounded-3xl flex items-center justify-center gap-2 text-red-600 font-black text-[15px] active:scale-[0.98] transition-all border border-red-100 mb-8"
+                        className="w-full h-[60px] bg-red-50 rounded-3xl flex items-center justify-center gap-2 text-red-600 font-black text-[15px] active:scale-[0.98] border border-red-100 mb-8"
                     >
                         <LogOut size={18} strokeWidth={3} />
                         Log Out

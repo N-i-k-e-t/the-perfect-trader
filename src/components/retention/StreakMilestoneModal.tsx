@@ -61,7 +61,7 @@ export default function StreakMilestoneModal({
                     <button
                         type="button"
                         onClick={onClose}
-                        className="w-full h-16 btn-primary rounded-[28px] font-black text-[18px] shadow-2xl active:scale-95 transition-transform"
+                        className="w-full h-16 btn-primary rounded-[28px] font-black text-[18px] shadow-2xl active:scale-95 "
                     >
                         Keep going
                     </button>

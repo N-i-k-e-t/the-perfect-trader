@@ -9,7 +9,7 @@ export function TradingDnaCard({ trades, dailyLogs }: { trades: Trade[]; dailyLo
     if (dna.tradeCount === 0 && dailyLogs.length < 3) return null;
 
     return (
-        <section className="bg-gradient-to-br from-[#1a1a2e] to-[#2d2d44] rounded-[32px] p-6 text-white shadow-xl relative overflow-hidden">
+        <section className="bg-gradient-to-br from-[#1a1a2e] to-[#2d2d44] rounded-[32px] p-6 text-white shadow-md relative overflow-hidden">
             <Sparkles className="absolute top-4 right-4 opacity-20" size={48} />
             <p className="text-[10px] font-black uppercase tracking-widest text-white/50 mb-1">Trading DNA</p>
             <h3 className="text-[18px] font-black mb-4">{dna.monthLabel}</h3>

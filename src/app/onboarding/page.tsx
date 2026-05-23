@@ -190,11 +190,11 @@ export default function OnboardingPage() {
         <motion.button
             whileTap={{ scale: 0.98 }}
             onClick={onClick}
-            className={`w-full group flex items-center gap-5 transition-all p-5 rounded-[40px] border-2 ${
+            className={`w-full group flex items-center gap-5 p-5 rounded-[40px] border-2 ${
                 selected ? 'border-[#1a1a2e] bg-[#1a1a2e]/5' : 'border-gray-50 bg-gray-50/30'
             }`}
         >
-            <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl transition-all flex-none ${selected ? 'bg-[#1a1a2e] text-white shadow-lg' : 'bg-white shadow-sm'}`}>
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl flex-none ${selected ? 'bg-[#1a1a2e] text-white shadow-lg' : 'bg-white shadow-sm'}`}>
                 {emoji}
             </div>
             <div className="flex flex-col items-start text-left flex-1">
@@ -241,7 +241,7 @@ export default function OnboardingPage() {
                 <button 
                     onClick={prevStep}
                     disabled={currentStep === 0}
-                    className="w-12 h-12 flex items-center justify-center text-[#1a1a2e] bg-gray-50 rounded-full disabled:opacity-0 active:scale-90 transition-all shadow-sm group"
+                    className="w-12 h-12 flex items-center justify-center text-[#1a1a2e] bg-gray-50 rounded-full disabled:opacity-0 active:scale-90 shadow-sm group"
                 >
                     <ArrowLeft size={20} strokeWidth={3} />
                 </button>
@@ -274,7 +274,7 @@ export default function OnboardingPage() {
                                 </p>
                             </div>
                             
-                            <button onClick={nextStep} className="h-[64px] w-full md:max-w-[280px] btn-primary rounded-[35px] font-black text-[20px] active:scale-95 transition-all shadow-2xl shrink-0">
+                            <button onClick={nextStep} className="h-[64px] w-full md:max-w-[280px] btn-primary rounded-[35px] font-black text-[20px] active:scale-95 shadow-2xl shrink-0">
                                 Start →
                             </button>
                         </motion.div>
@@ -315,7 +315,7 @@ export default function OnboardingPage() {
                                     <button 
                                         key={item.t}
                                         onClick={() => setAnswers({ ...answers, assetClass: item.t })}
-                                        className={`h-[110px] rounded-[32px] border-2 transition-all p-4 flex flex-col items-center justify-center gap-1 ${
+                                        className={`h-[110px] rounded-[32px] border-2 p-4 flex flex-col items-center justify-center gap-1 ${
                                             answers.assetClass === item.t ? 'border-blue-500 bg-blue-50/20 text-[#1a1a2e]' : 'border-gray-50 text-gray-400'
                                         }`}
                                     >
@@ -329,7 +329,7 @@ export default function OnboardingPage() {
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     onClick={nextStep}
-                                    className="h-[72px] w-full btn-primary rounded-[28px] font-black text-[20px] shadow-2xl active:scale-95 transition-all mt-4"
+                                    className="h-[72px] w-full btn-primary rounded-[28px] font-black text-[20px] shadow-2xl active:scale-95 mt-4"
                                 >
                                     Continue
                                 </motion.button>
@@ -360,7 +360,7 @@ export default function OnboardingPage() {
                             <button
                                 type="button"
                                 onClick={nextStep}
-                                className="h-[72px] w-full btn-primary rounded-[28px] font-black text-[20px] active:scale-95 transition-all shadow-2xl"
+                                className="h-[72px] w-full btn-primary rounded-[28px] font-black text-[20px] active:scale-95 shadow-2xl"
                             >
                                 Continue
                             </button>
@@ -391,11 +391,11 @@ export default function OnboardingPage() {
                                 <p className="text-[14px] font-bold text-gray-500 px-8 uppercase tracking-widest">Keep your gains</p>
                             </div>
                             <div className="flex items-center gap-8">
-                                <button onClick={() => setAnswers({...answers, frequency: Math.max(1, answers.frequency - 1)})} className="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center text-[#1a1a2e] border border-gray-100 active:scale-90 transition-all font-black text-3xl"><Minus /></button>
+                                <button onClick={() => setAnswers({...answers, frequency: Math.max(1, answers.frequency - 1)})} className="w-20 h-20 rounded-full bg-gray-50 flex items-center justify-center text-[#1a1a2e] border border-gray-100 active:scale-90 font-black text-3xl"><Minus /></button>
                                 <span className="text-[100px] font-black tabular-nums text-[#1a1a2e] leading-none">{answers.frequency}</span>
-                                <button onClick={() => setAnswers({...answers, frequency: Math.min(20, answers.frequency + 1)})} className="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-2xl shadow-blue-200 active:scale-90 transition-all font-black text-3xl"><Plus /></button>
+                                <button onClick={() => setAnswers({...answers, frequency: Math.min(20, answers.frequency + 1)})} className="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-2xl shadow-blue-200 active:scale-90 font-black text-3xl"><Plus /></button>
                             </div>
-                            <button onClick={nextStep} className="h-[72px] w-full btn-primary rounded-[28px] font-black text-[20px] shadow-2xl active:scale-95 transition-all">Continue</button>
+                            <button onClick={nextStep} className="h-[72px] w-full btn-primary rounded-[28px] font-black text-[20px] shadow-2xl active:scale-95 ">Continue</button>
                         </motion.div>
                     )}
 
@@ -411,7 +411,7 @@ export default function OnboardingPage() {
                                     <button 
                                         key={val} 
                                         onClick={() => setAnswers({ ...answers, riskPerTrade: val })}
-                                        className={`h-[80px] rounded-[28px] border-2 font-black text-xl transition-all ${
+                                        className={`h-[80px] rounded-[28px] border-2 font-black text-xl ${
                                             answers.riskPerTrade === val ? 'border-blue-500 bg-blue-50 text-blue-600 shadow-md' : 'border-gray-50 bg-white text-gray-300'
                                         }`}
                                     >
@@ -421,7 +421,7 @@ export default function OnboardingPage() {
                             </div>
                             <button 
                                 onClick={nextStep}
-                                className="h-[72px] w-full btn-primary rounded-[28px] font-black text-[20px] shadow-2xl active:scale-95 transition-all mt-8"
+                                className="h-[72px] w-full btn-primary rounded-[28px] font-black text-[20px] shadow-2xl active:scale-95 mt-8"
                             >
                                 Confirm Risk Level
                             </button>
@@ -456,7 +456,7 @@ export default function OnboardingPage() {
                                     I commit to following my custom trading plan for the next <strong className="text-[#1a1a2e]">14 days</strong> without deviation.
                                 </p>
                             </div>
-                            <button onClick={nextStep} className="h-[72px] w-full max-w-[320px] btn-primary rounded-[28px] font-black text-[20px] active:scale-95 transition-all shadow-2xl">
+                            <button onClick={nextStep} className="h-[72px] w-full max-w-[320px] btn-primary rounded-[28px] font-black text-[20px] active:scale-95 shadow-2xl">
                                 I Accept
                             </button>
                         </motion.div>
@@ -517,7 +517,7 @@ export default function OnboardingPage() {
                                     updateSession({ preSessionComplete: true });
                                     router.push('/today');
                                 }}
-                                className="h-[72px] btn-primary rounded-[28px] font-black text-[20px] flex items-center justify-center gap-3 active:scale-95 transition-all shadow-2xl"
+                                className="h-[72px] btn-primary rounded-[28px] font-black text-[20px] flex items-center justify-center gap-3 active:scale-95 shadow-2xl"
                             >
                                 Enter Your Dashboard <ArrowRight size={22} strokeWidth={3} />
                             </button>

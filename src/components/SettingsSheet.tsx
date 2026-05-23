@@ -129,7 +129,7 @@ export default function SettingsSheet({ isOpen, onClose }: { isOpen: boolean; on
 
                                                 window.location.href = '/login';
                                             }}
-                                            className="w-full h-14 bg-blue-50/30 border border-blue-100/50 flex items-center justify-between px-5 rounded-2xl active:bg-blue-100/50 transition-colors text-left"
+                                            className="w-full h-14 bg-blue-50/30 border border-blue-100/50 flex items-center justify-between px-5 rounded-2xl active:bg-blue-100/50 text-left"
                                         >
                                             <div className="flex items-center gap-4 text-blue-600">
                                                 <div className="w-6 h-6 bg-blue-500/10 rounded-lg flex items-center justify-center">
@@ -145,7 +145,7 @@ export default function SettingsSheet({ isOpen, onClose }: { isOpen: boolean; on
 
                             <button 
                                 onClick={logout}
-                                className="w-full h-16 bg-red-50 text-red-600 rounded-[24px] flex items-center justify-center gap-3 text-[15px] font-black uppercase tracking-widest active:scale-[0.98] transition-all"
+                                className="w-full h-16 bg-red-50 text-red-600 rounded-[24px] flex items-center justify-center gap-3 text-[15px] font-black uppercase tracking-widest active:scale-[0.98] "
                             >
                                 <LogOut size={20} />
                                 Sign Out
@@ -164,7 +164,7 @@ function SettingItem({ icon, label, value, onClick }: { icon: React.ReactNode; l
         <button
             type="button"
             onClick={onClick}
-            className="w-full h-14 bg-white border border-gray-100/50 flex items-center justify-between px-5 rounded-2xl active:bg-gray-50 transition-colors"
+            className="w-full h-14 bg-white border border-gray-100/50 flex items-center justify-between px-5 rounded-2xl active:bg-gray-50 "
         >
             <div className="flex items-center gap-4 text-[#1a1a2e]">
                 <div className="text-gray-400">{icon}</div>

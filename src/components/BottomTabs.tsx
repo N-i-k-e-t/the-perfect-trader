@@ -2,17 +2,17 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    Home, 
+import {
+    Home,
     Shield,
-    Calendar, 
+    Calendar,
     Activity,
     Plus,
     FileText,
     Camera,
-    ListChecks
+    ListChecks,
 } from 'lucide-react';
 import { usePerfectTrader } from '@/lib/context';
 import { track } from '@/lib/analytics';
@@ -20,14 +20,13 @@ import { track } from '@/lib/analytics';
 const navItems = [
     { to: '/today', icon: Home, label: 'Today' },
     { to: '/rules', icon: Shield, label: 'Rules' },
-    { type: 'fab' },
+    { type: 'fab' as const },
     { to: '/calendar', icon: Calendar, label: 'Calendar' },
     { to: '/stats', icon: Activity, label: 'Stats' },
 ];
 
 export default function BottomTabs() {
     const pathname = usePathname();
-    const router = useRouter();
     const { setCaptureOpen, setCaptureMode } = usePerfectTrader();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -35,42 +34,44 @@ export default function BottomTabs() {
 
     const handleAction = (type: string) => {
         setIsMenuOpen(false);
-        setCaptureMode(type as any);
+        setCaptureMode(type as 'checklist' | 'note' | 'photo');
         setCaptureOpen(true);
     };
 
     return (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 w-full z-[200]">
-            {/* FAB Fan-out Menu */}
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] z-[200]">
             <AnimatePresence>
                 {isMenuOpen && (
                     <>
-                        <motion.div 
+                        <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                             onClick={() => setIsMenuOpen(false)}
-                            className="fixed inset-0 bg-black/20 backdrop-blur-[2px]"
+                            className="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-[199]"
                         />
-                        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4">
+                        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 z-[210]">
                             {[
-                                { id: 'checklist', icon: ListChecks, label: 'Log Trade', color: 'bg-yellow-500' },
-                                { id: 'note', icon: FileText, label: 'Quick Note', color: 'bg-blue-500' },
-                                { id: 'photo', icon: Camera, label: 'Scan Rules', color: 'bg-purple-500' },
+                                { id: 'checklist', icon: ListChecks, label: 'Log Trade', bg: 'bg-[#10b981]' },
+                                { id: 'note', icon: FileText, label: 'Quick Note', bg: 'bg-[#1a1a2e]' },
+                                { id: 'photo', icon: Camera, label: 'Scan Rules', bg: 'bg-[#f59e0b]' },
                             ].map((item, i) => (
                                 <motion.button
                                     key={item.id}
+                                    type="button"
                                     initial={{ opacity: 0, y: 20, scale: 0.5 }}
                                     animate={{ opacity: 1, y: 0, scale: 1 }}
                                     exit={{ opacity: 0, y: 20, scale: 0.5 }}
-                                    transition={{ delay: i * 0.05, type: "spring", stiffness: 300, damping: 20 }}
+                                    transition={{ delay: i * 0.05, type: 'spring', stiffness: 300, damping: 20 }}
                                     onClick={() => handleAction(item.id)}
-                                    className="flex items-center gap-3 pr-4 pl-3 py-2 bg-white rounded-full shadow-xl border border-gray-100"
+                                    className="flex items-center gap-3 pr-4 pl-3 py-2 bg-white rounded-full shadow-md border border-[#f3f4f6] min-h-[44px]"
                                 >
-                                    <div className={`${item.color} min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center text-white`}>
+                                    <div
+                                        className={`${item.bg} min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center text-white`}
+                                    >
                                         <item.icon size={18} />
                                     </div>
-                                    <span className="text-[13px] font-black text-[#1a1a2e]">{item.label}</span>
+                                    <span className="text-[13px] font-semibold text-[#111827]">{item.label}</span>
                                 </motion.button>
                             ))}
                         </div>
@@ -78,18 +79,19 @@ export default function BottomTabs() {
                 )}
             </AnimatePresence>
 
-            {/* Bottom Tab Bar */}
-            <div className="px-6 pb-[calc(env(safe-area-inset-bottom)+16px)]">
-                <nav className="bg-white/80 backdrop-blur-3xl border border-white/40 rounded-[40px] px-2 h-[80px] flex justify-between items-center shadow-[0_25px_60px_rgba(0,0,0,0.15)] relative">
-                    {navItems.map((item, i) => {
+            <div className="px-4 pb-[calc(env(safe-area-inset-bottom)+12px)]">
+                <nav className="bg-white/90 backdrop-blur-md border border-[#f3f4f6] rounded-2xl px-2 h-[72px] flex justify-between items-center shadow-md relative">
+                    {navItems.map((item) => {
                         if (item.type === 'fab') {
                             return (
-                                <div key="fab-container" className="flex-1 flex justify-center -mt-12">
+                                <div key="fab-container" className="flex-1 flex justify-center -mt-10">
                                     <button
+                                        type="button"
                                         onClick={toggleMenu}
-                                        className={`w-18 h-18 bg-[#1a1a2e] rounded-full flex items-center justify-center text-white shadow-[0_20px_50px_rgba(0,0,0,0.3)] border-4 border-white active:scale-90 transition-all z-[210] p-4 ${isMenuOpen ? 'rotate-45' : ''}`}
+                                        aria-label="Open capture menu"
+                                        className={`min-w-[56px] min-h-[56px] bg-[#1a1a2e] rounded-full flex items-center justify-center text-white shadow-md border-4 border-white active:scale-[0.97] z-[210] ${isMenuOpen ? 'rotate-45' : ''}`}
                                     >
-                                        <Plus size={36} strokeWidth={4} />
+                                        <Plus size={28} strokeWidth={2.5} />
                                     </button>
                                 </div>
                             );
@@ -109,24 +111,20 @@ export default function BottomTabs() {
                                         });
                                     }
                                 }}
-                                className={`flex flex-col items-center justify-center transition-all flex-1 h-full gap-1 ${
-                                    isActive ? 'text-[#1a1a2e]' : 'text-gray-300'
+                                className={`flex flex-col items-center justify-center flex-1 min-h-[44px] gap-1 active:opacity-80 ${
+                                    isActive ? 'text-[#1a1a2e]' : 'text-[#9ca3af]'
                                 }`}
                             >
-                                <motion.div 
-                                    whileTap={{ scale: 0.9 }}
-                                    className={`relative flex items-center justify-center h-10 w-10 rounded-full transition-all ${isActive ? 'bg-gray-50/50' : ''}`}
+                                <span className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl">
+                                    <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
+                                </span>
+                                <span
+                                    className={`text-[12px] font-medium ${isActive ? 'text-[#111827]' : 'text-[#9ca3af]'}`}
                                 >
-                                    <Icon size={22} strokeWidth={isActive ? 3 : 2} />
-                                </motion.div>
-                                <span className={`text-[10px] font-black uppercase tracking-widest ${isActive ? 'text-[#1a1a2e]' : 'text-gray-400'}`}>
-                                     {item.label}
-                                 </span>
+                                    {item.label}
+                                </span>
                                 {isActive && (
-                                    <motion.div 
-                                        layoutId="activeTabDot"
-                                        className="w-1 h-1 bg-[#1a1a2e] rounded-full mt-0.5"
-                                    />
+                                    <motion.div layoutId="activeTabDot" className="w-1 h-1 bg-[#10b981] rounded-full" />
                                 )}
                             </Link>
                         );
@@ -136,4 +134,3 @@ export default function BottomTabs() {
         </div>
     );
 }
-

@@ -1,9 +1,9 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomTabs from './BottomTabs';
-import Sidebar from './Sidebar';
 import { usePerfectTrader } from '@/lib/context';
 import LabMode from './LabMode';
 import InstallPrompt from './InstallPrompt';
@@ -37,25 +37,23 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         fetchBetaCapacity().then(setBetaCapacity);
     }, []);
 
-    // Route Protection
     useEffect(() => {
         if (isHydrated && !isCheckingAuth && !user) {
             router.push('/login');
         }
     }, [isHydrated, isCheckingAuth, user, router]);
 
-    // STREAK LOGIC
     const streak = useMemo(() => {
         let count = 0;
         const today = new Date().toISOString().split('T')[0];
         const sortedLogs = [...dailyLogs].sort((a, b) => b.date.localeCompare(a.date));
-        
+
         if (analytics.consistencyDays) return analytics.consistencyDays;
 
         const checkDate = new Date();
         for (let i = 0; i < 30; i++) {
             const dStr = checkDate.toISOString().split('T')[0];
-            const log = sortedLogs.find(l => l.date === dStr);
+            const log = sortedLogs.find((l) => l.date === dStr);
             if (log && (log.complianceScore ?? 0) >= 75) {
                 count++;
             } else if (dStr !== today) {
@@ -84,9 +82,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     }, [user]);
 
     if (!isHydrated || isCheckingAuth) {
-        return <div className="min-h-[100dvh] bg-white flex items-center justify-center">
-            <div className="w-8 h-8 border-4 border-[#1a1a2e] border-t-transparent rounded-full animate-spin" />
-        </div>;
+        return (
+            <motion.div className="min-h-[100dvh] bg-white flex items-center justify-center">
+                <motion.div className="w-8 h-8 border-4 border-[#1a1a2e] border-t-transparent rounded-full animate-spin" />
+            </motion.div>
+        );
     }
 
     if (!user) {
@@ -95,78 +95,84 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
     if (!IS_BETA && isTrialExpired) {
         return (
-            <div className="min-h-[100dvh] flex flex-col items-center justify-center px-5 bg-[#f8f9fa] text-center">
-                <div className="w-full max-w-[360px] bg-white p-6 rounded-[24px] shadow-xl">
-                    <h2 className="text-2xl font-bold text-[#1a1a2e] mb-4">Trial Expired</h2>
-                    <p className="text-[#6b7280] mb-8">Your 3-day free trial has ended. Upgrade to The Perfect Trader Pro to continue executing with discipline.</p>
-                    <button 
+            <motion.div className="min-h-[100dvh] flex flex-col items-center justify-center px-5 bg-white text-center">
+                <motion.div className="w-full max-w-[360px] bg-white p-6 rounded-2xl shadow-md border border-[#f3f4f6]">
+                    <h2 className="text-xl font-semibold text-[#111827] mb-4">Trial expired</h2>
+                    <p className="text-[#6b7280] text-[15px] mb-8">
+                        Upgrade to continue tracking discipline with The Perfect Trader Pro.
+                    </p>
+                    <button
+                        type="button"
                         onClick={() => router.push('/pricing')}
-                        className="w-full h-14 btn-primary font-bold rounded-full shadow-lg"
+                        className="w-full min-h-[52px] btn-primary font-semibold rounded-xl shadow-sm"
                     >
-                        View Pricing Plans
+                        View pricing
                     </button>
-                </div>
-            </div>
+                </motion.div>
+            </motion.div>
         );
     }
 
     return (
-        <div className="flex min-h-[100dvh] w-full bg-white md:bg-[#0a0a12] overflow-x-hidden selection:bg-yellow-200">
-            <Sidebar onSettingsOpen={() => setIsSettingsOpen(true)} />
-
-            {/* Mobile header — hidden on desktop (sidebar replaces nav) */}
+        <motion.div className="flex min-h-[100dvh] w-full max-w-[390px] mx-auto bg-white overflow-x-hidden selection:bg-emerald-100">
             {!labMode && (
-                <header className="md:hidden fixed top-0 left-0 right-0 w-full h-[72px] bg-white/70 backdrop-blur-2xl border-b border-gray-100/50 z-[180] flex items-center justify-between px-6 pt-[env(safe-area-inset-top)] shadow-sm">
+                <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] h-[72px] bg-white/90 backdrop-blur-md border-b border-[#f3f4f6] z-[180] flex items-center justify-between px-5 pt-[env(safe-area-inset-top)]">
                     <div className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 bg-[#1a1a2e] text-white rounded-[12px] flex items-center justify-center shadow-lg shadow-[#1a1a2e]/10">
+                        <div className="w-11 h-11 bg-[#1a1a2e] text-white rounded-xl flex items-center justify-center">
                             <Target size={20} strokeWidth={2.5} />
                         </div>
-                        <span className="text-[19px] font-black tracking-[-0.03em] text-[#1a1a2e]">The Perfect Trader</span>
+                        <span className="text-[17px] font-semibold tracking-tight text-[#111827]">Perfect Trader</span>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <motion.div className="flex items-center gap-2">
                         {streak > 0 && (
-                            <div className="bg-orange-50 px-3 py-1.5 rounded-full flex items-center gap-2 border border-orange-100 shadow-sm">
-                                <Flame size={14} className="text-orange-500 fill-orange-500" />
-                                <span className="text-[12px] font-black text-orange-600 tabular-nums">{streak}</span>
+                            <div className="bg-amber-50 px-3 py-1.5 rounded-full flex items-center gap-1.5 border border-amber-100 min-h-[44px]">
+                                <Flame size={14} className="text-[#f59e0b] fill-[#f59e0b]" />
+                                <span className="text-[12px] font-semibold text-[#f59e0b] tabular-nums">{streak}</span>
                             </div>
                         )}
-                        <button 
+                        <button
+                            type="button"
                             onClick={() => setIsSettingsOpen(true)}
-                            className="w-10 h-10 rounded-full bg-[#1a1a2e] border-4 border-white flex items-center justify-center text-[11px] font-black text-white shadow-xl active:scale-90 transition-transform"
+                            aria-label="Open settings"
+                            className="min-w-[44px] min-h-[44px] rounded-full bg-[#1a1a2e] border-2 border-white flex items-center justify-center text-[11px] font-bold text-white shadow-md active:scale-95 "
                         >
                             {user?.name?.substring(0, 2).toUpperCase() || 'TR'}
                         </button>
-                    </div>
+                    </motion.div>
                 </header>
             )}
 
             <main
-                className={`flex-1 flex flex-col md:ml-[240px] md:min-h-screen ${labMode ? 'pt-0' : 'pt-[72px] md:pt-8'} transition-all duration-300 ${labMode ? 'focus-mode' : ''} pb-[calc(env(safe-area-inset-bottom,0px)+110px)] md:pb-10 md:bg-[#f4f5f7]`}
+                className={`flex-1 flex flex-col w-full ${labMode ? 'pt-0' : 'pt-[calc(72px+env(safe-area-inset-top,0px))]'} pb-[calc(env(safe-area-inset-bottom,0px)+110px)]`}
             >
-                <div className="w-full max-w-[390px] md:max-w-[min(800px,calc(100vw-280px))] mx-auto min-h-full md:px-8 md:py-2">
+                <div className="w-full max-w-[390px] mx-auto min-h-full">
                     {IS_BETA && !labMode && (
-                        <div className="mx-6 mt-6 mb-2 p-4 bg-gradient-to-r from-[#1a1a2e] to-[#2d2d4a] text-white rounded-[20px] flex items-center gap-3 border border-yellow-500/20">
-                            <Sparkles size={18} className="text-yellow-500 shrink-0" />
-                            <p className="text-[12px] font-bold text-white/80 leading-snug">
-                                <span className="text-yellow-500 font-black uppercase tracking-wider text-[10px] block mb-0.5">Beta</span>
+                        <div className="mx-4 mt-4 mb-2 p-4 bg-[#1a1a2e] text-white rounded-2xl flex items-center gap-3 border border-[#f3f4f6]/10">
+                            <Sparkles size={18} className="text-[#f59e0b] shrink-0" />
+                            <p className="text-[12px] font-medium text-white/80 leading-snug">
+                                <span className="text-[#f59e0b] font-semibold uppercase tracking-wider text-[10px] block mb-0.5">
+                                    Beta
+                                </span>
                                 All features free
                                 {betaCapacity
-                                    ? ` · ${betaCapacity.remaining}/${betaCapacity.max} beta spots left`
-                                    : ' — help us improve before Pro launches'}.
+                                    ? ` · ${betaCapacity.remaining}/${betaCapacity.max} spots left`
+                                    : ''}
                             </p>
                         </div>
                     )}
                     {!IS_BETA && !user?.isPro && user?.trialStartDate && !labMode && (
-                        <div className="mx-6 mt-6 mb-2 p-5 bg-[#1a1a2e] text-white rounded-[24px] flex items-center justify-between shadow-2xl shadow-yellow-100/20 relative overflow-hidden group">
-                            <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                            <div className="flex flex-col relative z-5">
-                                <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest mb-0.5">Trial</span>
-                                <span className="text-[14px] font-bold text-gray-300">{daysLeft} days remaining</span>
-                            </div>
+                        <div className="mx-4 mt-4 mb-2 p-4 bg-[#1a1a2e] text-white rounded-2xl flex items-center justify-between gap-3">
+                            <motion.div className="flex flex-col">
+                                <span className="text-[10px] font-semibold text-[#f59e0b] uppercase tracking-widest mb-0.5">
+                                    Trial
+                                </span>
+                                <span className="text-[14px] font-medium text-white/80">{daysLeft} days left</span>
+                            </motion.div>
                             <button
+                                type="button"
                                 onClick={() => router.push('/pricing')}
-                                className="relative z-5 h-10 px-5 bg-yellow-500 text-[#1a1a2e] font-black text-[12px] rounded-full uppercase tracking-wider shadow-lg active:scale-95 transition-all"
+                                className="min-h-[44px] px-4 bg-[#f59e0b] text-[#1a1a2e] font-semibold text-[12px] rounded-xl active:scale-95 "
                             >
                                 Upgrade
                             </button>
@@ -178,13 +184,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
             {!labMode && <BottomTabs />}
             {labMode && <LabMode />}
-            
+
             <InstallPrompt />
             <CaptureHub />
             <DailyStateCheck />
             <RetentionEffects />
             <SettingsSheet isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
-        </div>
+        </motion.div>
     );
 }
-

@@ -103,7 +103,7 @@ export function JournalMonthView({ trades, onSelectDate }: Props) {
                             key={key}
                             type="button"
                             onClick={() => onSelectDate?.(key)}
-                            className={`aspect-square rounded-xl flex flex-col items-center justify-center text-[11px] font-black transition-all ${
+                            className={`aspect-square rounded-xl flex flex-col items-center justify-center text-[11px] font-black ${
                                 isToday(day) ? 'ring-2 ring-[#1a1a2e]/20' : ''
                             } ${
                                 !has

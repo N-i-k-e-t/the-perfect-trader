@@ -38,7 +38,7 @@ export default function OnboardingFlowShell({
     const progressPct = Math.round(((currentStep + 1) / totalSteps) * 100);
 
     return (
-        <div className="min-h-[100dvh] w-full md:flex md:min-h-screen md:bg-[#0a0a12]">
+        <div className="min-h-[100dvh] w-full md:flex md:min-h-[100dvh] md:bg-[#0a0a12]">
             {/* Desktop — left rail */}
             <aside className="hidden md:flex flex-col w-[min(380px,32vw)] shrink-0 bg-[#1a1a2e] text-white p-10 xl:p-12 border-r border-white/10">
                 <div className="flex items-center gap-3 mb-12">
@@ -60,7 +60,7 @@ export default function OnboardingFlowShell({
                     {Array.from({ length: totalSteps }).map((_, i) => (
                         <div key={i} className="h-1.5 flex-1 rounded-full bg-white/10 overflow-hidden">
                             <div
-                                className="h-full bg-emerald-500 transition-all duration-300"
+                                className="h-full bg-emerald-500 duration-300"
                                 style={{ width: i <= currentStep ? '100%' : '0%' }}
                             />
                         </div>
@@ -84,7 +84,7 @@ export default function OnboardingFlowShell({
             </aside>
 
             {/* Content — mobile chrome is inside children (md:hidden); desktop scrolls here */}
-            <div className="flex-1 flex flex-col min-h-[100dvh] md:min-h-screen md:bg-white md:overflow-y-auto">
+            <div className="flex-1 flex flex-col min-h-[100dvh] md:min-h-[100dvh] md:bg-white md:overflow-y-auto">
                 <div className="flex-1 w-full md:max-w-3xl md:mx-auto md:px-10 lg:px-14 md:py-10">
                     {children}
                 </div>

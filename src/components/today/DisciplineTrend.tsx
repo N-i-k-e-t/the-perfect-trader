@@ -40,19 +40,19 @@ export default function DisciplineTrend({
                 {scores.map((s, i) => (
                     <div
                         key={i}
-                        className="flex-1 rounded-t-md bg-blue-500/80 min-h-[4px] transition-all"
+                        className="flex-1 rounded-t-md bg-[#10b981]/80 min-h-[4px]"
                         style={{ height: `${Math.max(12, (s / max) * 100)}%` }}
                         title={`${s}%`}
                     />
                 ))}
             </div>
-            <div className="flex items-center justify-between">
-                <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
+            <div className="flex items-center justify-between gap-2">
+                <span className="text-[12px] font-medium text-[#9ca3af] uppercase tracking-wide">
                     7-day discipline
                 </span>
                 {isBestToday && (
-                    <span className="text-[9px] font-black text-green-600 uppercase tracking-widest bg-green-50 px-2 py-0.5 rounded-full">
-                        Best day this week · {scoreToGrade(todayScore)}
+                    <span className="text-[12px] font-medium text-[#10b981] uppercase tracking-wide bg-emerald-50 px-2 py-1 rounded-full">
+                        Best day · {scoreToGrade(todayScore)}
                     </span>
                 )}
             </div>
