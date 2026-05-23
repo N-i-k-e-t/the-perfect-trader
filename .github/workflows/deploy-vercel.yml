@@ -9,9 +9,10 @@
 
 name: Deploy Vercel Production
 
+# Production deploys via Vercel ↔ GitHub integration (always succeeds).
+# This workflow is optional manual deploy — requires GitHub secrets:
+# VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 jobs:
