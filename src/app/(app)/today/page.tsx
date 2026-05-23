@@ -252,9 +252,9 @@ export default function DashboardPage() {
     ];
 
     return (
-        <div className="min-h-[100dvh] bg-[#fafafa] pb-[calc(env(safe-area-inset-bottom)+120px)] selection:bg-blue-100 italic-none overflow-x-hidden">
+        <div className="min-h-[100dvh] bg-[#fafafa] pb-[calc(env(safe-area-inset-bottom)+120px)] md:pb-8 selection:bg-blue-100 italic-none overflow-x-hidden w-full">
             <PullToRefresh onRefresh={refreshData} className="w-full">
-            <main className="px-5 pt-4 flex flex-col items-center w-full">
+            <main className="px-5 md:px-0 pt-4 flex flex-col items-center md:items-stretch w-full max-w-none">
                 {riskAlerts.length > 0 && (
                     <RiskAlertBanner
                         alert={riskAlerts[0]}
@@ -265,8 +265,8 @@ export default function DashboardPage() {
 
                 {selectedDateStr === today && <MarketHoursBanner />}
 
-                <header className="w-full mb-6 flex flex-col items-center">
-                    <div className="w-full flex justify-between items-center mb-8 px-2">
+                <header className="w-full mb-6 flex flex-col items-center md:items-stretch">
+                    <div className="w-full flex justify-between items-center mb-6 md:mb-8 px-2">
                         <div className="flex flex-col">
                             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Account Level</span>
                             <span className="text-[13px] font-black text-[#1a1a2e]">MY TRADING PLAN</span>
@@ -277,9 +277,10 @@ export default function DashboardPage() {
                         </div>
                     </div>
 
-                    <div className="flex flex-col items-center gap-1 mb-8">
-                        <div className="flex items-center gap-2">
-                            <span className="text-[28px] font-black text-[#1a1a2e] tracking-tight">
+                    <div className="w-full md:grid md:grid-cols-[1fr_auto] md:gap-10 md:items-start mb-6 md:mb-8">
+                    <div className="flex flex-col items-center md:items-start gap-1 mb-8 md:mb-0">
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                            <span className="text-[28px] md:text-[32px] font-black text-[#1a1a2e] tracking-tight">
                                 {selectedDate.toLocaleDateString('en-US', { day: 'numeric', month: 'long' })}
                             </span>
                             <div className="flex items-center gap-1 bg-orange-50 px-3 py-1 rounded-full border border-orange-100">
@@ -296,8 +297,8 @@ export default function DashboardPage() {
                     </div>
 
                     {/* DISCIPLINE SCORE — hero above the fold */}
-                    <div className="w-full flex flex-col items-center mb-8">
-                        <div className="relative w-56 h-56">
+                    <div className="w-full flex flex-col items-center md:items-end mb-8 md:mb-0">
+                        <div className="relative w-56 h-56 shrink-0">
                             <motion.div 
                                 animate={{ scale: [1, 1.05, 1], opacity: [0.05, 0.1, 0.05] }}
                                 transition={{ duration: 4, repeat: Infinity }}
@@ -333,7 +334,7 @@ export default function DashboardPage() {
                                 todayScore={score}
                             />
                         )}
-                        <div className="w-full grid grid-cols-2 gap-3 mt-6">
+                        <div className="w-full max-w-[280px] md:max-w-none grid grid-cols-2 gap-3 mt-6">
                             <div className="bg-white rounded-[24px] p-4 shadow-sm border border-gray-50 flex flex-col items-center gap-1">
                                 <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest flex items-center gap-1">
                                     <Zap size={10} /> Rules Followed
@@ -347,6 +348,7 @@ export default function DashboardPage() {
                                 <span className="text-[16px] font-black text-[#1a1a2e]">{targetTrades.length}/{session.tradesAllowed}</span>
                             </div>
                         </div>
+                    </div>
                     </div>
 
                     {!session.preSessionComplete && selectedDateStr === today && (

@@ -13,7 +13,7 @@ import { waitForSession } from '@/lib/auth-session';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Plus, Minus, Check, Loader2, Sparkles, ShieldCheck, Target, Lock, Award } from 'lucide-react';
 import DisciplineGrowthChart from '@/components/onboarding/DisciplineGrowthChart';
-import AppScreenLayout from '@/components/layout/AppScreenLayout';
+import OnboardingFlowShell from '@/components/onboarding/OnboardingFlowShell';
 
 export default function OnboardingPage() {
     const { user, isCheckingAuth, showToast, updateUserModel, updateSession, setUser } = usePerfectTrader();
@@ -174,12 +174,12 @@ export default function OnboardingPage() {
 
     if (!authReady) {
         return (
-            <AppScreenLayout variant="flow-wide">
+            <OnboardingFlowShell currentStep={0} totalSteps={12} onBack={() => {}} canGoBack={false}>
                 <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3">
                     <Loader2 className="animate-spin text-blue-500" size={32} />
                     <p className="text-[12px] font-bold text-gray-400">Setting up your account…</p>
                 </div>
-            </AppScreenLayout>
+            </OnboardingFlowShell>
         );
     }
 
@@ -210,10 +210,15 @@ export default function OnboardingPage() {
     );
 
     return (
-        <AppScreenLayout variant="flow-wide">
-        <div className="min-h-[100dvh] md:min-h-0 bg-white flex flex-col pb-[calc(env(safe-area-inset-bottom)+20px)]">
-            {/* SEGMENTED PROGRESS BAR - CAL AI STYLE */}
-            <div className="fixed md:sticky top-0 left-0 right-0 px-5 pt-4 z-[110] flex flex-col gap-2 bg-white/95 backdrop-blur-md" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
+        <OnboardingFlowShell
+            currentStep={currentStep}
+            totalSteps={totalSteps}
+            onBack={prevStep}
+            canGoBack={currentStep > 0}
+        >
+        <div className="min-h-[100dvh] md:min-h-0 bg-white flex flex-col pb-[calc(env(safe-area-inset-bottom)+20px)] md:pb-8">
+            {/* Mobile progress + step (desktop uses left rail) */}
+            <div className="md:hidden fixed top-0 left-0 right-0 px-5 pt-4 z-[110] flex flex-col gap-2 bg-white/95 backdrop-blur-md" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
                 <div className="flex gap-1">
                     {Array.from({ length: totalSteps }).map((_, i) => (
                         <div key={i} className="h-1.5 flex-1 bg-gray-100 rounded-full overflow-hidden">
@@ -231,8 +236,8 @@ export default function OnboardingPage() {
                 </p>
             </div>
 
-            {/* NAV BAR */}
-            <nav className="h-14 flex items-center justify-between px-5 z-[100] mt-8">
+            {/* Mobile back */}
+            <nav className="md:hidden h-14 flex items-center justify-between px-5 z-[100] mt-8">
                 <button 
                     onClick={prevStep}
                     disabled={currentStep === 0}
@@ -243,11 +248,11 @@ export default function OnboardingPage() {
                 <div className="w-12 h-12" />
             </nav>
 
-            <main className="flex-1 px-5 flex flex-col pt-4 overflow-x-hidden pb-20">
+            <main className="flex-1 px-5 md:px-0 flex flex-col pt-4 md:pt-0 overflow-x-hidden pb-20 md:pb-8">
                 <AnimatePresence mode="wait">
                     {/* STEP 0: THE SPLASH - PREMIUM CAL AI STYLE */}
                     {currentStep === 0 && (
-                        <motion.div key="s0" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.1 }} className="flex-1 flex flex-col items-center justify-start text-center px-4 pt-2">
+                        <motion.div key="s0" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.1 }} className="flex-1 flex flex-col items-center justify-start text-center md:text-left px-4 pt-2 md:px-0 md:flex-row md:items-center md:gap-12 md:justify-between">
                             <div className="relative w-full max-w-[280px] aspect-[3/4] max-h-[220px] rounded-[48px] overflow-hidden shadow-[0_24px_48px_rgba(0,0,0,0.2)] border-4 border-white bg-gradient-to-br from-[#1a1a2e] via-[#2d2d4a] to-blue-900 mb-6 flex flex-col items-center justify-center shrink-0">
                                 <div className="w-20 h-20 bg-white/10 rounded-[24px] flex items-center justify-center mb-6">
                                     <Target size={40} className="text-yellow-400" strokeWidth={2.5} />
@@ -262,14 +267,14 @@ export default function OnboardingPage() {
                                 </div>
                             </div>
                             
-                            <div className="flex flex-col gap-3 mb-6">
-                                <h1 className="text-[36px] font-black text-[#1a1a2e] leading-[0.95] tracking-tighter">Trade with<br/>Discipline.</h1>
-                                <p className="text-[15px] font-bold text-gray-400 max-w-[280px] mx-auto">
+                            <div className="flex flex-col gap-3 mb-6 md:mb-0 md:flex-1">
+                                <h1 className="text-[36px] md:text-[44px] font-black text-[#1a1a2e] leading-[0.95] tracking-tighter">Trade with<br/>Discipline.</h1>
+                                <p className="text-[15px] font-bold text-gray-400 max-w-[280px] mx-auto md:mx-0">
                                     Build a custom trading plan based on your trading style.
                                 </p>
                             </div>
                             
-                            <button onClick={nextStep} className="h-[64px] w-full btn-primary rounded-[35px] font-black text-[20px] active:scale-95 transition-all shadow-2xl shrink-0">
+                            <button onClick={nextStep} className="h-[64px] w-full md:max-w-[280px] btn-primary rounded-[35px] font-black text-[20px] active:scale-95 transition-all shadow-2xl shrink-0">
                                 Start →
                             </button>
                         </motion.div>
@@ -278,11 +283,11 @@ export default function OnboardingPage() {
                     {/* STEP 1: IDENTITY */}
                     {currentStep === 1 && (
                         <motion.div key="s1" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="flex flex-col gap-8">
-                            <div className="flex flex-col gap-2">
+                            <div className="flex flex-col gap-2 md:hidden">
                                 <h2 className="text-[28px] font-black text-[#1a1a2e] leading-tight">I identify as a...</h2>
                                 <p className="text-[14px] font-bold text-gray-500 uppercase tracking-widest pl-1">Build your plan</p>
                             </div>
-                            <div className="flex flex-col gap-3">
+                            <div className="flex flex-col md:grid md:grid-cols-2 gap-3">
                                 <OptionCard emoji="🏦" title="Institutional Mind" subtitle="Focus on large trends, risk-averse" onClick={() => handleSingleSelect('style', 'institutional')} selected={answers.style === 'institutional'} />
                                 <OptionCard emoji="🗡️" title="Aggressive Scalper" subtitle="High intensity, precision entries" onClick={() => handleSingleSelect('style', 'scalper')} selected={answers.style === 'scalper'} />
                                 <OptionCard emoji="🏰" title="Portfolio Manager" subtitle="Swing focused, diversified" onClick={() => handleSingleSelect('style', 'portfolio')} selected={answers.style === 'portfolio'} />
@@ -298,7 +303,7 @@ export default function OnboardingPage() {
                                 <h2 className="text-[28px] font-black text-[#1a1a2e] leading-tight">Primary Asset?</h2>
                                 <p className="text-[14px] font-bold text-gray-500 uppercase tracking-widest pl-1">Your Market</p>
                             </div>
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                                 {[
                                     { e: '📈', t: 'Indices', s: 'NQ, ES, DAX' },
                                     { e: '₿', t: 'Crypto', s: 'BTC, ETH' },
@@ -369,7 +374,7 @@ export default function OnboardingPage() {
                                 <h2 className="text-[28px] font-black text-[#1a1a2e] leading-tight">Trading Window?</h2>
                                 <p className="text-[14px] font-bold text-gray-500 uppercase tracking-widest pl-1">Active Hours</p>
                             </div>
-                            <div className="flex flex-col gap-3">
+                            <div className="flex flex-col md:grid md:grid-cols-2 gap-3">
                                 <OptionCard emoji="🗽" title="New York Session" subtitle="9:30 AM - 4:00 PM EST" onClick={() => handleSingleSelect('timeWindow', 'nyc')} selected={answers.timeWindow === 'nyc'} />
                                 <OptionCard emoji="🏰" title="London Session" subtitle="3:00 AM - 11:30 AM EST" onClick={() => handleSingleSelect('timeWindow', 'ldn')} selected={answers.timeWindow === 'ldn'} />
                                 <OptionCard emoji="🗼" title="Asian Session" subtitle="7:00 PM - 3:00 AM EST" onClick={() => handleSingleSelect('timeWindow', 'asia')} selected={answers.timeWindow === 'asia'} />
@@ -430,7 +435,7 @@ export default function OnboardingPage() {
                                 <h2 className="text-[28px] font-black text-[#1a1a2e] leading-tight">Hardest Constraint?</h2>
                                 <p className="text-[14px] font-bold text-gray-500 uppercase tracking-widest pl-1">Biggest Struggle</p>
                             </div>
-                            <div className="flex flex-col gap-3">
+                            <div className="flex flex-col md:grid md:grid-cols-2 gap-3">
                                 <OptionCard emoji="🎰" title="Impulse Entry" subtitle="Entering without rules confirmation" onClick={() => handleSingleSelect('primaryConstraint', 'impulse')} selected={answers.primaryConstraint === 'impulse'} />
                                 <OptionCard emoji="📉" title="Moving Stops" subtitle="Letting losers run too far" onClick={() => handleSingleSelect('primaryConstraint', 'stoploss')} selected={answers.primaryConstraint === 'stoploss'} />
                                 <OptionCard emoji="😤" title="Revenge Trading" subtitle="Trying to make back losses fast" onClick={() => handleSingleSelect('primaryConstraint', 'revenge')} selected={answers.primaryConstraint === 'revenge'} />
@@ -521,6 +526,6 @@ export default function OnboardingPage() {
                 </AnimatePresence>
             </main>
         </div>
-        </AppScreenLayout>
+        </OnboardingFlowShell>
     );
 }
