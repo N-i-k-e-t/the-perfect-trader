@@ -50,7 +50,7 @@ export default function SignupPage() {
 
     const strength = useMemo(() => {
         const pass = formData.password;
-        if (!pass) return { score: 0, color: 'bg-gray-100' };
+        if (!pass) return { score: 0, color: 'bg-gray-100', label: '' };
 
         let score = 0;
         if (pass.length >= 8) score++;
@@ -58,9 +58,10 @@ export default function SignupPage() {
         if (/[0-9]/.test(pass)) score++;
         if (/[^A-Za-z0-9]/.test(pass)) score++;
 
-        if (score <= 1) return { score, color: 'bg-red-500' };
-        if (score <= 3) return { score, color: 'bg-blue-400' };
-        return { score, color: 'bg-green-500' };
+        if (score <= 1) return { score, color: 'bg-red-500', label: 'Weak' };
+        if (score === 2) return { score, color: 'bg-yellow-500', label: 'Fair' };
+        if (score === 3) return { score, color: 'bg-blue-400', label: 'Good' };
+        return { score, color: 'bg-green-500', label: 'Strong' };
     }, [formData.password]);
 
     const ensureSlot = async (): Promise<boolean> => {
@@ -186,9 +187,9 @@ export default function SignupPage() {
                     <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-[18px] flex items-center justify-center mb-6 shadow-inner">
                         <Sparkles size={24} />
                     </div>
-                    <h1 className="text-[34px] font-black text-[#1a1a2e] mb-1 tracking-tighter leading-none">Create Account.</h1>
+                    <h1 className="text-[34px] font-black text-[#1a1a2e] mb-1 tracking-tighter leading-none">Start trading with discipline.</h1>
                     <p className="text-[15px] font-bold text-gray-400 mt-2 max-w-[300px]">
-                        Start with Google or GitHub — no password needed.
+                        Google or GitHub skips to onboarding. Email signup uses a secure password.
                     </p>
                     {capacity && !capacity.full && (
                         <p className="text-[12px] font-black text-yellow-600 mt-3 uppercase tracking-wider">
@@ -304,6 +305,9 @@ export default function SignupPage() {
                                                 />
                                             ))}
                                         </div>
+                                        <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">
+                                            {strength.label}
+                                        </p>
                                     </div>
                                 )}
                             </div>

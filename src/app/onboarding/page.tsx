@@ -266,7 +266,7 @@ export default function OnboardingPage() {
                             </div>
                             
                             <button onClick={nextStep} className="h-[64px] w-full btn-primary rounded-[35px] font-black text-[20px] active:scale-95 transition-all shadow-2xl shrink-0">
-                                Get Started
+                                Start →
                             </button>
                         </motion.div>
                     )}

@@ -14,8 +14,10 @@ import { Target, Flame, Sparkles } from 'lucide-react';
 import { useMemo } from 'react';
 import { IS_BETA } from '@/lib/config';
 import { fetchBetaCapacity, type BetaCapacity } from '@/lib/beta-capacity';
+import { useAppKeyboardShortcuts } from '@/hooks/useAppKeyboardShortcuts';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
+    useAppKeyboardShortcuts();
     const { labMode, user, isCheckingAuth, dailyLogs, analytics } = usePerfectTrader();
     const router = useRouter();
 
@@ -108,7 +110,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <div className="flex min-h-[100dvh] bg-[#fafafa] overflow-x-hidden selection:bg-yellow-200">
+        <div className="flex min-h-[100dvh] bg-[#0a0a12] md:bg-[#0a0a12] overflow-x-hidden selection:bg-yellow-200">
             {/* Mobile Header - High Fidelity Glassmorphism */}
             {!labMode && (
                 <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] h-[72px] bg-white/70 backdrop-blur-2xl border-b border-gray-100/50 z-[180] flex items-center justify-between px-6 pt-[env(safe-area-inset-top)] shadow-sm">

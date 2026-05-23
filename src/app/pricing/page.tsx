@@ -4,200 +4,153 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { usePerfectTrader } from '@/lib/context';
-import { Star, ShieldCheck } from 'lucide-react';
+import { Check, ShieldCheck } from 'lucide-react';
 import { IS_BETA } from '@/lib/config';
 import { APP_NAME } from '@/lib/brand';
+import { track } from '@/lib/analytics';
 
 export default function PricingPage() {
     const { user } = usePerfectTrader();
     const router = useRouter();
-    const [timeLeft, setTimeLeft] = useState(600); // 10 minutes
-    const [isHydrated, setIsHydrated] = useState(false);
+    const [timeLeft, setTimeLeft] = useState(600);
+    const [hydrated, setHydrated] = useState(false);
 
+    useEffect(() => setHydrated(true), []);
     useEffect(() => {
-        setIsHydrated(true);
-    }, []);
-
+        if (hydrated && user) router.push('/today');
+    }, [hydrated, user, router]);
     useEffect(() => {
-        if (isHydrated && user) {
-            router.push('/today');
-        }
-    }, [isHydrated, user, router]);
-
-    useEffect(() => {
+        const stored = localStorage.getItem('The Perfect Trader_pricing_timer');
+        if (stored) setTimeLeft(Number(stored) || 600);
         const timer = setInterval(() => {
-            setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+            setTimeLeft((prev) => {
+                const next = prev > 0 ? prev - 1 : 600;
+                localStorage.setItem('The Perfect Trader_pricing_timer', String(next));
+                return next;
+            });
         }, 1000);
         return () => clearInterval(timer);
     }, []);
 
-    const formatTime = (seconds: number) => {
-        const m = Math.floor(seconds / 60);
-        const s = seconds % 60;
-        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    const formatTime = (s: number) => {
+        const m = Math.floor(s / 60);
+        const sec = s % 60;
+        return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
     };
 
-    if (!isHydrated || user) {
-        return <div className="min-h-[100dvh] bg-transparent" />; // Wait to route
-    }
+    if (!hydrated || user) return <div className="min-h-[100dvh] bg-[#fafafa]" />;
 
     return (
-        <div className="min-h-[100dvh] bg-transparent pb-24">
-            {/* Sticky Top Bar */}
-            <div className="sticky top-0 left-0 right-0 z-[110] bg-white border-b border-[#1a1a2e]/5 px-6 h-20 flex items-center justify-between shadow-sm">
-                <div className="flex flex-col">
-                    <span className="text-[11px] font-bold text-[#6b7280] uppercase tracking-wider">Discount reserved for:</span>
-                    <span className="text-xl font-bold text-[#1a1a2e] tabular-nums">{formatTime(timeLeft)}</span>
+        <div className="min-h-[100dvh] bg-[#fafafa] pb-24">
+            <div className="sticky top-0 z-50 bg-white border-b border-gray-100 px-6 h-16 flex items-center justify-between max-w-[900px] mx-auto">
+                <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Founding offer</p>
+                    <p className="text-lg font-black text-[#1a1a2e] tabular-nums">{formatTime(timeLeft)}</p>
                 </div>
                 <Link
-                    href="/signup"
-                    className="bg-[#1a1a2e] text-white px-8 h-11 flex items-center justify-center rounded-full text-sm font-bold shadow-md hover:shadow-lg transition-all"
+                    href="/beta"
+                    onClick={() => track('external_link_clicked', 'navigation', { path: '/beta' })}
+                    className="btn-primary h-11 px-6 rounded-full font-black text-[13px] flex items-center"
                 >
-                    START NOW
+                    Join Beta
                 </Link>
             </div>
 
-            <main className="max-w-[620px] mx-auto px-6 pt-12 text-center">
-                <h1 className="text-2xl md:text-[28px] font-bold text-[#1a1a2e] mb-2">
-                    {IS_BETA ? `${APP_NAME} Beta` : 'Master Your Trading Discipline.'}
-                </h1>
-                <p className="text-base text-[#6b7280] mb-12">
+            <main className="max-w-[900px] mx-auto px-6 pt-12">
+                <h1 className="text-[36px] font-black text-[#1a1a2e] text-center tracking-tight mb-3">Pricing</h1>
+                <p className="text-center text-[15px] font-bold text-gray-500 mb-12 max-w-[480px] mx-auto">
                     {IS_BETA
-                        ? 'All features are free during beta. Paid plans (Pro / Premium) launch after we validate with real traders.'
-                        : 'Track your rules. Build consistency. Trade with confidence.'}
+                        ? `${APP_NAME} is free during beta. Lock founding pricing before we launch billing.`
+                        : 'Choose the plan that matches your discipline journey.'}
                 </p>
 
-                {IS_BETA ? (
-                    <div className="mb-12 text-left bg-[#1a1a2e]/5 rounded-3xl p-8 border border-[#1a1a2e]/10">
-                        <p className="text-[14px] font-bold text-[#1a1a2e] mb-4">Planned tiers (not billed yet)</p>
-                        <ul className="text-[13px] text-[#6b7280] font-medium flex flex-col gap-2">
-                            <li>Free — 10 trades/mo, basic journal</li>
-                            <li>Pro (~₹749/mo) — unlimited trades, AI coaching, analytics</li>
-                            <li>Premium — advanced coaching + storage</li>
+                <div className="grid md:grid-cols-3 gap-6">
+                    {/* FREE / BETA */}
+                    <div className="bg-white rounded-[32px] border border-gray-100 p-8 shadow-sm flex flex-col">
+                        <p className="text-[11px] font-black uppercase tracking-widest text-emerald-600 mb-2">Beta</p>
+                        <h2 className="text-[24px] font-black text-[#1a1a2e] mb-1">Free</h2>
+                        <p className="text-[32px] font-black text-[#1a1a2e] mb-6">
+                            ₹0 <span className="text-[14px] font-bold text-gray-400">/ during beta</span>
+                        </p>
+                        <ul className="flex flex-col gap-3 mb-8 flex-1 text-[14px] font-bold text-gray-600">
+                            {['All features during beta', 'Rules + journal + grades', 'AI coach insights', 'No credit card'].map(
+                                (f) => (
+                                    <li key={f} className="flex gap-2">
+                                        <Check size={18} className="text-emerald-500 shrink-0" />
+                                        {f}
+                                    </li>
+                                )
+                            )}
                         </ul>
                         <Link
-                            href="/signup"
-                            className="mt-8 w-full bg-[#1a1a2e] text-white h-14 flex items-center justify-center rounded-full text-base font-bold"
+                            href="/beta"
+                            className="w-full h-14 btn-primary rounded-full font-black flex items-center justify-center"
                         >
-                            Use beta free — create account
-                        </Link>
-                        <Link href="/beta" className="block text-center mt-4 text-[13px] font-bold text-[#6b7280]">
-                            Join waitlist →
+                            Join Beta →
                         </Link>
                     </div>
-                ) : null}
 
-                {!IS_BETA && (
-                <>
-                {/* Plan Cards */}
-                <div className="flex flex-col gap-4 mb-12">
-                    {/* Most Popular */}
-                    <Link href="/signup" className="group">
-                        <div className="relative bg-white rounded-2xl border-2 border-[#1a1a2e] p-6 shadow-lg text-left overflow-hidden transition-transform group-hover:translate-y-[-2px]">
-                            <div className="absolute top-0 left-0 right-0 bg-[#1a1a2e] py-1 text-center">
-                                <span className="text-[10px] font-bold text-white uppercase tracking-[0.1em]">MOST POPULAR</span>
-                            </div>
+                    {/* PRO */}
+                    <div className="bg-[#1a1a2e] rounded-[32px] p-8 text-white shadow-xl flex flex-col relative overflow-hidden">
+                        <p className="text-[11px] font-black uppercase tracking-widest text-emerald-400 mb-2">Post-beta</p>
+                        <h2 className="text-[24px] font-black mb-1">Pro</h2>
+                        <p className="text-[32px] font-black mb-1">
+                            ₹499 <span className="text-[14px] font-bold text-white/50">/ mo</span>
+                        </p>
+                        <p className="text-[13px] font-bold text-white/40 mb-6">or ₹3,999 / year</p>
+                        <ul className="flex flex-col gap-3 mb-8 flex-1 text-[14px] font-bold text-white/70">
+                            {[
+                                'Everything in Free',
+                                'AI coach + advanced analytics',
+                                'Trading DNA monthly reports',
+                                'CSV export',
+                            ].map((f) => (
+                                <li key={f} className="flex gap-2">
+                                    <Check size={18} className="text-emerald-400 shrink-0" />
+                                    {f}
+                                </li>
+                            ))}
+                        </ul>
+                        <button
+                            type="button"
+                            disabled
+                            className="w-full h-14 rounded-full font-black bg-white/10 text-white/40 cursor-not-allowed"
+                        >
+                            Coming Soon
+                        </button>
+                    </div>
 
-                            <div className="flex items-center justify-between mt-4">
-                                <div className="flex flex-col">
-                                    <span className="text-lg font-bold text-[#1a1a2e]">12-MONTHS</span>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <span className="text-sm text-[#9ca3af] line-through">$199.99</span>
-                                        <span className="text-base font-bold text-[#22c55e]">$59.99</span>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <span className="text-2xl font-bold text-[#1a1a2e]">$4.99</span>
-                                    <span className="block text-[11px] text-[#6b7280] font-medium uppercase tracking-wider">per month</span>
-                                </div>
-                            </div>
-
-                            <div className="mt-6 pt-4 border-t border-[#1a1a2e]/5">
-                                <div className="h-1 bg-[#ef4444]/10 rounded-full overflow-hidden">
-                                    <div className="h-full bg-[#ef4444] animate-[pulse_2s_infinite]" style={{ width: '40%' }} />
-                                </div>
-                                <p className="text-[11px] font-bold text-[#ef4444] mt-2 uppercase tracking-wide">
-                                    Early Bird Offer ends in {formatTime(timeLeft)}
-                                </p>
-                            </div>
-                        </div>
-                    </Link>
-
-                    {/* Regular Plan */}
-                    <Link href="/signup" className="group">
-                        <div className="bg-white/50 rounded-2xl border-2 border-[#1a1a2e]/5 p-6 shadow-sm text-left transition-transform group-hover:translate-y-[-2px] group-hover:border-[#1a1a2e]/10">
-                            <div className="flex items-center justify-between">
-                                <div className="flex flex-col">
-                                    <span className="text-lg font-bold text-[#1a1a2e]">1-WEEK</span>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <span className="text-sm text-[#9ca3af] line-through">$14.99</span>
-                                        <span className="text-base font-bold text-[#6b7280]">$9.99</span>
-                                    </div>
-                                </div>
-                                <div className="text-right">
-                                    <span className="text-2xl font-bold text-[#1a1a2e]">$1.42</span>
-                                    <span className="block text-[11px] text-[#6b7280] font-medium uppercase tracking-wider">per day</span>
-                                </div>
-                            </div>
-                        </div>
-                    </Link>
+                    {/* FOUNDING */}
+                    <div className="bg-gradient-to-br from-emerald-50 to-white rounded-[32px] border-2 border-emerald-200 p-8 flex flex-col">
+                        <p className="text-[11px] font-black uppercase tracking-widest text-emerald-700 mb-2">Limited</p>
+                        <h2 className="text-[24px] font-black text-[#1a1a2e] mb-1">Founding Member</h2>
+                        <p className="text-[32px] font-black text-emerald-700 mb-2">
+                            ₹299 <span className="text-[14px] font-bold text-gray-500">/ mo forever</span>
+                        </p>
+                        <p className="text-[13px] font-bold text-gray-500 mb-6">
+                            For beta users only — price increases at launch
+                        </p>
+                        <ul className="flex flex-col gap-3 mb-8 flex-1 text-[14px] font-bold text-gray-600">
+                            {['Lock lifetime rate', 'All Pro features', 'Founder support line'].map((f) => (
+                                <li key={f} className="flex gap-2">
+                                    <Check size={18} className="text-emerald-600 shrink-0" />
+                                    {f}
+                                </li>
+                            ))}
+                        </ul>
+                        <Link
+                            href="/beta"
+                            className="w-full h-14 bg-[#1a1a2e] text-white rounded-full font-black flex items-center justify-center"
+                        >
+                            Join Beta to Qualify →
+                        </Link>
+                    </div>
                 </div>
 
-                <p className="text-[14px] font-bold text-[#f59e0b] mb-3 uppercase tracking-wider">
-                    🎉 Includes 3-Day Free Trial
+                <p className="flex items-center justify-center gap-2 text-[13px] font-bold text-gray-400 mt-12">
+                    <ShieldCheck size={16} className="text-emerald-500" />
+                    No Stripe billing yet — marketing pricing only
                 </p>
-                <Link
-                    href="/signup"
-                    className="w-full bg-[#1a1a2e] text-white h-14 flex items-center justify-center rounded-full text-base font-bold shadow-xl hover:translate-y-[-2px] transition-all mb-4"
-                >
-                    Start 3-Day Free Trial
-                </Link>
-                <p className="text-[14px] text-[#9ca3af] mb-1">Cancel anytime.</p>
-                <div className="flex items-center justify-center gap-2 text-[14px] font-semibold text-[#1a1a2e] mb-20">
-                    <ShieldCheck size={16} className="text-[#22c55e]" />
-                    14-day money-back guarantee!
-                </div>
-
-                {/* Social Proof */}
-                <h2 className="text-2xl font-bold text-[#1a1a2e] mb-10">Traders love The Perfect Trader</h2>
-                <div className="flex flex-col gap-4 mb-20">
-                    {[
-                        { name: "Marco S.", rating: 5, text: "The first app that actually made me stick to my stop loss. The interface is calming and the rules library is gold." },
-                        { name: "Sarah L.", rating: 5, text: "I've tried every journal out there. The Perfect Trader is different. It focuses on the behavior, not just the numbers." },
-                        { name: "David K.", rating: 5, text: "The onboarding quiz really nailed my struggle with overtrading. Worth every penny." }
-                    ].map((review, i) => (
-                        <div key={i} className="bg-white rounded-2xl p-6 shadow-sm text-left">
-                            <div className="flex gap-1 mb-3">
-                                {[...Array(review.rating)].map((_, j) => (
-                                    <Star key={j} size={14} fill="#f59e0b" className="text-[#f59e0b]" />
-                                ))}
-                            </div>
-                            <p className="text-[14px] leading-relaxed text-[#6b7280] mb-3">"{review.text}"</p>
-                            <p className="text-[14px] font-bold text-[#1a1a2e]">{review.name}</p>
-                        </div>
-                    ))}
-                </div>
-
-                {/* Badges */}
-                <div className="flex items-center justify-center gap-4">
-                    <div className="bg-[#1a1a2e]/5 p-4 rounded-xl flex flex-col items-center gap-1 min-w-[140px]">
-                        <span className="text-xl font-bold text-[#1a1a2e]">4.5</span>
-                        <div className="flex gap-0.5">
-                            {[...Array(5)].map((_, j) => <Star key={j} size={10} fill="#1a1a2e" className="text-[#1a1a2e]" />)}
-                        </div>
-                        <span className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-wider">App Store</span>
-                    </div>
-                    <div className="bg-[#1a1a2e]/5 p-4 rounded-xl flex flex-col items-center gap-1 min-w-[140px]">
-                        <span className="text-xl font-bold text-[#1a1a2e]">4.1</span>
-                        <div className="flex gap-0.5">
-                            {[...Array(5)].map((_, j) => <Star key={j} size={10} fill="#1a1a2e" className="text-[#1a1a2e]" />)}
-                        </div>
-                        <span className="text-[10px] font-bold text-[#9ca3af] uppercase tracking-wider">Play Store</span>
-                    </div>
-                </div>
-                <p className="text-[11px] font-bold text-[#9ca3af] uppercase tracking-[0.2em] mt-8">Coming Soon to Devices</p>
-                </>
-                )}
             </main>
         </div>
     );

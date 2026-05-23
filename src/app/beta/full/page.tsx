@@ -29,6 +29,14 @@ export default function BetaFullPage() {
             <Link href="/login" className="text-[14px] font-bold text-white/50 hover:text-white">
                 Already have an account? Log in
             </Link>
+            <a
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-8 text-[13px] font-bold text-white/40 hover:text-yellow-500"
+            >
+                Follow for updates on X →
+            </a>
         </div>
     );
 }

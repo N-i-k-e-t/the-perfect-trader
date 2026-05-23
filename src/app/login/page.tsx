@@ -194,7 +194,7 @@ export default function LoginPage() {
                     <div className="w-16 h-16 bg-[#1a1a2e] text-white rounded-[24px] flex items-center justify-center shadow-2xl shadow-blue-100/50 mb-8 border border-white/10">
                         <Target size={32} strokeWidth={2.5} />
                     </div>
-                    <h1 className="text-[34px] font-black text-[#1a1a2e] mb-1 tracking-tighter leading-none">Welcome Back.</h1>
+                    <h1 className="text-[34px] font-black text-[#1a1a2e] mb-1 tracking-tighter leading-none">Welcome back, trader.</h1>
                     <p className="text-[15px] font-bold text-gray-400 mt-2 text-center max-w-[280px]">
                         Continue with Google or GitHub — the same way you signed up.
                     </p>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { usePerfectTrader } from '@/lib/context';
 import { motion, AnimatePresence } from 'framer-motion';
+import AdminLiveDashboard from '@/components/admin/AdminLiveDashboard';
 import BetaWaitlistPanel from '@/components/admin/BetaWaitlistPanel';
 import { 
     ShieldCheck, Users, TrendingUp, ShieldAlert, CheckCircle, 
@@ -116,9 +117,11 @@ export default function AdminPage() {
                 {activeTab === 'overview' && (
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-                        className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+                        className="flex flex-col gap-8"
                     >
-                        {/* High-Level Stats */}
+                        <AdminLiveDashboard />
+                        <div className="hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Legacy mock stats — hidden when live dashboard loads */}
                         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                             <KPICloudCard 
                                 label="Total Trading Desk Alpha" 
@@ -222,6 +225,7 @@ export default function AdminPage() {
                                     <AgentHealthBar name="Learner Node" status="Syncing" load={92} />
                                 </div>
                             </div>
+                        </div>
                         </div>
                     </motion.div>
                 )}
