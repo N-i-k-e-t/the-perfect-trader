@@ -6,9 +6,11 @@ import { usePerfectTrader } from '@/lib/context';
 import { 
     Camera, 
     ChevronRight, 
-    Clock, 
+    Mic,
     FileText, 
+    CheckSquare,
     MoreVertical,
+    Clock,
     Search
 } from 'lucide-react';
 import EmptyState from '@/components/ui/EmptyState';
@@ -72,6 +74,34 @@ export default function DiaryHistoryPage() {
             </header>
 
             <main className="flex-1 px-5 pt-6">
+                <div className="grid grid-cols-2 gap-3 mb-8">
+                    {[
+                        { icon: FileText, label: 'Note', sub: 'Text + tags', onClick: () => setCaptureOpen(true), soon: false },
+                        { icon: Mic, label: 'Voice', sub: 'Audio → text', onClick: () => {}, soon: true },
+                        { icon: Camera, label: 'Scan', sub: 'Photo journal', onClick: () => setIsScannerOpen(true), soon: false },
+                        { icon: CheckSquare, label: 'Checklist', sub: 'Quick yes/no', onClick: () => setCaptureOpen(true), soon: false },
+                    ].map((mode) => (
+                        <button
+                            key={mode.label}
+                            type="button"
+                            disabled={mode.soon}
+                            onClick={mode.onClick}
+                            className={`relative p-5 rounded-[24px] border text-left flex flex-col gap-2 min-h-[100px] active:scale-[0.98] transition-all ${
+                                mode.soon ? 'bg-gray-50 border-gray-100 opacity-60' : 'bg-white border-gray-100 shadow-sm'
+                            }`}
+                        >
+                            {mode.soon && (
+                                <span className="absolute top-3 right-3 text-[8px] font-black uppercase bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
+                                    Soon
+                                </span>
+                            )}
+                            <mode.icon size={24} className="text-[#1a1a2e]" />
+                            <span className="text-[15px] font-black text-[#1a1a2e]">{mode.label}</span>
+                            <span className="text-[11px] font-bold text-gray-400">{mode.sub}</span>
+                        </button>
+                    ))}
+                </div>
+
                 <AnimatePresence mode="popLayout">
                     {diaryEntries.length === 0 ? (
                         <div className="h-full flex flex-col justify-center py-20">

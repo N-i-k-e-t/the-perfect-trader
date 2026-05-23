@@ -233,12 +233,32 @@ export default function ProfilePage() {
                         </div>
                     </section>
 
+                    {/* NOTIFICATIONS — coming soon */}
+                    <section className="flex flex-col">
+                        <SectionLabel text="Notifications" />
+                        <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm px-5 py-4 flex flex-col gap-4">
+                            <p className="text-[12px] font-bold text-gray-400">Push reminders — coming soon</p>
+                            {[
+                                'Pre-session reminder',
+                                'Post-session nudge',
+                                'Weekly report',
+                                'Streak at-risk alert',
+                            ].map((label) => (
+                                <div key={label} className="flex items-center justify-between opacity-50">
+                                    <span className="text-[14px] font-bold text-[#1a1a2e]">{label}</span>
+                                    <div className="w-11 h-7 rounded-full bg-gray-200 relative">
+                                        <div className="absolute left-1 top-1 w-5 h-5 bg-white rounded-full shadow" />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
                     {/* PREFERENCES */}
                     <section className="flex flex-col">
                         <SectionLabel text="Preferences" />
                         <div className="bg-white rounded-3xl border border-gray-100 overflow-hidden shadow-sm">
                             <MenuItem icon={Camera} label="Diary Scans" value={`${diaryEntries.length} Items`} onClick={() => router.push('/diary')} />
-                            <MenuItem icon={Bell} label="Notifications" value="On" />
                             <MenuItem icon={Globe} label="Default Markets" value={userModel.primary_market} isLast />
                         </div>
                     </section>

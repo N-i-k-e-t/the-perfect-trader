@@ -7,6 +7,10 @@ import { runOrchestrator } from '@/lib/agents/orchestrator';
 import { EmptyState } from '@/components/ui/EmptyState';
 import RiskAlertTrack from '@/components/analytics/RiskAlertTrack';
 import PatternInsightTrack from '@/components/analytics/PatternInsightTrack';
+import { TimeOfDayHeatmap } from '@/components/stats/TimeOfDayHeatmap';
+import { ConsistencyHeatmap } from '@/components/stats/ConsistencyHeatmap';
+import { TradingDnaCard } from '@/components/stats/TradingDnaCard';
+import { buildSymbolStats, buildEmotionOutcome } from '@/lib/stats-compute';
 import {
     Flame,
     Lightbulb,
@@ -126,6 +130,23 @@ export default function StatsPage() {
 
     const streakPercent = bestStreak > 0 ? Math.min((streak / Math.max(bestStreak, 1)) * 100, 100) : (streak > 0 ? 100 : 0);
 
+    const overview = useMemo(() => {
+        const total = filteredTrades.length;
+        const wins = filteredTrades.filter((t) => (t.pnl ?? 0) > 0).length;
+        const winRate = total ? Math.round((wins / total) * 100) : 0;
+        const rVals = filteredTrades.map((t) => t.pnlR).filter((r): r is number => r != null);
+        const avgR = rVals.length ? rVals.reduce((a, b) => a + b, 0) / rVals.length : 0;
+        return { total, winRate, avgR, bestStreak };
+    }, [filteredTrades, bestStreak]);
+
+    const symbolStats = useMemo(() => buildSymbolStats(filteredTrades), [filteredTrades]);
+    const emotionStats = useMemo(() => buildEmotionOutcome(filteredTrades), [filteredTrades]);
+
+    const weakestRule = useMemo(() => {
+        if (compliance.length === 0) return null;
+        return [...compliance].sort((a, b) => a.value - b.value)[0];
+    }, [compliance]);
+
     return (
         <div className="min-h-[100dvh] flex flex-col gap-6 px-5 pt-[calc(env(safe-area-inset-top)+20px)] pb-[calc(env(safe-area-inset-bottom)+110px)] italic-none overflow-x-hidden">
             {/* HEADER */}
@@ -133,6 +154,25 @@ export default function StatsPage() {
                 <h1 className="text-[38px] font-black text-[#1a1a2e] leading-none mb-2 tracking-tighter">My Stats.</h1>
                 <p className="text-[14px] font-bold text-gray-400 uppercase tracking-widest pl-1">How I'm Doing</p>
             </header>
+
+            <div className="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+                {[
+                    { label: 'Trades', value: String(overview.total) },
+                    { label: 'Win rate', value: `${overview.winRate}%` },
+                    { label: 'Avg R', value: `${overview.avgR.toFixed(1)}R` },
+                    { label: 'Best streak', value: `${overview.bestStreak}d` },
+                ].map((m) => (
+                    <div
+                        key={m.label}
+                        className="min-w-[100px] shrink-0 bg-white rounded-2xl px-4 py-3 border border-gray-100 shadow-sm"
+                    >
+                        <p className="text-[18px] font-black text-[#1a1a2e] tabular-nums">{m.value}</p>
+                        <p className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{m.label}</p>
+                    </div>
+                ))}
+            </div>
+
+            <TradingDnaCard trades={trades} dailyLogs={dailyLogs} />
 
             {/* AI COACH — HERO INSIGHT */}
             {aiOutput.coachMessages.length > 0 && (
@@ -213,6 +253,45 @@ export default function StatsPage() {
                     </p>
                 </div>
             </section>
+
+            {weakestRule && (
+                <p className="text-[13px] font-bold text-red-600 px-1">
+                    Weakest rule: {weakestRule.rule} ({weakestRule.value}% followed)
+                </p>
+            )}
+
+            <ConsistencyHeatmap dailyLogs={dailyLogs} />
+            <TimeOfDayHeatmap trades={filteredTrades} />
+
+            {symbolStats.length > 0 && (
+                <section className="bg-white rounded-[32px] p-6 border border-gray-100">
+                    <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-4">Symbol performance</h3>
+                    <div className="flex flex-col gap-3">
+                        {symbolStats.map((s) => (
+                            <div key={s.symbol} className="flex justify-between items-center">
+                                <span className="text-[14px] font-black text-[#1a1a2e]">{s.symbol}</span>
+                                <span className="text-[13px] font-bold text-gray-500">
+                                    {s.winRate}% · {s.total} trades · ₹{s.pnl.toFixed(0)}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {emotionStats.length > 0 && (
+                <section className="bg-white rounded-[32px] p-6 border border-gray-100">
+                    <h3 className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-4">Emotion × outcome</h3>
+                    <div className="flex flex-col gap-2">
+                        {emotionStats.map((e) => (
+                            <div key={e.mood} className="flex justify-between text-[14px] font-bold">
+                                <span className="capitalize text-[#1a1a2e]">{e.mood.replace('_', ' ')}</span>
+                                <span className="text-gray-500">{e.winRate}% win ({e.total})</span>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            )}
 
             {/* Rule Compliance Chart */}
             <section className="px-1">
