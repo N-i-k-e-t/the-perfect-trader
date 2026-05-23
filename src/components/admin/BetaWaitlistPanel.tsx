@@ -3,13 +3,20 @@
 import { useEffect, useState } from 'react';
 import { Mail, RefreshCw } from 'lucide-react';
 
-type Row = { id: string; email: string; source: string; created_at: string };
+type Row = {
+    id: string;
+    email: string;
+    source: string;
+    created_at: string;
+    invited_at: string | null;
+};
 
 export default function BetaWaitlistPanel() {
     const [rows, setRows] = useState<Row[]>([]);
     const [count, setCount] = useState(0);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [inviting, setInviting] = useState<string | null>(null);
 
     const load = async () => {
         setLoading(true);
@@ -31,19 +38,38 @@ export default function BetaWaitlistPanel() {
         void load();
     }, []);
 
+    const invite = async (email: string) => {
+        setInviting(email);
+        setError(null);
+        try {
+            const res = await fetch('/api/admin/invite', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error ?? 'Invite failed');
+            await load();
+        } catch (e) {
+            setError(e instanceof Error ? e.message : 'Invite failed');
+        } finally {
+            setInviting(null);
+        }
+    };
+
     return (
         <div className="bg-white rounded-[40px] border border-[#1a1a2e]/5 shadow-sm overflow-hidden">
             <div className="p-8 border-b border-gray-50 flex items-center justify-between gap-4">
                 <div>
                     <h3 className="text-lg font-bold text-[#1a1a2e]">Beta waitlist</h3>
                     <p className="text-[12px] font-bold text-gray-400 mt-1">
-                        Server-side emails from /beta (apply migration if empty + error)
+                        Invite sends Resend email and marks row as invited
                     </p>
                 </div>
                 <button
                     type="button"
                     onClick={() => void load()}
-                    className="p-3 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors"
+                    className="p-3 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                     aria-label="Refresh waitlist"
                 >
                     <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
@@ -68,6 +94,20 @@ export default function BetaWaitlistPanel() {
                                 {row.source} · {new Date(row.created_at).toLocaleString()}
                             </p>
                         </div>
+                        {row.invited_at ? (
+                            <span className="text-[11px] font-black text-emerald-600 uppercase tracking-wider shrink-0">
+                                Invited ✓
+                            </span>
+                        ) : (
+                            <button
+                                type="button"
+                                disabled={inviting === row.email}
+                                onClick={() => void invite(row.email)}
+                                className="shrink-0 min-h-[44px] px-4 rounded-full bg-[#1a1a2e] text-white text-[11px] font-black uppercase tracking-wider disabled:opacity-50"
+                            >
+                                {inviting === row.email ? '…' : 'Invite'}
+                            </button>
+                        )}
                     </div>
                 ))}
             </div>

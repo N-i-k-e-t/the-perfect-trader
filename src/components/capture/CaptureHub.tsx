@@ -244,12 +244,22 @@ export default function CaptureHub() {
         const brokenIds = rules
             .filter((r) => r.isActive !== false && !finalRules.includes(r.id))
             .map((r) => r.id);
-        const todayDate = new Date().toISOString().split('T')[0];
+        const now = new Date();
+        const todayDate = now.toISOString().split('T')[0];
+        const timestamp = now.toISOString();
+        const timeOfDay = now.toLocaleTimeString('en-IN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+            timeZone: 'Asia/Kolkata',
+        });
         const pnlValue = tradeData.pnl !== '' ? Number(tradeData.pnl) : 0;
 
         const tradePayload = {
             id: tradeId,
-            date: editingTrade?.date ?? new Date().toISOString(),
+            date: editingTrade?.date?.split('T')[0] ?? todayDate,
+            timestamp: editingTrade?.timestamp ?? timestamp,
+            time_of_day: editingTrade?.time_of_day ?? timeOfDay,
             pair: tradeData.ticker || 'NIFTY',
             type: tradeData.direction,
             entry: tradeData.entry,

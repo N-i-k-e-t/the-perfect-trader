@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { ArrowLeft, Users } from 'lucide-react';
 import { APP_NAME } from '@/lib/brand';
-import { BETA_USER_CAP } from '@/lib/config';
+import { BETA_USER_CAP, TWITTER_URL } from '@/lib/config';
 
 export default function BetaFullPage() {
     return (
@@ -30,7 +30,7 @@ export default function BetaFullPage() {
                 Already have an account? Log in
             </Link>
             <a
-                href="https://twitter.com"
+                href={TWITTER_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-8 text-[13px] font-bold text-white/40 hover:text-yellow-500"

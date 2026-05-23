@@ -9,8 +9,21 @@ const SESSION_BANDS = [
 ];
 
 function parseTradeHour(trade: Trade): number | null {
-    if (!trade.date.includes('T')) return null;
-    const h = new Date(trade.date).getHours();
+    const iso = trade.timestamp ?? (trade.date.includes('T') ? trade.date : null);
+    if (!iso) {
+        if (trade.time_of_day) {
+            const h = parseInt(trade.time_of_day.split(':')[0], 10);
+            return Number.isFinite(h) ? h : null;
+        }
+        return null;
+    }
+    const h = Number(
+        new Date(iso).toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            hour: 'numeric',
+            hour12: false,
+        })
+    );
     return Number.isFinite(h) ? h : null;
 }
 

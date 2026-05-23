@@ -49,6 +49,10 @@ export interface Trade {
     setupId?: string; // Link to Playbook
     setupQuality?: number; // 1-10 string
     notes: string;
+    /** Full ISO instant when trade was logged */
+    timestamp?: string;
+    /** HH:mm in IST for stats heatmaps */
+    time_of_day?: string;
 }
 
 export interface Observation {

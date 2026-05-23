@@ -51,7 +51,7 @@ export async function GET() {
     const admin = createAdminClient();
     const { data, error, count } = await admin
         .from('beta_waitlist')
-        .select('id, email, source, created_at', { count: 'exact' })
+        .select('id, email, source, created_at, invited_at', { count: 'exact' })
         .order('created_at', { ascending: false })
         .limit(100);
 

@@ -19,3 +19,9 @@ export const LEGAL_ENTITY =
 
 export const SUPABASE_REGION_LABEL =
     process.env.NEXT_PUBLIC_SUPABASE_REGION_LABEL ?? 'ap-northeast-1 (Tokyo)';
+
+export const TWITTER_URL =
+    process.env.NEXT_PUBLIC_TWITTER_URL ?? 'https://x.com/ThePerfectTrader';
+
+export const SITE_URL =
+    process.env.NEXT_PUBLIC_SITE_URL ?? 'https://the-perfect-trader.vercel.app';
