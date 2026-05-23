@@ -16,6 +16,7 @@ import { track } from '@/lib/analytics';
 import ClearStuckSessionLink from '@/components/auth/ClearStuckSessionLink';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Loader2, Sparkles, Check, AlertCircle, ChevronDown } from 'lucide-react';
+import AppScreenLayout from '@/components/layout/AppScreenLayout';
 
 export default function SignupPage() {
     const { showToast, setUser } = usePerfectTrader();
@@ -157,15 +158,18 @@ export default function SignupPage() {
 
     if (checkingSession) {
         return (
-            <div className="min-h-[100dvh] bg-white flex items-center justify-center">
-                <Loader2 className="animate-spin text-blue-500" size={32} />
-            </div>
+            <AppScreenLayout>
+                <div className="min-h-[50vh] flex items-center justify-center">
+                    <Loader2 className="animate-spin text-blue-500" size={32} />
+                </div>
+            </AppScreenLayout>
         );
     }
 
     return (
+        <AppScreenLayout>
         <div
-            className="min-h-[100dvh] bg-white flex flex-col items-center justify-center px-6 selection:bg-blue-100 relative overflow-hidden"
+            className="min-h-[100dvh] md:min-h-0 flex flex-col items-center justify-center px-6 selection:bg-blue-100 relative overflow-hidden"
             style={{
                 paddingTop: 'env(safe-area-inset-top, 24px)',
                 paddingBottom: 'env(safe-area-inset-bottom, 24px)',
@@ -332,5 +336,6 @@ export default function SignupPage() {
                 </p>
             </div>
         </div>
+        </AppScreenLayout>
     );
 }

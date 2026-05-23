@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePerfectTrader } from '@/lib/context';
 import { motion, AnimatePresence } from 'framer-motion';
+import AppScreenLayout from '@/components/layout/AppScreenLayout';
 
 const tourSteps = [
     {
@@ -54,7 +55,8 @@ export default function WelcomeTour() {
     const step = tourSteps[currentStep];
 
     return (
-        <div className="min-h-[100dvh] flex flex-col items-center justify-center px-6">
+        <AppScreenLayout variant="flow-wide">
+        <div className="min-h-[100dvh] md:min-h-0 flex flex-col items-center justify-center px-6 py-8">
             <AnimatePresence mode="wait">
                 <motion.div
                     key={currentStep}
@@ -94,5 +96,6 @@ export default function WelcomeTour() {
                 </motion.div>
             </AnimatePresence>
         </div>
+        </AppScreenLayout>
     );
 }

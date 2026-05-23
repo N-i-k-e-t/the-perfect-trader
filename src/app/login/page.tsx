@@ -16,6 +16,7 @@ import SocialAuthButtons from '@/components/auth/SocialAuthButtons';
 import ClearStuckSessionLink from '@/components/auth/ClearStuckSessionLink';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Target, ArrowLeft, Loader2, ChevronDown } from 'lucide-react';
+import AppScreenLayout from '@/components/layout/AppScreenLayout';
 
 export default function LoginPage() {
     const { showToast, setUser } = usePerfectTrader();
@@ -163,15 +164,18 @@ export default function LoginPage() {
 
     if (checkingSession) {
         return (
-            <div className="min-h-[100dvh] bg-white flex items-center justify-center">
-                <Loader2 className="animate-spin text-[#1a1a2e]" size={32} />
-            </div>
+            <AppScreenLayout>
+                <div className="min-h-[50vh] flex items-center justify-center">
+                    <Loader2 className="animate-spin text-[#1a1a2e]" size={32} />
+                </div>
+            </AppScreenLayout>
         );
     }
 
     return (
+        <AppScreenLayout>
         <div
-            className="min-h-[100dvh] bg-white flex flex-col items-center justify-center px-6 selection:bg-blue-100 relative overflow-hidden"
+            className="min-h-[100dvh] md:min-h-0 flex flex-col items-center justify-center px-6 selection:bg-blue-100 relative overflow-hidden"
             style={{
                 paddingTop: 'env(safe-area-inset-top, 24px)',
                 paddingBottom: 'env(safe-area-inset-bottom, 24px)',
@@ -304,5 +308,6 @@ export default function LoginPage() {
                 </p>
             </div>
         </div>
+        </AppScreenLayout>
     );
 }

@@ -13,6 +13,7 @@ import { waitForSession } from '@/lib/auth-session';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, Plus, Minus, Check, Loader2, Sparkles, ShieldCheck, Target, Lock, Award } from 'lucide-react';
 import DisciplineGrowthChart from '@/components/onboarding/DisciplineGrowthChart';
+import AppScreenLayout from '@/components/layout/AppScreenLayout';
 
 export default function OnboardingPage() {
     const { user, isCheckingAuth, showToast, updateUserModel, updateSession, setUser } = usePerfectTrader();
@@ -173,10 +174,12 @@ export default function OnboardingPage() {
 
     if (!authReady) {
         return (
-            <div className="min-h-[100dvh] bg-white flex flex-col items-center justify-center gap-3">
-                <Loader2 className="animate-spin text-blue-500" size={32} />
-                <p className="text-[12px] font-bold text-gray-400">Setting up your account…</p>
-            </div>
+            <AppScreenLayout variant="flow-wide">
+                <div className="min-h-[50vh] flex flex-col items-center justify-center gap-3">
+                    <Loader2 className="animate-spin text-blue-500" size={32} />
+                    <p className="text-[12px] font-bold text-gray-400">Setting up your account…</p>
+                </div>
+            </AppScreenLayout>
         );
     }
 
@@ -207,9 +210,10 @@ export default function OnboardingPage() {
     );
 
     return (
-        <div className="min-h-[100dvh] bg-white flex flex-col pb-[calc(env(safe-area-inset-bottom)+20px)]">
+        <AppScreenLayout variant="flow-wide">
+        <div className="min-h-[100dvh] md:min-h-0 bg-white flex flex-col pb-[calc(env(safe-area-inset-bottom)+20px)]">
             {/* SEGMENTED PROGRESS BAR - CAL AI STYLE */}
-            <div className="fixed top-0 left-0 right-0 px-5 pt-4 z-[110] flex flex-col gap-2" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
+            <div className="fixed md:sticky top-0 left-0 right-0 px-5 pt-4 z-[110] flex flex-col gap-2 bg-white/95 backdrop-blur-md" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
                 <div className="flex gap-1">
                     {Array.from({ length: totalSteps }).map((_, i) => (
                         <div key={i} className="h-1.5 flex-1 bg-gray-100 rounded-full overflow-hidden">
@@ -517,5 +521,6 @@ export default function OnboardingPage() {
                 </AnimatePresence>
             </main>
         </div>
+        </AppScreenLayout>
     );
 }

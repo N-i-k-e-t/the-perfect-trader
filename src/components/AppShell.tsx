@@ -111,7 +111,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <div className="flex min-h-[100dvh] bg-white md:bg-[#0a0a12] overflow-x-hidden selection:bg-yellow-200">
+        <div className="flex min-h-[100dvh] w-full bg-white md:bg-[#0a0a12] overflow-x-hidden selection:bg-yellow-200">
             <Sidebar onSettingsOpen={() => setIsSettingsOpen(true)} />
 
             {/* Mobile header — hidden on desktop (sidebar replaces nav) */}
@@ -142,9 +142,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             )}
 
             <main
-                className={`flex-1 flex flex-col md:ml-[240px] ${labMode ? 'pt-0' : 'pt-[72px] md:pt-8'} transition-all duration-300 ${labMode ? 'focus-mode' : ''} pb-[calc(env(safe-area-inset-bottom,0px)+110px)] md:pb-10`}
+                className={`flex-1 flex flex-col md:ml-[240px] md:min-h-screen ${labMode ? 'pt-0' : 'pt-[72px] md:pt-8'} transition-all duration-300 ${labMode ? 'focus-mode' : ''} pb-[calc(env(safe-area-inset-bottom,0px)+110px)] md:pb-10 md:bg-[#f4f5f7]`}
             >
-                <div className="w-full max-w-[390px] md:max-w-[min(720px,calc(100vw-280px))] mx-auto min-h-full md:px-6">
+                <div className="w-full max-w-[390px] md:max-w-[min(800px,calc(100vw-280px))] mx-auto min-h-full md:px-8 md:py-2">
                     {IS_BETA && !labMode && (
                         <div className="mx-6 mt-6 mb-2 p-4 bg-gradient-to-r from-[#1a1a2e] to-[#2d2d4a] text-white rounded-[20px] flex items-center gap-3 border border-yellow-500/20">
                             <Sparkles size={18} className="text-yellow-500 shrink-0" />
