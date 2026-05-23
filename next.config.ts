@@ -2,7 +2,9 @@ import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-    output: 'standalone',
+    // Standalone breaks `next build` on GitHub Actions (Sentry node:inspector paths).
+    // Vercel production builds use VERCEL=1 and keep standalone.
+    ...(process.env.VERCEL || !process.env.GITHUB_ACTIONS ? { output: 'standalone' as const } : {}),
     async redirects() {
         return [
             {

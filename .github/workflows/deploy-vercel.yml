@@ -26,12 +26,9 @@ jobs:
           cache: npm
 
       - run: npm ci
-      - run: npm run build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          NEXT_PUBLIC_BETA_MODE: ${{ secrets.NEXT_PUBLIC_BETA_MODE || 'true' }}
 
+      # Build runs on Vercel (git integration). Skip duplicate local build — it can
+      # fail in GHA while Vercel production still succeeds (standalone + Sentry).
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
         with:
