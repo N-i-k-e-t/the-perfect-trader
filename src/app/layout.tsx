@@ -6,6 +6,7 @@ import { APP_NAME, APP_NAME_SHORT } from "@/lib/brand";
 import { SITE_URL } from "@/lib/config";
 import ToastContainer from "@/components/Toast";
 import CookieConsent from "@/components/CookieConsent";
+import ViewportShell from "@/components/layout/ViewportShell";
 import TrackingProvider from "@/components/analytics/TrackingProvider";
 import { createClient } from "@/utils/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase-data";
@@ -80,17 +81,13 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased min-h-[100dvh] overflow-x-hidden`}>
-        <div className="min-h-screen bg-gray-950 flex justify-center">
-          <div className="w-full max-w-[390px] min-h-screen relative bg-white shadow-2xl overflow-hidden">
-            <PerfectTraderProvider initialUser={initialUser} initialAuthUserId={initialAuthUserId}>
-              <TrackingProvider initialAuthUserId={initialAuthUserId}>
-                {children}
-                <ToastContainer />
-                <CookieConsent />
-              </TrackingProvider>
-            </PerfectTraderProvider>
-          </div>
-        </div>
+        <PerfectTraderProvider initialUser={initialUser} initialAuthUserId={initialAuthUserId}>
+          <TrackingProvider initialAuthUserId={initialAuthUserId}>
+            <ViewportShell>{children}</ViewportShell>
+            <ToastContainer />
+            <CookieConsent />
+          </TrackingProvider>
+        </PerfectTraderProvider>
       </body>
     </html>
   );

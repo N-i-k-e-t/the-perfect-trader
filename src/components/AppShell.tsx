@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BottomTabs from './BottomTabs';
+import Sidebar from './Sidebar';
 import { usePerfectTrader } from '@/lib/context';
 import LabMode from './LabMode';
 import InstallPrompt from './InstallPrompt';
@@ -110,10 +111,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     }
 
     return (
-        <div className="flex min-h-[100dvh] bg-[#0a0a12] md:bg-[#0a0a12] overflow-x-hidden selection:bg-yellow-200">
-            {/* Mobile Header - High Fidelity Glassmorphism */}
+        <div className="flex min-h-[100dvh] bg-white md:bg-[#0a0a12] overflow-x-hidden selection:bg-yellow-200">
+            <Sidebar onSettingsOpen={() => setIsSettingsOpen(true)} />
+
+            {/* Mobile header — hidden on desktop (sidebar replaces nav) */}
             {!labMode && (
-                <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] h-[72px] bg-white/70 backdrop-blur-2xl border-b border-gray-100/50 z-[180] flex items-center justify-between px-6 pt-[env(safe-area-inset-top)] shadow-sm">
+                <header className="md:hidden fixed top-0 left-0 right-0 w-full h-[72px] bg-white/70 backdrop-blur-2xl border-b border-gray-100/50 z-[180] flex items-center justify-between px-6 pt-[env(safe-area-inset-top)] shadow-sm">
                     <div className="flex items-center gap-2.5">
                         <div className="w-9 h-9 bg-[#1a1a2e] text-white rounded-[12px] flex items-center justify-center shadow-lg shadow-[#1a1a2e]/10">
                             <Target size={20} strokeWidth={2.5} />
@@ -139,12 +142,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             )}
 
             <main
-                className={`flex-1 flex flex-col ${labMode ? 'pt-0' : 'pt-[72px]'} transition-all duration-300 ${labMode ? 'focus-mode' : ''}`}
-                style={{
-                    paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 110px)',
-                }}
+                className={`flex-1 flex flex-col md:ml-[240px] ${labMode ? 'pt-0' : 'pt-[72px] md:pt-8'} transition-all duration-300 ${labMode ? 'focus-mode' : ''} pb-[calc(env(safe-area-inset-bottom,0px)+110px)] md:pb-10`}
             >
-                <div className="w-full max-w-[390px] mx-auto min-h-full">
+                <div className="w-full max-w-[390px] md:max-w-[min(720px,calc(100vw-280px))] mx-auto min-h-full md:px-6">
                     {IS_BETA && !labMode && (
                         <div className="mx-6 mt-6 mb-2 p-4 bg-gradient-to-r from-[#1a1a2e] to-[#2d2d4a] text-white rounded-[20px] flex items-center gap-3 border border-yellow-500/20">
                             <Sparkles size={18} className="text-yellow-500 shrink-0" />
