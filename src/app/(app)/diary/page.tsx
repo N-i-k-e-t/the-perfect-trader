@@ -32,7 +32,7 @@ export default function DiaryHistoryPage() {
                     <h1 className="text-[20px] font-black text-[#1a1a2e]">Diary Scans</h1>
                     <button 
                         onClick={() => setIsScannerOpen(true)}
-                        className="w-10 h-10 bg-[#1a1a2e] text-white rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all"
+                        className="w-10 h-10 btn-primary rounded-full flex items-center justify-center shadow-lg active:scale-95 transition-all"
                     >
                         <Camera size={20} />
                     </button>

@@ -11,7 +11,8 @@ import { track } from '@/lib/analytics';
 import { ONBOARDING_STEPS } from '@/lib/analytics/constants';
 import { waitForSession } from '@/lib/auth-session';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Plus, Minus, Check, Loader2, Sparkles, ShieldCheck, Target, Lock, Award } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Plus, Minus, Check, Loader2, Sparkles, ShieldCheck, Target, Lock, Award } from 'lucide-react';
+import DisciplineGrowthChart from '@/components/onboarding/DisciplineGrowthChart';
 
 export default function OnboardingPage() {
     const { user, isCheckingAuth, showToast, updateUserModel, updateSession, setUser } = usePerfectTrader();
@@ -99,7 +100,7 @@ export default function OnboardingPage() {
 
     // Auto-advance Step 9 (Architecture Generation)
     useEffect(() => {
-        if (currentStep === 9) {
+        if (currentStep === 10) {
             const timer = setTimeout(() => {
                 nextStep();
             }, 4500);
@@ -179,7 +180,7 @@ export default function OnboardingPage() {
         );
     }
 
-    const totalSteps = 11; // 0-10
+    const totalSteps = 12; // 0-11
     const progress = ((currentStep + 1) / totalSteps) * 100;
 
     const OptionCard = ({ emoji, title, subtitle, selected, onClick }: any) => (
@@ -208,17 +209,22 @@ export default function OnboardingPage() {
     return (
         <div className="min-h-[100dvh] bg-white flex flex-col pb-[calc(env(safe-area-inset-bottom)+20px)]">
             {/* SEGMENTED PROGRESS BAR - CAL AI STYLE */}
-            <div className="fixed top-0 left-0 right-0 px-5 pt-4 flex gap-1 z-[110]" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
-                {Array.from({ length: totalSteps }).map((_, i) => (
-                    <div key={i} className="h-1.5 flex-1 bg-gray-100 rounded-full overflow-hidden">
-                        <motion.div 
-                            className="h-full bg-[#1a1a2e]"
-                            initial={{ width: '0%' }}
-                            animate={{ width: i <= currentStep ? '100%' : '0%' }}
-                            transition={{ duration: 0.4, ease: "circOut" }}
-                        />
-                    </div>
-                ))}
+            <div className="fixed top-0 left-0 right-0 px-5 pt-4 z-[110] flex flex-col gap-2" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
+                <div className="flex gap-1">
+                    {Array.from({ length: totalSteps }).map((_, i) => (
+                        <div key={i} className="h-1.5 flex-1 bg-gray-100 rounded-full overflow-hidden">
+                            <motion.div 
+                                className="h-full bg-[#1a1a2e]"
+                                initial={{ width: '0%' }}
+                                animate={{ width: i <= currentStep ? '100%' : '0%' }}
+                                transition={{ duration: 0.4, ease: "circOut" }}
+                            />
+                        </div>
+                    ))}
+                </div>
+                <p className="text-center text-[11px] font-bold text-gray-400 tracking-wider">
+                    Step {currentStep + 1} of {totalSteps}
+                </p>
             </div>
 
             {/* NAV BAR */}
@@ -237,8 +243,8 @@ export default function OnboardingPage() {
                 <AnimatePresence mode="wait">
                     {/* STEP 0: THE SPLASH - PREMIUM CAL AI STYLE */}
                     {currentStep === 0 && (
-                        <motion.div key="s0" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.1 }} className="flex-1 flex flex-col items-center justify-center text-center px-4">
-                            <div className="relative w-full max-w-[320px] aspect-[4/5] rounded-[60px] overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.25)] border-4 border-white bg-gradient-to-br from-[#1a1a2e] via-[#2d2d4a] to-blue-900 mb-12 flex flex-col items-center justify-center">
+                        <motion.div key="s0" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.1 }} className="flex-1 flex flex-col items-center justify-start text-center px-4 pt-2">
+                            <div className="relative w-full max-w-[280px] aspect-[3/4] max-h-[220px] rounded-[48px] overflow-hidden shadow-[0_24px_48px_rgba(0,0,0,0.2)] border-4 border-white bg-gradient-to-br from-[#1a1a2e] via-[#2d2d4a] to-blue-900 mb-6 flex flex-col items-center justify-center shrink-0">
                                 <div className="w-20 h-20 bg-white/10 rounded-[24px] flex items-center justify-center mb-6">
                                     <Target size={40} className="text-yellow-400" strokeWidth={2.5} />
                                 </div>
@@ -252,14 +258,14 @@ export default function OnboardingPage() {
                                 </div>
                             </div>
                             
-                            <div className="flex flex-col gap-4 mb-12">
-                                <h1 className="text-[42px] font-black text-[#1a1a2e] leading-[0.9] tracking-tighter">Trade with<br/>Discipline.</h1>
-                                <p className="text-[16px] font-bold text-gray-400 max-w-[280px]">
+                            <div className="flex flex-col gap-3 mb-6">
+                                <h1 className="text-[36px] font-black text-[#1a1a2e] leading-[0.95] tracking-tighter">Trade with<br/>Discipline.</h1>
+                                <p className="text-[15px] font-bold text-gray-400 max-w-[280px] mx-auto">
                                     Build a custom trading plan based on your trading style.
                                 </p>
                             </div>
                             
-                            <button onClick={nextStep} className="h-[74px] w-full bg-[#1a1a2e] text-white rounded-[35px] font-black text-[20px] active:scale-95 transition-all shadow-2xl">
+                            <button onClick={nextStep} className="h-[64px] w-full btn-primary rounded-[35px] font-black text-[20px] active:scale-95 transition-all shadow-2xl shrink-0">
                                 Get Started
                             </button>
                         </motion.div>
@@ -314,7 +320,7 @@ export default function OnboardingPage() {
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     onClick={nextStep}
-                                    className="h-[72px] w-full bg-[#1a1a2e] text-white rounded-[28px] font-black text-[20px] shadow-2xl active:scale-95 transition-all mt-4"
+                                    className="h-[72px] w-full btn-primary rounded-[28px] font-black text-[20px] shadow-2xl active:scale-95 transition-all mt-4"
                                 >
                                     Continue
                                 </motion.button>
@@ -338,9 +344,23 @@ export default function OnboardingPage() {
                         </motion.div>
                     )}
 
-                    {/* STEP 4: TIME WINDOW */}
+                    {/* STEP 4: GROWTH PATH */}
                     {currentStep === 4 && (
-                        <motion.div key="s4" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="flex flex-col gap-8">
+                        <motion.div key="s4growth" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} className="flex flex-col gap-8">
+                            <DisciplineGrowthChart experience={answers.experience || '1'} />
+                            <button
+                                type="button"
+                                onClick={nextStep}
+                                className="h-[72px] w-full btn-primary rounded-[28px] font-black text-[20px] active:scale-95 transition-all shadow-2xl"
+                            >
+                                Continue
+                            </button>
+                        </motion.div>
+                    )}
+
+                    {/* STEP 5: TIME WINDOW */}
+                    {currentStep === 5 && (
+                        <motion.div key="s5" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="flex flex-col gap-8">
                             <div className="flex flex-col gap-2">
                                 <h2 className="text-[28px] font-black text-[#1a1a2e] leading-tight">Trading Window?</h2>
                                 <p className="text-[14px] font-bold text-gray-500 uppercase tracking-widest pl-1">Active Hours</p>
@@ -354,9 +374,9 @@ export default function OnboardingPage() {
                         </motion.div>
                     )}
 
-                    {/* STEP 5: DAILY TRADE CAP (Framer Motion interaction) */}
-                    {currentStep === 5 && (
-                        <motion.div key="s5" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, y: -20 }} className="flex flex-col items-center justify-center flex-1 gap-12">
+                    {/* STEP 6: DAILY TRADE CAP */}
+                    {currentStep === 6 && (
+                        <motion.div key="s6" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, y: -20 }} className="flex flex-col items-center justify-center flex-1 gap-12">
                             <div className="flex flex-col gap-2 text-center">
                                 <h2 className="text-[28px] font-black text-[#1a1a2e] leading-tight">Daily Execution Cap?</h2>
                                 <p className="text-[14px] font-bold text-gray-500 px-8 uppercase tracking-widest">Keep your gains</p>
@@ -366,13 +386,13 @@ export default function OnboardingPage() {
                                 <span className="text-[100px] font-black tabular-nums text-[#1a1a2e] leading-none">{answers.frequency}</span>
                                 <button onClick={() => setAnswers({...answers, frequency: Math.min(20, answers.frequency + 1)})} className="w-20 h-20 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-2xl shadow-blue-200 active:scale-90 transition-all font-black text-3xl"><Plus /></button>
                             </div>
-                            <button onClick={nextStep} className="h-[72px] w-full bg-[#1a1a2e] text-white rounded-[28px] font-black text-[20px] shadow-2xl active:scale-95 transition-all">Continue</button>
+                            <button onClick={nextStep} className="h-[72px] w-full btn-primary rounded-[28px] font-black text-[20px] shadow-2xl active:scale-95 transition-all">Continue</button>
                         </motion.div>
                     )}
 
-                    {/* STEP 6: RISK PER TRADE */}
-                    {currentStep === 6 && (
-                        <motion.div key="s6" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="flex flex-col gap-8">
+                    {/* STEP 7: RISK PER TRADE */}
+                    {currentStep === 7 && (
+                        <motion.div key="s7" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="flex flex-col gap-8">
                             <div className="flex flex-col gap-2">
                                 <h2 className="text-[28px] font-black text-[#1a1a2e] leading-tight">Risk Per Trade?</h2>
                                 <p className="text-[14px] font-bold text-gray-500 uppercase tracking-widest pl-1">Risk Settings</p>
@@ -392,16 +412,16 @@ export default function OnboardingPage() {
                             </div>
                             <button 
                                 onClick={nextStep}
-                                className="h-[72px] w-full bg-[#1a1a2e] text-white rounded-[28px] font-black text-[20px] shadow-2xl active:scale-95 transition-all mt-8"
+                                className="h-[72px] w-full btn-primary rounded-[28px] font-black text-[20px] shadow-2xl active:scale-95 transition-all mt-8"
                             >
                                 Confirm Risk Level
                             </button>
                         </motion.div>
                     )}
 
-                    {/* STEP 7: BIGGEST BIAS */}
-                    {currentStep === 7 && (
-                        <motion.div key="s7" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="flex flex-col gap-8">
+                    {/* STEP 8: BIGGEST BIAS */}
+                    {currentStep === 8 && (
+                        <motion.div key="s8" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }} className="flex flex-col gap-8">
                             <div className="flex flex-col gap-2">
                                 <h2 className="text-[28px] font-black text-[#1a1a2e] leading-tight">Hardest Constraint?</h2>
                                 <p className="text-[14px] font-bold text-gray-500 uppercase tracking-widest pl-1">Biggest Struggle</p>
@@ -415,9 +435,9 @@ export default function OnboardingPage() {
                         </motion.div>
                     )}
 
-                    {/* STEP 8: THE PROMISE (Micro-Commitment) */}
-                    {currentStep === 8 && (
-                        <motion.div key="s8" initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} className="flex-1 flex flex-col items-center justify-center text-center gap-12">
+                    {/* STEP 9: THE PROMISE */}
+                    {currentStep === 9 && (
+                        <motion.div key="s9" initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} className="flex-1 flex flex-col items-center justify-center text-center gap-12">
                             <div className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-2xl shadow-blue-200">
                                 <Lock size={48} strokeWidth={3} />
                             </div>
@@ -427,15 +447,15 @@ export default function OnboardingPage() {
                                     I commit to following my custom trading plan for the next <strong className="text-[#1a1a2e]">14 days</strong> without deviation.
                                 </p>
                             </div>
-                            <button onClick={nextStep} className="h-[72px] w-full max-w-[320px] bg-[#1a1a2e] text-white rounded-[28px] font-black text-[20px] active:scale-95 transition-all shadow-2xl">
+                            <button onClick={nextStep} className="h-[72px] w-full max-w-[320px] btn-primary rounded-[28px] font-black text-[20px] active:scale-95 transition-all shadow-2xl">
                                 I Accept
                             </button>
                         </motion.div>
                     )}
 
-                    {/* STEP 9: GENERATION SEQUENCE (Cal AI Reveal) */}
-                    {currentStep === 9 && (
-                        <motion.div key="s9" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center text-center gap-12">
+                    {/* STEP 10: GENERATION SEQUENCE */}
+                    {currentStep === 10 && (
+                        <motion.div key="s10gen" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex-1 flex flex-col items-center justify-center text-center gap-12">
                             <div className="relative">
                                 <Loader2 className="animate-spin text-blue-500" size={64} />
                                 <motion.div animate={{ scale: [1, 1.5, 1], opacity: [0.1, 0.4, 0.1] }} transition={{ duration: 1.5, repeat: Infinity }} className="absolute inset-0 bg-blue-100 rounded-full blur-2xl" />
@@ -458,42 +478,39 @@ export default function OnboardingPage() {
                         </motion.div>
                     )}
 
-                    {/* STEP 10: FINAL PAYWALL / PLAN CONFIRMATION (Perfect Day Style) */}
-                    {currentStep === 10 && (
-                        <motion.div key="s10" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 flex flex-col gap-10">
-                            <div className="flex flex-col items-center text-center gap-4">
+                    {/* STEP 11: PERSONALIZED PLAN RECAP */}
+                    {currentStep === 11 && (
+                        <motion.div key="s11" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex-1 flex flex-col gap-8">
+                            <div className="flex flex-col items-center text-center gap-3">
                                 <div className="w-16 h-16 bg-green-50 text-green-500 rounded-full flex items-center justify-center shadow-lg"><Award size={32} /></div>
-                                <h2 className="text-[32px] font-black text-[#1a1a2e] leading-tight text-center">Trading Plan <br/> Created!</h2>
+                                <h2 className="text-[32px] font-black text-[#1a1a2e] leading-tight">Here&apos;s your<br/>trading plan.</h2>
+                                <p className="text-[14px] font-bold text-gray-400 px-4">Built from your answers — review before you start.</p>
                             </div>
-                            
-                            <div className="card-premium !bg-[#1a1a2e] !p-8 text-white relative overflow-hidden shadow-2xl">
-                                <Sparkles className="absolute top-4 right-4 text-white/10" size={48} />
-                                <p className="text-[11px] font-black uppercase tracking-widest text-blue-400 mb-2">Selected Tier</p>
-                                <h3 className="text-[38px] font-black mb-4 tracking-tighter">Elite Access</h3>
-                                <div className="space-y-4 pt-4 border-t border-white/5">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center"><Check size={12} strokeWidth={4} /></div>
-                                        <span className="text-[15px] font-bold text-gray-200">Rule-based Model Lock</span>
+
+                            <div className="card-premium !p-6 flex flex-col gap-4">
+                                {[
+                                    { label: 'Trading style', value: answers.style || '—' },
+                                    { label: 'Market', value: answers.assetClass || '—' },
+                                    { label: 'Risk per trade', value: answers.riskPerTrade || '—' },
+                                    { label: 'Daily cap', value: `${answers.frequency} trades` },
+                                    { label: 'Biggest challenge', value: answers.primaryConstraint || '—' },
+                                    { label: 'Your goal', value: answers.goalLevel || '—' },
+                                ].map((row) => (
+                                    <div key={row.label} className="flex items-center justify-between gap-4 py-2 border-b border-gray-50 last:border-0">
+                                        <span className="text-[11px] font-black text-gray-400 uppercase tracking-widest">{row.label}</span>
+                                        <span className="text-[15px] font-black text-[#1a1a2e] text-right capitalize">{row.value}</span>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center"><Check size={12} strokeWidth={4} /></div>
-                                        <span className="text-[15px] font-bold text-gray-200">Mood Analysis</span>
-                                    </div>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center"><Check size={12} strokeWidth={4} /></div>
-                                        <span className="text-[15px] font-bold text-gray-200">Daily Discipline Credits</span>
-                                    </div>
-                                </div>
+                                ))}
                             </div>
-                            
+
                             <button 
                                 onClick={() => {
                                     updateSession({ preSessionComplete: true });
                                     router.push('/today');
                                 }}
-                                className="h-[72px] bg-blue-600 text-white rounded-[28px] font-black text-[20px] flex items-center justify-center gap-4 active:scale-95 transition-all shadow-2xl shadow-blue-100"
+                                className="h-[72px] btn-primary rounded-[28px] font-black text-[20px] flex items-center justify-center gap-3 active:scale-95 transition-all shadow-2xl"
                             >
-                                Enter Dashboard <Sparkles size={24} />
+                                Enter Your Dashboard <ArrowRight size={22} strokeWidth={3} />
                             </button>
                         </motion.div>
                     )}

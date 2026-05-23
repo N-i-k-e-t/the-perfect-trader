@@ -98,7 +98,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     <p className="text-[#6b7280] mb-8">Your 3-day free trial has ended. Upgrade to The Perfect Trader Pro to continue executing with discipline.</p>
                     <button 
                         onClick={() => router.push('/pricing')}
-                        className="w-full h-14 bg-[#1a1a2e] text-white font-bold rounded-full shadow-lg"
+                        className="w-full h-14 btn-primary font-bold rounded-full shadow-lg"
                     >
                         View Pricing Plans
                     </button>
@@ -111,7 +111,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex min-h-[100dvh] bg-[#fafafa] overflow-x-hidden selection:bg-yellow-200">
             {/* Mobile Header - High Fidelity Glassmorphism */}
             {!labMode && (
-                <header className="fixed top-0 left-0 right-0 h-[72px] bg-white/70 backdrop-blur-2xl border-b border-gray-100/50 z-[180] flex items-center justify-between px-6 pt-[env(safe-area-inset-top)] shadow-sm">
+                <header className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] h-[72px] bg-white/70 backdrop-blur-2xl border-b border-gray-100/50 z-[180] flex items-center justify-between px-6 pt-[env(safe-area-inset-top)] shadow-sm">
                     <div className="flex items-center gap-2.5">
                         <div className="w-9 h-9 bg-[#1a1a2e] text-white rounded-[12px] flex items-center justify-center shadow-lg shadow-[#1a1a2e]/10">
                             <Target size={20} strokeWidth={2.5} />
@@ -142,7 +142,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 110px)',
                 }}
             >
-                <div className="w-full max-w-[430px] mx-auto min-h-full">
+                <div className="w-full max-w-[390px] mx-auto min-h-full">
                     {IS_BETA && !labMode && (
                         <div className="mx-6 mt-6 mb-2 p-4 bg-gradient-to-r from-[#1a1a2e] to-[#2d2d4a] text-white rounded-[20px] flex items-center gap-3 border border-yellow-500/20">
                             <Sparkles size={18} className="text-yellow-500 shrink-0" />

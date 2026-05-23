@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useCallback, useEffect, useRef, useMemo, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useCallback, useEffect, useRef, useMemo, useState, ReactNode } from 'react';
 import { Rule, Trade, Observation, Session, Analytics, BaselineState, User, DailyLog, PatternInsight, CoachMessage, RiskAlert, Playbook, MarketEvent, UserModel, DiaryEntry } from '@/types/trading';
 import { checkRisks } from '@/lib/agents/riskSentinel';
 import { createClient } from '@/utils/supabase/client';
@@ -10,6 +10,7 @@ import { clearLocalAuthCache } from '@/lib/clear-auth-state';
 import { track } from '@/lib/analytics';
 import {
     buildTiltWarningAlert,
+    countSessionTradeViolations,
     countSessionViolations,
     TILT_VIOLATION_THRESHOLD,
 } from '@/lib/retention/tilt-warning';
@@ -62,6 +63,7 @@ type Action =
     | { type: 'SET_COACH_MESSAGES'; payload: CoachMessage[] }
     | { type: 'REMOVE_COACH_MESSAGE'; payload: string }
     | { type: 'ADD_RISK_ALERT'; payload: RiskAlert }
+    | { type: 'DISMISS_RISK_ALERT'; payload: string }
     | { type: 'ADD_PLAYBOOK'; payload: Playbook }
     | { type: 'SET_MARKET_EVENTS'; payload: MarketEvent[] }
     | { type: 'ADD_MARKET_EVENT'; payload: MarketEvent }
@@ -275,6 +277,12 @@ function perfectTraderReducer(state: AppState, action: Action): AppState {
         case 'ADD_RISK_ALERT':
             return { ...state, riskAlerts: [action.payload, ...state.riskAlerts].slice(0, 10) };
 
+        case 'DISMISS_RISK_ALERT':
+            return {
+                ...state,
+                riskAlerts: state.riskAlerts.filter((a) => a.timestamp !== action.payload),
+            };
+
         case 'ADD_PLAYBOOK':
             return { ...state, playbooks: [...state.playbooks, action.payload] };
 
@@ -349,6 +357,7 @@ interface PerfectTraderContextType extends AppState {
     setCoachMessages: (msgs: CoachMessage[]) => void;
     removeCoachMessage: (id: string) => void;
     addRiskAlert: (alert: RiskAlert) => void;
+    dismissRiskAlert: (timestamp: string) => void;
     addPlaybook: (pb: Playbook) => void;
     setMarketEvents: (events: MarketEvent[]) => void;
     addMarketEvent: (event: MarketEvent) => void;
@@ -361,6 +370,13 @@ interface PerfectTraderContextType extends AppState {
     setCaptureOpen: (open: boolean) => void;
     setCaptureMode: (mode: 'initial' | 'note' | 'voice' | 'photo' | 'checklist' | 'none') => void;
     lockRules: () => void;
+    showPreSessionCheck: boolean;
+    openPreSessionCheck: () => void;
+    closePreSessionCheck: () => void;
+    editingTrade: Trade | null;
+    openCaptureForEdit: (trade: Trade) => void;
+    clearEditingTrade: () => void;
+    refreshData: () => Promise<void>;
 }
 
 const PerfectTraderContext = createContext<PerfectTraderContextType | null>(null);
@@ -374,6 +390,9 @@ export function PerfectTraderProvider({
     initialUser?: User | null;
     initialAuthUserId?: string | null;
 }) {
+    const [showPreSessionCheck, setShowPreSessionCheck] = useState(false);
+    const [editingTrade, setEditingTrade] = useState<Trade | null>(null);
+
     const [state, dispatch] = useReducer(perfectTraderReducer, {
         ...initialState,
         user: initialUser ?? initialState.user,
@@ -632,7 +651,24 @@ export function PerfectTraderProvider({
         alerts.forEach(alert => {
             dispatch({ type: 'ADD_RISK_ALERT', payload: alert });
         });
-    }, [state.trades, state.rules, state.session.emotionalBaseline]);
+
+        const sessionDate = state.session.date || new Date().toISOString().split('T')[0];
+        const violationCount = countSessionTradeViolations(newTrades, sessionDate);
+        if (violationCount >= TILT_VIOLATION_THRESHOLD) {
+            const alreadyTilt = state.riskAlerts.some((a) =>
+                a.alert.toLowerCase().includes('violated')
+            );
+            if (!alreadyTilt) {
+                const tiltAlert = buildTiltWarningAlert(violationCount);
+                dispatch({ type: 'ADD_RISK_ALERT', payload: tiltAlert });
+                track('risk_alert_shown', 'ai', {
+                    severity: 'high',
+                    alert_type: 'tilt_warning',
+                    violation_count: violationCount,
+                });
+            }
+        }
+    }, [state.trades, state.rules, state.session.emotionalBaseline, state.session.date, state.riskAlerts]);
 
     const updateTrade = useCallback(
         (trade: Trade, changedFields: string[] = ['all']) => {
@@ -694,7 +730,29 @@ export function PerfectTraderProvider({
     );
     const addObservation = useCallback((obs: Observation) => dispatch({ type: 'ADD_OBSERVATION', payload: obs }), []);
     const setEmotionalBaseline = useCallback((em: BaselineState) => dispatch({ type: 'SET_EMOTIONAL_BASELINE', payload: em }), []);
-    const completePreSession = useCallback(() => dispatch({ type: 'COMPLETE_PRE_SESSION' }), []);
+    const completePreSession = useCallback(() => {
+        dispatch({ type: 'COMPLETE_PRE_SESSION' });
+        setShowPreSessionCheck(false);
+    }, []);
+
+    const openPreSessionCheck = useCallback(() => setShowPreSessionCheck(true), []);
+    const closePreSessionCheck = useCallback(() => setShowPreSessionCheck(false), []);
+
+    const clearEditingTrade = useCallback(() => setEditingTrade(null), []);
+
+    const openCaptureForEdit = useCallback((trade: Trade) => {
+        setEditingTrade(trade);
+        dispatch({ type: 'SET_CAPTURE_MODE', payload: 'checklist' });
+        dispatch({ type: 'SET_CAPTURE_OPEN', payload: true });
+    }, []);
+
+    const refreshData = useCallback(async () => {
+        hydrateFromStorage();
+        const userId = authUserIdRef.current;
+        if (userId && supabaseEnabled) {
+            await hydrateFromCloud(userId);
+        }
+    }, [supabaseEnabled]);
 
     // New action dispatchers
     const addRule = useCallback((rule: Rule) => {
@@ -737,6 +795,10 @@ export function PerfectTraderProvider({
     const setCoachMessages = useCallback((msgs: CoachMessage[]) => dispatch({ type: 'SET_COACH_MESSAGES', payload: msgs }), []);
     const removeCoachMessage = useCallback((id: string) => dispatch({ type: 'REMOVE_COACH_MESSAGE', payload: id }), []);
     const addRiskAlert = useCallback((alert: RiskAlert) => dispatch({ type: 'ADD_RISK_ALERT', payload: alert }), []);
+    const dismissRiskAlert = useCallback(
+        (timestamp: string) => dispatch({ type: 'DISMISS_RISK_ALERT', payload: timestamp }),
+        []
+    );
     const addPlaybook = useCallback((pb: Playbook) => {
         dispatch({ type: 'ADD_PLAYBOOK', payload: pb });
         track('playbook_created', 'playbooks', {
@@ -785,6 +847,7 @@ export function PerfectTraderProvider({
         setCoachMessages,
         removeCoachMessage,
         addRiskAlert,
+        dismissRiskAlert,
         addPlaybook,
         setMarketEvents,
         addMarketEvent,
@@ -799,6 +862,13 @@ export function PerfectTraderProvider({
             track('rule_locked_for_session', 'rules', { session_date: state.session.date });
             dispatch({ type: 'LOCK_RULES' });
         },
+        showPreSessionCheck,
+        openPreSessionCheck,
+        closePreSessionCheck,
+        editingTrade,
+        openCaptureForEdit,
+        clearEditingTrade,
+        refreshData,
     };
 
     return <PerfectTraderContext.Provider value={value}>{children}</PerfectTraderContext.Provider>;

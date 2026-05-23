@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Sparkles, Target, Zap, TrendingUp, Brain, Globe } from 'lucide-react';
 import { usePerfectTrader } from '@/lib/context';
 import { useModalTracking } from '@/lib/analytics';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 
 interface PersonaSheetProps {
     isOpen: boolean;
@@ -32,6 +33,8 @@ export default function PersonaSheet({ isOpen, onClose }: PersonaSheetProps) {
         onClose();
     };
 
+    useEscapeKey(onClose, isOpen);
+
     return (
         <AnimatePresence>
             {isOpen && (
@@ -51,7 +54,7 @@ export default function PersonaSheet({ isOpen, onClose }: PersonaSheetProps) {
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="relative w-full max-w-[430px] bg-white rounded-t-[32px] sm:rounded-[32px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+                        className="relative w-full max-w-[390px] bg-white rounded-t-[32px] sm:rounded-[32px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
                     >
                         {/* Header */}
                         <div className="px-6 py-5 border-b border-gray-50 flex items-center justify-between">
@@ -67,7 +70,7 @@ export default function PersonaSheet({ isOpen, onClose }: PersonaSheetProps) {
                         </div>
 
                         {/* Scrollable Content */}
-                        <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-8 no-scrollbar">
+                        <div className="flex-1 sheet-scroll p-6 flex flex-col gap-8 no-scrollbar">
                             <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100/50">
                                 <p className="text-[13px] font-bold text-blue-700 leading-relaxed flex items-start gap-2">
                                     <Sparkles size={16} className="shrink-0 mt-0.5" />
@@ -173,7 +176,7 @@ export default function PersonaSheet({ isOpen, onClose }: PersonaSheetProps) {
                         <div className="p-6 bg-white border-t border-gray-50 pb-[calc(env(safe-area-inset-bottom)+24px)]">
                             <button
                                 onClick={handleSave}
-                                className="w-full h-14 bg-blue-600 text-white font-black rounded-xl shadow-xl shadow-blue-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                                className="w-full h-14 btn-primary font-black rounded-xl shadow-xl shadow-emerald-200/50 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
                             >
                                 Save Profile
                             </button>

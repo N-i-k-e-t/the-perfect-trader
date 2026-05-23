@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Home, 
-    BookOpen, 
+    Shield,
     Calendar, 
     Activity,
     Plus,
@@ -19,8 +19,8 @@ import { track } from '@/lib/analytics';
 
 const navItems = [
     { to: '/today', icon: Home, label: 'Today' },
-    { to: '/journal', icon: BookOpen, label: 'Journal' },
-    { type: 'fab' }, // Center FAB
+    { to: '/rules', icon: Shield, label: 'Rules' },
+    { type: 'fab' },
     { to: '/calendar', icon: Calendar, label: 'Calendar' },
     { to: '/stats', icon: Activity, label: 'Stats' },
 ];
@@ -40,7 +40,7 @@ export default function BottomTabs() {
     };
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-[200]">
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[390px] z-[200]">
             {/* FAB Fan-out Menu */}
             <AnimatePresence>
                 {isMenuOpen && (
@@ -55,7 +55,7 @@ export default function BottomTabs() {
                         <div className="absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4">
                             {[
                                 { id: 'checklist', icon: ListChecks, label: 'Log Trade', color: 'bg-yellow-500' },
-                                { id: 'text', icon: FileText, label: 'Quick Note', color: 'bg-blue-500' },
+                                { id: 'note', icon: FileText, label: 'Quick Note', color: 'bg-blue-500' },
                                 { id: 'photo', icon: Camera, label: 'Scan Rules', color: 'bg-purple-500' },
                             ].map((item, i) => (
                                 <motion.button
@@ -67,7 +67,7 @@ export default function BottomTabs() {
                                     onClick={() => handleAction(item.id)}
                                     className="flex items-center gap-3 pr-4 pl-3 py-2 bg-white rounded-full shadow-xl border border-gray-100"
                                 >
-                                    <div className={`${item.color} w-8 h-8 rounded-full flex items-center justify-center text-white`}>
+                                    <div className={`${item.color} min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center text-white`}>
                                         <item.icon size={18} />
                                     </div>
                                     <span className="text-[13px] font-black text-[#1a1a2e]">{item.label}</span>

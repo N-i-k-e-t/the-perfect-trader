@@ -3,6 +3,7 @@ export const ONBOARDING_STEPS = [
     'identity',
     'asset',
     'experience',
+    'growth_path',
     'time_window',
     'trade_cap',
     'risk',

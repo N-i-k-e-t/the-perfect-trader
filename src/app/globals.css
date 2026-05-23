@@ -2,6 +2,8 @@
 
 @theme {
   --color-primary: #1a1a2e;
+  --color-cta: #10b981;
+  --color-cta-dark: #059669;
   --color-success: #22c55e;
   --color-danger: #ef4444;
   --color-warning: #f59e0b;
@@ -112,6 +114,26 @@ h3 { font-size: 18px; font-weight: 700; color: #1a1a2e; }
     padding: 20px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     border: 1px solid #f1f5f9;
+}
+
+/* Primary CTA — emerald brand action */
+.btn-primary {
+  background-color: var(--color-cta);
+  color: #ffffff;
+  font-weight: 800;
+}
+.btn-primary:active {
+  background-color: var(--color-cta-dark);
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.sheet-scroll {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
 }
 
 .custom-scrollbar::-webkit-scrollbar {

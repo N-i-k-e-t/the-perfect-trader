@@ -1,4 +1,7 @@
+'use client';
+
 import React, { useState } from 'react';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePerfectTrader } from '@/lib/context';
 import { track, useModalTracking } from '@/lib/analytics';
@@ -14,6 +17,7 @@ export default function MentalReset({ isOpen, onClose }: MentalResetProps) {
     const [step, setStep] = useState(1);
     const [postNote, setPostNote] = useState('');
     useModalTracking('mental_reset_modal', isOpen);
+    useEscapeKey(onClose, isOpen);
     
     const todayTrades = trades.filter(t => t.date.split('T')[0] === new Date().toISOString().split('T')[0]);
     const totalPnl = todayTrades.reduce((acc, t) => acc + (t.pnl || 0), 0);
@@ -35,7 +39,7 @@ export default function MentalReset({ isOpen, onClose }: MentalResetProps) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-[200] bg-white flex flex-col p-6 pb-[calc(env(safe-area-inset-bottom)+20px)] overflow-y-auto">
+        <div className="fixed inset-0 z-[200] bg-white flex flex-col p-6 pb-[calc(env(safe-area-inset-bottom)+20px)] sheet-scroll">
             {/* SEGMENTED PROGRESS BAR - CAL AI STYLE */}
             <div className="absolute top-0 left-0 right-0 px-6 pt-4 flex gap-1 z-[210]">
                 {[1, 2].map((i) => (
@@ -124,14 +128,14 @@ export default function MentalReset({ isOpen, onClose }: MentalResetProps) {
                 {step === 1 ? (
                     <button 
                         onClick={() => setStep(2)}
-                        className="w-full h-20 bg-[#1a1a2e] text-white rounded-full font-black text-xl flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all"
+                        className="w-full h-20 btn-primary rounded-full font-black text-xl flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all"
                     >
                         Review Process <Check size={24} strokeWidth={4} />
                     </button>
                 ) : (
                     <button 
                         onClick={handleFinalize}
-                        className="w-full h-20 bg-[#1a1a2e] text-white rounded-full font-black text-xl flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all"
+                        className="w-full h-20 btn-primary rounded-full font-black text-xl flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all"
                     >
                         Finish Session <Coffee size={24} strokeWidth={4} />
                     </button>

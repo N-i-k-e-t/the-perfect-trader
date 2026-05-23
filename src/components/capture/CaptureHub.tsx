@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { motion, AnimatePresence, useDragControls, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { 
     Plus, 
@@ -11,7 +12,6 @@ import {
     ArrowRight,
     Loader2,
     CheckCircle2,
-    ChevronDown,
     ListChecks,
     AlertCircle,
     Shield,
@@ -24,7 +24,14 @@ import {
 } from 'lucide-react';
 import { usePerfectTrader } from '@/lib/context';
 import { track, useModalTracking } from '@/lib/analytics';
-import { getSupportedAudioMimeType } from '@/lib/utils/media';
+import type { BaselineState } from '@/types/trading';
+
+const EMOTION_OPTIONS: { e: string; v: BaselineState; l: string }[] = [
+    { e: '😤', v: 'bad', l: 'Tilt' },
+    { e: '😐', v: 'neutral', l: 'Neutral' },
+    { e: '🙂', v: 'good', l: 'Good' },
+    { e: '🔥', v: 'great', l: 'Great' },
+];
 
 const SNAP_POINTS = {
     PEEK: 0.7,   // 30% from top (70% down)
@@ -33,14 +40,17 @@ const SNAP_POINTS = {
 };
 
 export default function CaptureHub() {
-    const { 
-        rules, 
-        addTrade, 
-        showToast, 
-        isCaptureOpen, 
-        setCaptureOpen, 
-        captureMode, 
-        setCaptureMode 
+    const {
+        rules,
+        addTrade,
+        updateTrade,
+        showToast,
+        isCaptureOpen,
+        setCaptureOpen,
+        captureMode,
+        setCaptureMode,
+        editingTrade,
+        clearEditingTrade,
     } = usePerfectTrader();
 
     useModalTracking('capture_hub_modal', isCaptureOpen);
@@ -59,7 +69,7 @@ export default function CaptureHub() {
     const [tradeStep, setTradeStep] = useState(1);
     const [tradeResult, setTradeResult] = useState<'WIN' | 'LOSS' | null>(null);
     const [rulesStatus, setRulesStatus] = useState<'ALL' | 'SOME' | null>(null);
-    const [showAdvanced, setShowAdvanced] = useState(false);
+    const [noteText, setNoteText] = useState('');
 
     const [tradeData, setTradeData] = useState({
         ticker: 'NIFTY',
@@ -70,38 +80,105 @@ export default function CaptureHub() {
         size: '',
         risk: 0,
         reward: 0,
+        pnl: '',
         notes: '',
+        emotion: 'neutral' as BaselineState,
         checkedRules: [] as string[],
         isSystematic: true
     });
 
+    const TRADE_STEPS = 6;
+
     useEffect(() => {
         if (isCaptureOpen) {
             y.set(window.innerHeight * (captureMode === 'checklist' ? SNAP_POINTS.FULL : SNAP_POINTS.HALF));
-            setTradeStep(1);
-            setTradeResult(null);
-            setRulesStatus(null);
+            if (editingTrade && captureMode === 'checklist') {
+                const followed = editingTrade.rules_followed ?? [];
+                const broken = editingTrade.rules_broken ?? [];
+                setTradeStep(1);
+                setTradeResult((editingTrade.pnl ?? 0) >= 0 ? 'WIN' : 'LOSS');
+                setRulesStatus(
+                    broken.length === 0 ? 'ALL' : followed.length > 0 ? 'SOME' : 'SOME'
+                );
+                setTradeData({
+                    ticker: editingTrade.pair || 'NIFTY',
+                    direction: editingTrade.type === 'Short' ? 'Short' : 'Long',
+                    entry: editingTrade.entry ?? '',
+                    exit: editingTrade.exit ?? '',
+                    sl: editingTrade.plannedSL ?? '',
+                    size: '',
+                    risk: 0,
+                    reward: 0,
+                    pnl: editingTrade.pnl != null ? String(editingTrade.pnl) : '',
+                    notes: editingTrade.notes ?? '',
+                    emotion: (editingTrade.emotion as BaselineState) || 'neutral',
+                    checkedRules: followed,
+                    isSystematic: true,
+                });
+            } else if (captureMode === 'checklist') {
+                setTradeStep(1);
+                setTradeResult(null);
+                setRulesStatus(null);
+            }
         } else {
             y.set(window.innerHeight);
         }
-    }, [isCaptureOpen, captureMode]);
+    }, [isCaptureOpen, captureMode, editingTrade]);
 
-    useEffect(() => {
-        if (captureMode !== 'note' && captureMode !== 'voice' && captureMode !== 'photo') return;
-        const scanType = captureMode as 'note' | 'voice' | 'photo';
-        track('ai_diary_scan_started', 'ai', { scan_type: scanType });
+    const handleParseNote = async () => {
+        if (!noteText.trim()) {
+            showToast('Enter a note first', 'error');
+            return;
+        }
+        setIsProcessing(true);
         const started = Date.now();
-        const timer = setTimeout(() => {
-            track('ai_diary_scan_completed', 'ai', {
-                scan_type: scanType,
-                confidence: 0.85,
-                fields_extracted: ['ticker', 'direction', 'notes'],
-                latency_ms: Date.now() - started,
-                has_image: scanType === 'photo',
+        track('ai_diary_scan_started', 'ai', { scan_type: 'note' });
+        try {
+            const res = await fetch('/api/parse-trade', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    note: noteText,
+                    activeRules: rules.filter((r) => r.isActive !== false),
+                }),
             });
-        }, 1200);
-        return () => clearTimeout(timer);
-    }, [captureMode]);
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Parse failed');
+
+            const pnlNum = Number(data.pnl);
+            setTradeData((prev) => ({
+                ...prev,
+                ticker: (data.asset || data.pair || prev.ticker || 'NIFTY').toString().toUpperCase(),
+                direction: data.direction === 'Short' ? 'Short' : 'Long',
+                entry: data.entry != null ? String(data.entry) : prev.entry,
+                exit: data.exit != null ? String(data.exit) : prev.exit,
+                pnl: data.pnl != null ? String(data.pnl) : prev.pnl,
+                emotion: data.emotion_tags || prev.emotion,
+                notes: noteText,
+                checkedRules: Array.isArray(data.rules_followed) ? data.rules_followed : prev.checkedRules,
+            }));
+            setTradeResult(!Number.isNaN(pnlNum) && pnlNum >= 0 ? 'WIN' : 'LOSS');
+            if (Array.isArray(data.rules_broken) && data.rules_broken.length > 0) {
+                setRulesStatus('SOME');
+            } else {
+                setRulesStatus('ALL');
+            }
+            track('ai_diary_scan_completed', 'ai', {
+                scan_type: 'note',
+                confidence: 0.85,
+                fields_extracted: ['ticker', 'direction', 'pnl', 'entry', 'exit'],
+                latency_ms: Date.now() - started,
+                has_image: false,
+            });
+            setCaptureMode('checklist');
+            setTradeStep(6);
+            showToast('Note parsed — review and save', 'success');
+        } catch {
+            showToast('Could not parse note. Try manual entry.', 'error');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
 
     const handleDragEnd = (event: any, info: any) => {
         const threshold = 100;
@@ -126,7 +203,8 @@ export default function CaptureHub() {
         if (closest === h) reset();
     };
 
-    const reset = () => {
+    const reset = useCallback(() => {
+        clearEditingTrade();
         setCaptureOpen(false);
         setCaptureMode('none');
         setIsProcessing(false);
@@ -135,7 +213,7 @@ export default function CaptureHub() {
         setTradeStep(1);
         setTradeResult(null);
         setRulesStatus(null);
-        setShowAdvanced(false);
+        setNoteText('');
         setTradeData({
             ticker: 'NIFTY',
             direction: 'Long',
@@ -145,24 +223,51 @@ export default function CaptureHub() {
             size: '',
             risk: 0,
             reward: 0,
+            pnl: '',
             notes: '',
+            emotion: 'neutral' as BaselineState,
             checkedRules: [],
             isSystematic: true
         });
-    };
+    }, [clearEditingTrade, setCaptureOpen, setCaptureMode]);
+
+    useEscapeKey(reset, captureMode !== 'none');
 
     const handleSaveTrade = () => {
-        setIsProcessing(true);
-        
-        // Finalize checked rules if "Yes All" was selected
-        const finalRules = rulesStatus === 'ALL' 
-            ? rules.filter(r => r.isActive).map(r => r.id)
-            : tradeData.checkedRules;
+        const isEdit = Boolean(editingTrade);
+        const finalRules =
+            rulesStatus === 'ALL'
+                ? rules.filter((r) => r.isActive !== false).map((r) => r.id)
+                : tradeData.checkedRules;
 
-        setTimeout(() => {
-            const tradeId = Date.now().toString();
-            const brokenIds = rules.filter(r => r.isActive && !finalRules.includes(r.id)).map(r => r.id);
-            const todayDate = new Date().toISOString().split('T')[0];
+        const tradeId = editingTrade?.id ?? Date.now().toString();
+        const brokenIds = rules
+            .filter((r) => r.isActive !== false && !finalRules.includes(r.id))
+            .map((r) => r.id);
+        const todayDate = new Date().toISOString().split('T')[0];
+        const pnlValue = tradeData.pnl !== '' ? Number(tradeData.pnl) : 0;
+
+        const tradePayload = {
+            id: tradeId,
+            date: editingTrade?.date ?? new Date().toISOString(),
+            pair: tradeData.ticker || 'NIFTY',
+            type: tradeData.direction,
+            entry: tradeData.entry,
+            exit: tradeData.exit,
+            plannedSL: tradeData.sl,
+            pnl: Number.isNaN(pnlValue) ? 0 : pnlValue,
+            rules_followed: finalRules,
+            rules_broken: brokenIds,
+            emotion: tradeData.emotion as BaselineState,
+            notes: tradeData.notes,
+        };
+
+        reset();
+        showToast(isEdit ? 'Trade updated' : 'Trade logged', 'success');
+
+        if (isEdit) {
+            updateTrade(tradePayload, ['pair', 'type', 'entry', 'exit', 'pnl', 'rules', 'emotion', 'notes']);
+        } else {
             finalRules.forEach((ruleId) => {
                 track('rule_followed_flagged', 'rules', { rule_id: ruleId, trade_id: tradeId });
             });
@@ -173,24 +278,8 @@ export default function CaptureHub() {
                     session_date: todayDate,
                 });
             });
-            addTrade({
-                id: tradeId,
-                date: new Date().toISOString(),
-                pair: tradeData.ticker || 'NIFTY',
-                type: tradeData.direction,
-                entry: tradeData.entry,
-                exit: tradeData.exit,
-                plannedSL: tradeData.sl,
-                pnl: tradeResult === 'WIN' ? 1 : -1,
-                rules_followed: finalRules,
-                rules_broken: brokenIds,
-                emotion: 'neutral',
-                notes: tradeData.notes
-            });
-            showToast('Trade logged', 'success');
-            setIsProcessing(false);
-            reset();
-        }, 800);
+            addTrade(tradePayload);
+        }
     };
 
     if (captureMode === 'none') return null;
@@ -214,7 +303,7 @@ export default function CaptureHub() {
                 dragConstraints={{ top: 0, bottom: window.innerHeight }}
                 style={{ y: springY }}
                 onDragEnd={handleDragEnd}
-                className="relative w-full max-w-[430px] h-[92vh] bg-white rounded-t-[40px] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden"
+                className="relative w-full max-w-[390px] h-[92vh] bg-white rounded-t-[40px] shadow-[0_-20px_50px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden"
             >
                 {/* Drag Handle Area */}
                 <div 
@@ -225,7 +314,7 @@ export default function CaptureHub() {
                 </div>
 
                 {/* Dynamic Content */}
-                <div className="flex-1 overflow-y-auto px-8 pb-32 custom-scrollbar">
+                <div className="flex-1 sheet-scroll px-8 pb-32 custom-scrollbar">
                     {captureMode === 'initial' && (
                         <motion.div 
                             initial={{ opacity: 0, y: 10 }}
@@ -244,13 +333,15 @@ export default function CaptureHub() {
                                     <FileText size={36} strokeWidth={2.5} />
                                     <span className="font-black text-[14px] uppercase tracking-widest">Quick Note</span>
                                 </button>
-                                <button onClick={() => setCaptureMode('voice')} className="aspect-square bg-red-50 rounded-[32px] flex flex-col items-center justify-center gap-4 active:scale-95 transition-all text-red-600 border border-red-100/50 shadow-sm">
+                                <button type="button" disabled className="relative aspect-square bg-red-50/60 rounded-[32px] flex flex-col items-center justify-center gap-4 text-red-400 border border-red-100/50 opacity-70 cursor-not-allowed">
+                                    <span className="absolute top-3 right-3 text-[9px] font-black bg-white text-gray-500 px-2 py-0.5 rounded-full border border-gray-100">SOON</span>
                                     <Mic size={36} strokeWidth={2.5} />
                                     <span className="font-black text-[14px] uppercase tracking-widest">Voice</span>
                                 </button>
-                                <button onClick={() => setCaptureMode('photo')} className="aspect-square bg-blue-50 rounded-[32px] flex flex-col items-center justify-center gap-4 active:scale-95 transition-all text-blue-600 border border-blue-100/50 shadow-sm">
+                                <button type="button" disabled className="relative aspect-square bg-blue-50/60 rounded-[32px] flex flex-col items-center justify-center gap-4 text-blue-400 border border-blue-100/50 opacity-70 cursor-not-allowed">
+                                    <span className="absolute top-3 right-3 text-[9px] font-black bg-white text-gray-500 px-2 py-0.5 rounded-full border border-gray-100">SOON</span>
                                     <Camera size={36} strokeWidth={2.5} />
-                                    <span className="font-black text-[14px] uppercase tracking-widest">Scan Rules</span>
+                                    <span className="font-black text-[14px] uppercase tracking-widest">Scan</span>
                                 </button>
                             </div>
                         </motion.div>
@@ -264,40 +355,157 @@ export default function CaptureHub() {
                         >
                             <header>
                                 <h2 className="text-[32px] font-black text-[#1a1a2e] leading-tight mb-1">Log Trade.</h2>
-                                <p className="text-[14px] font-bold text-gray-400">Step {tradeStep} of 3</p>
+                                <p className="text-[14px] font-bold text-gray-400">Step {tradeStep} of {TRADE_STEPS}</p>
                             </header>
 
-                            {/* STEP 1: WIN OR LOSS */}
+                            {/* STEP 1: DIRECTION + RESULT */}
                             {tradeStep === 1 && (
                                 <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex flex-col gap-6">
-                                    <h3 className="text-xl font-black text-[#1a1a2e]">Win or Loss?</h3>
+                                    <h3 className="text-xl font-black text-[#1a1a2e]">Direction</h3>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <button 
-                                            onClick={() => { setTradeResult('WIN'); setTradeStep(2); }}
-                                            className="h-36 bg-green-50 rounded-[32px] border-2 border-transparent hover:border-green-500 transition-all flex flex-col items-center justify-center gap-2 group"
+                                        <button
+                                            type="button"
+                                            onClick={() => setTradeData({ ...tradeData, direction: 'Long' })}
+                                            className={`h-32 rounded-[32px] border-2 transition-all flex flex-col items-center justify-center gap-2 ${
+                                                tradeData.direction === 'Long'
+                                                    ? 'bg-green-50 border-green-500 shadow-lg'
+                                                    : 'bg-green-50/40 border-transparent active:border-green-500'
+                                            }`}
                                         >
-                                            <TrendingUp size={40} className="text-green-500" />
-                                            <span className="font-black text-green-600 uppercase tracking-widest text-lg">WIN</span>
+                                            <TrendingUp size={36} className="text-green-500" />
+                                            <span className="font-black text-green-600 uppercase tracking-widest text-lg">Long</span>
                                         </button>
-                                        <button 
-                                            onClick={() => { setTradeResult('LOSS'); setTradeStep(2); }}
-                                            className="h-36 bg-red-50 rounded-[32px] border-2 border-transparent hover:border-red-500 transition-all flex flex-col items-center justify-center gap-2 group"
+                                        <button
+                                            type="button"
+                                            onClick={() => setTradeData({ ...tradeData, direction: 'Short' })}
+                                            className={`h-32 rounded-[32px] border-2 transition-all flex flex-col items-center justify-center gap-2 ${
+                                                tradeData.direction === 'Short'
+                                                    ? 'bg-red-50 border-red-500 shadow-lg'
+                                                    : 'bg-red-50/40 border-transparent active:border-red-500'
+                                            }`}
                                         >
-                                            <TrendingDown size={40} className="text-red-500" />
-                                            <span className="font-black text-red-600 uppercase tracking-widest text-lg">LOSS</span>
+                                            <TrendingDown size={36} className="text-red-500" />
+                                            <span className="font-black text-red-600 uppercase tracking-widest text-lg">Short</span>
                                         </button>
                                     </div>
+
+                                    <h3 className="text-xl font-black text-[#1a1a2e]">Result</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <button
+                                            type="button"
+                                            onClick={() => setTradeResult('WIN')}
+                                            className={`h-24 rounded-[28px] border-2 transition-all flex flex-col items-center justify-center gap-2 ${
+                                                tradeResult === 'WIN'
+                                                    ? 'bg-green-50 border-green-500 shadow-lg'
+                                                    : 'bg-green-50/40 border-transparent active:border-green-500'
+                                            }`}
+                                        >
+                                            <TrendingUp size={28} className="text-green-500" />
+                                            <span className="font-black text-green-600 uppercase tracking-widest">Win</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setTradeResult('LOSS')}
+                                            className={`h-24 rounded-[28px] border-2 transition-all flex flex-col items-center justify-center gap-2 ${
+                                                tradeResult === 'LOSS'
+                                                    ? 'bg-red-50 border-red-500 shadow-lg'
+                                                    : 'bg-red-50/40 border-transparent active:border-red-500'
+                                            }`}
+                                        >
+                                            <TrendingDown size={28} className="text-red-500" />
+                                            <span className="font-black text-red-600 uppercase tracking-widest">Loss</span>
+                                        </button>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        disabled={!tradeResult}
+                                        onClick={() => setTradeStep(2)}
+                                        className="w-full h-16 btn-primary rounded-[24px] font-black text-[14px] uppercase tracking-widest shadow-xl disabled:opacity-40"
+                                    >
+                                        Continue
+                                    </button>
                                 </motion.div>
                             )}
 
-                            {/* STEP 2: RULES FOLLOWED */}
+                            {/* STEP 2: SYMBOL */}
                             {tradeStep === 2 && (
+                                <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex flex-col gap-6">
+                                    <h3 className="text-xl font-black text-[#1a1a2e]">Symbol</h3>
+                                    <input
+                                        placeholder="Ticker (e.g. NIFTY)"
+                                        value={tradeData.ticker}
+                                        onChange={(e) => setTradeData({ ...tradeData, ticker: e.target.value.toUpperCase() })}
+                                        className="w-full h-14 bg-gray-50 rounded-2xl px-5 font-bold outline-none border border-gray-100"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setTradeStep(3)}
+                                        className="w-full h-16 btn-primary rounded-[24px] font-black text-[14px] uppercase tracking-widest shadow-xl"
+                                    >
+                                        Continue
+                                    </button>
+                                </motion.div>
+                            )}
+
+                            {/* STEP 3: ENTRY / EXIT / PNL */}
+                            {tradeStep === 3 && (
+                                <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex flex-col gap-5">
+                                    <h3 className="text-xl font-black text-[#1a1a2e]">Prices &amp; P&amp;L</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="flex flex-col gap-2">
+                                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Entry</span>
+                                            <input
+                                                type="text"
+                                                inputMode="decimal"
+                                                placeholder="0"
+                                                value={tradeData.entry}
+                                                onChange={(e) => setTradeData({ ...tradeData, entry: e.target.value })}
+                                                className="w-full h-14 bg-gray-50 rounded-2xl px-4 font-bold outline-none"
+                                            />
+                                        </div>
+                                        <div className="flex flex-col gap-2">
+                                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">Exit</span>
+                                            <input
+                                                type="text"
+                                                inputMode="decimal"
+                                                placeholder="0"
+                                                value={tradeData.exit}
+                                                onChange={(e) => setTradeData({ ...tradeData, exit: e.target.value })}
+                                                className="w-full h-14 bg-gray-50 rounded-2xl px-4 font-bold outline-none"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-1">P&amp;L (₹)</span>
+                                        <input
+                                            type="number"
+                                            inputMode="decimal"
+                                            placeholder={tradeResult === 'WIN' ? 'e.g. 500' : 'e.g. -200'}
+                                            value={tradeData.pnl}
+                                            onChange={(e) => setTradeData({ ...tradeData, pnl: e.target.value })}
+                                            className="w-full h-14 bg-gray-50 rounded-2xl px-5 font-bold outline-none"
+                                        />
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setTradeStep(4)}
+                                        className="w-full h-16 btn-primary rounded-[24px] font-black text-[14px] uppercase tracking-widest shadow-xl"
+                                    >
+                                        Continue
+                                    </button>
+                                </motion.div>
+                            )}
+
+                            {/* STEP 4: RULES */}
+                            {tradeStep === 4 && (
                                 <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex flex-col gap-6">
                                     <h3 className="text-xl font-black text-[#1a1a2e]">Did you follow your rules?</h3>
                                     <div className="grid grid-cols-2 gap-4">
                                         <button 
-                                            onClick={() => { setRulesStatus('ALL'); setTradeStep(3); }}
-                                            className="h-28 bg-blue-50 rounded-[28px] border-2 border-transparent hover:border-blue-500 transition-all flex flex-col items-center justify-center gap-2 px-4 text-center"
+                                            type="button"
+                                            onClick={() => { setRulesStatus('ALL'); setTradeStep(5); }}
+                                            className="h-28 bg-blue-50 rounded-[28px] border-2 border-transparent active:border-blue-500 transition-all flex flex-col items-center justify-center gap-2 px-4 text-center"
                                         >
                                             <CheckCircle2 size={24} className="text-blue-500" />
                                             <span className="font-black text-blue-600 uppercase tracking-widest text-[11px]">YES, ALL</span>
@@ -335,8 +543,9 @@ export default function CaptureHub() {
                                                 </button>
                                             ))}
                                             <button 
-                                                onClick={() => setTradeStep(3)}
-                                                className="w-full h-16 bg-[#1a1a2e] text-white rounded-[24px] font-black text-[14px] uppercase tracking-widest mt-4 shadow-xl mb-4"
+                                                type="button"
+                                                onClick={() => setTradeStep(5)}
+                                                className="w-full h-16 btn-primary rounded-[24px] font-black text-[14px] uppercase tracking-widest mt-4 shadow-xl mb-4"
                                             >
                                                 Continue
                                             </button>
@@ -345,72 +554,61 @@ export default function CaptureHub() {
                                 </motion.div>
                             )}
 
-                            {/* STEP 3: FINAL NOTES & ADVANCED */}
-                            {tradeStep === 3 && (
+                            {/* STEP 5: EMOTION */}
+                            {tradeStep === 5 && (
                                 <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex flex-col gap-6">
-                                    <h3 className="text-xl font-black text-[#1a1a2e]">Notes</h3>
-                                    
-                                    <textarea 
-                                        placeholder="Optional text..." 
-                                        rows={2}
-                                        value={tradeData.notes}
-                                        onChange={(e) => setTradeData({...tradeData, notes: e.target.value})}
-                                        className="w-full bg-gray-50 rounded-[28px] p-6 text-[15px] font-bold text-[#1a1a2e] outline-none border border-transparent focus:bg-white focus:border-blue-100 transition-all resize-none shadow-inner"
-                                    />
-
-                                    <button 
-                                        onClick={() => setShowAdvanced(!showAdvanced)}
-                                        className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-300 hover:text-[#1a1a2e] transition-colors w-fit px-2"
+                                    <h3 className="text-xl font-black text-[#1a1a2e]">How did you feel?</h3>
+                                    <div className="grid grid-cols-4 gap-3">
+                                        {EMOTION_OPTIONS.map((item) => (
+                                            <button
+                                                key={item.v}
+                                                type="button"
+                                                onClick={() => setTradeData({ ...tradeData, emotion: item.v })}
+                                                className={`flex flex-col items-center justify-center gap-1 h-24 rounded-[28px] border-2 ${
+                                                    tradeData.emotion === item.v
+                                                        ? 'bg-[#1a1a2e] border-[#1a1a2e] text-white'
+                                                        : 'bg-white border-gray-100 text-gray-400'
+                                                }`}
+                                            >
+                                                <span className="text-2xl">{item.e}</span>
+                                                <span className="text-[9px] font-black uppercase tracking-widest">{item.l}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setTradeStep(6)}
+                                        className="w-full h-16 btn-primary rounded-[24px] font-black text-[14px] uppercase tracking-widest shadow-xl"
                                     >
-                                        {showAdvanced ? 'Hide Advanced Fields' : 'Add Advanced Fields (Ticker, RR)'}
-                                        <ChevronDown size={14} className={showAdvanced ? 'rotate-180' : ''} />
+                                        Continue
                                     </button>
+                                </motion.div>
+                            )}
 
-                                    {showAdvanced && (
-                                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="flex flex-col gap-4 overflow-hidden">
-                                            <div className="flex flex-col gap-2">
-                                                <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest px-2">Ticker / Pair</span>
-                                                <input 
-                                                    placeholder="Ticker (e.g. NIFTY)" 
-                                                    value={tradeData.ticker}
-                                                    onChange={(e) => setTradeData({...tradeData, ticker: e.target.value.toUpperCase()})}
-                                                    className="w-full h-12 bg-gray-50 rounded-2xl px-5 text-[14px] font-bold outline-none border border-transparent focus:border-gray-200"
-                                                />
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="flex flex-col gap-2">
-                                                    <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest px-2">Risk (₹)</span>
-                                                    <input 
-                                                        type="number"
-                                                        value={tradeData.risk || ''}
-                                                        onChange={(e) => setTradeData({...tradeData, risk: Number(e.target.value)})}
-                                                        className="w-full h-12 bg-gray-50 rounded-2xl px-5 text-[14px] font-bold outline-none"
-                                                    />
-                                                </div>
-                                                <div className="flex flex-col gap-2">
-                                                    <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest px-2">Reward (₹)</span>
-                                                    <input 
-                                                        type="number"
-                                                        value={tradeData.reward || ''}
-                                                        onChange={(e) => setTradeData({...tradeData, reward: Number(e.target.value)})}
-                                                        className="w-full h-12 bg-gray-50 rounded-2xl px-5 text-[14px] font-bold outline-none"
-                                                    />
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    )}
-
-                                    <div className="flex flex-col gap-4 mt-4">
+                            {/* STEP 6: NOTES + SAVE */}
+                            {tradeStep === 6 && (
+                                <motion.div initial={{ x: 20, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="flex flex-col gap-6">
+                                    <h3 className="text-xl font-black text-[#1a1a2e]">Notes (optional)</h3>
+                                    <textarea 
+                                        placeholder="What happened on this trade?" 
+                                        rows={3}
+                                        value={tradeData.notes}
+                                        onChange={(e) => setTradeData({ ...tradeData, notes: e.target.value })}
+                                        className="w-full bg-gray-50 rounded-[28px] p-6 font-bold text-[#1a1a2e] outline-none border border-gray-100 resize-none"
+                                    />
+                                    <div className="flex flex-col gap-4 mt-2">
                                         <button 
+                                            type="button"
                                             onClick={handleSaveTrade}
                                             disabled={isProcessing}
-                                            className="w-full h-20 bg-[#1a1a2e] text-white rounded-[32px] font-black text-[18px] shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                                            className="w-full h-20 btn-primary rounded-[32px] font-black text-[18px] shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
                                         >
-                                            {isProcessing ? <Loader2 className="animate-spin" /> : <>SAVE TRADE</>}
+                                            {isProcessing ? <Loader2 className="animate-spin" /> : <>{editingTrade ? 'UPDATE TRADE' : 'SAVE TRADE'}</>}
                                         </button>
                                         <button 
-                                            onClick={() => setTradeStep(2)}
-                                            className="text-[11px] font-black text-gray-300 uppercase tracking-[0.2em] hover:text-gray-400"
+                                            type="button"
+                                            onClick={() => setTradeStep(5)}
+                                            className="text-[11px] font-black text-gray-300 uppercase tracking-[0.2em]"
                                         >
                                             Back
                                         </button>
@@ -420,38 +618,56 @@ export default function CaptureHub() {
                         </motion.div>
                     )}
 
-                    {/* Placeholder for other modes */}
-                    {(captureMode === 'note' || captureMode === 'photo' || captureMode === 'voice') && (
-                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="pt-20 flex flex-col items-center text-center gap-10">
-                            <div className={`w-24 h-24 rounded-[32px] flex items-center justify-center shadow-xl ${
-                                captureMode === 'note' ? 'bg-orange-50 text-orange-500' : 
-                                captureMode === 'voice' ? 'bg-red-50 text-red-500' : 
-                                'bg-blue-50 text-blue-500'
-                            }`}>
-                                {captureMode === 'note' ? <FileText size={42} /> : captureMode === 'voice' ? <Mic size={42} /> : <Camera size={42} />}
+                    {captureMode === 'note' && (
+                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="pt-4 flex flex-col gap-6">
+                            <header>
+                                <h2 className="text-[32px] font-black text-[#1a1a2e] leading-tight mb-1">Quick Note</h2>
+                                <p className="text-[14px] font-bold text-gray-400">Paste or type — AI extracts trade fields.</p>
+                            </header>
+                            <textarea
+                                placeholder="e.g. Long NIFTY 24500 entry, exited 24580, +₹800, broke my stop rule..."
+                                rows={6}
+                                value={noteText}
+                                onChange={(e) => setNoteText(e.target.value)}
+                                className="w-full bg-gray-50 rounded-[28px] p-6 font-bold text-[#1a1a2e] outline-none border border-gray-100 resize-none"
+                            />
+                            <button
+                                type="button"
+                                onClick={handleParseNote}
+                                disabled={isProcessing}
+                                className="w-full h-16 btn-primary rounded-[28px] font-black text-[15px] flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {isProcessing ? <Loader2 className="animate-spin" size={22} /> : <>Parse with AI <Sparkles size={18} /></>}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setCaptureMode('checklist')}
+                                className="w-full h-14 text-gray-400 font-black text-[13px] uppercase tracking-widest"
+                            >
+                                Enter manually instead
+                            </button>
+                        </motion.div>
+                    )}
+
+                    {(captureMode === 'voice' || captureMode === 'photo') && (
+                        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="pt-20 flex flex-col items-center text-center gap-8 px-4">
+                            <div className="w-24 h-24 rounded-[32px] bg-gray-100 text-gray-400 flex items-center justify-center">
+                                {captureMode === 'voice' ? <Mic size={42} /> : <Camera size={42} />}
                             </div>
                             <div>
-                                <h2 className="text-[28px] font-black text-[#1a1a2e] mb-3">
-                                    {captureMode === 'note' ? 'Quick Note' : captureMode === 'voice' ? 'Voice Check' : 'Scan Rules'}
+                                <span className="inline-block text-[10px] font-black uppercase tracking-widest bg-gray-100 text-gray-500 px-3 py-1 rounded-full mb-3">Coming soon</span>
+                                <h2 className="text-[26px] font-black text-[#1a1a2e] mb-2">
+                                    {captureMode === 'voice' ? 'Voice capture' : 'Scan capture'}
                                 </h2>
-                                <p className="text-[16px] font-bold text-gray-400 px-10">Recording details using AI powered input.</p>
+                                <p className="text-[15px] font-bold text-gray-400">This mode is not available in beta yet. Use Quick Note or manual log.</p>
                             </div>
-                            <div className="w-full flex flex-col gap-4 px-4">
-                                <div className="h-2 w-full bg-gray-50 rounded-full overflow-hidden">
-                                    <motion.div 
-                                        initial={{ width: 0 }}
-                                        animate={{ width: "100%" }}
-                                        transition={{ duration: 3, repeat: Infinity }}
-                                        className="h-full bg-[#1a1a2e]"
-                                    />
-                                </div>
-                                <button 
-                                    onClick={() => setCaptureMode('checklist')}
-                                    className="w-full h-16 bg-white text-[#1a1a2e] rounded-[24px] font-black text-[14px] border border-gray-100 shadow-sm active:scale-95 transition-all uppercase tracking-widest"
-                                >
-                                    Switch to Manual Entry
-                                </button>
-                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setCaptureMode('checklist')}
+                                className="w-full h-16 btn-primary rounded-[24px] font-black text-[14px] uppercase tracking-widest active:scale-95"
+                            >
+                                Log trade manually
+                            </button>
                         </motion.div>
                     )}
                 </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     X, 
@@ -20,6 +21,7 @@ export default function SettingsSheet({ isOpen, onClose }: { isOpen: boolean; on
     const { logout, user } = usePerfectTrader();
     const [isPasswordOpen, setIsPasswordOpen] = useState(false);
     useModalTracking('settings_sheet', isOpen);
+    useEscapeKey(onClose, isOpen);
 
     return (
         <>
@@ -39,7 +41,7 @@ export default function SettingsSheet({ isOpen, onClose }: { isOpen: boolean; on
                         animate={{ y: 0 }} 
                         exit={{ y: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] z-[201] max-h-[85vh] overflow-y-auto pb-[calc(env(safe-area-inset-bottom)+20px)] shadow-[0_-8px_40px_rgba(0,0,0,0.1)]"
+                        className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[40px] z-[201] max-h-[85vh] sheet-scroll pb-[calc(env(safe-area-inset-bottom)+20px)] shadow-[0_-8px_40px_rgba(0,0,0,0.1)]"
                     >
                         <div className="w-12 h-1.5 bg-gray-200 rounded-full mx-auto my-4" />
                         

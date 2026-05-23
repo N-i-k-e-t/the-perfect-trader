@@ -102,7 +102,13 @@ GROUP BY geo_country_name, geo_city
 ORDER BY users DESC
 LIMIT 20;
 
--- 10. pt_sync_health — cloud sync reliability
+-- 10. pt_beta_waitlist — emails waiting for invite (after migration applied)
+SELECT email, source, created_at
+FROM beta_waitlist
+ORDER BY created_at DESC
+LIMIT 100;
+
+-- 11. pt_sync_health — cloud sync reliability
 SELECT
   DATE(timestamp_utc) AS day,
   COUNT(*) FILTER (WHERE event_name = 'cloud_sync_completed') AS successful_syncs,

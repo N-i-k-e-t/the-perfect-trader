@@ -61,14 +61,18 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} bg-[#1a1a2e] text-white antialiased min-h-[100dvh] overflow-x-hidden`}>
-        <PerfectTraderProvider initialUser={initialUser} initialAuthUserId={initialAuthUserId}>
-          <TrackingProvider initialAuthUserId={initialAuthUserId}>
-            {children}
-            <ToastContainer />
-            <CookieConsent />
-          </TrackingProvider>
-        </PerfectTraderProvider>
+      <body className={`${inter.className} antialiased min-h-[100dvh] overflow-x-hidden`}>
+        <div className="min-h-screen bg-gray-950 flex justify-center">
+          <div className="w-full max-w-[390px] min-h-screen relative bg-white shadow-2xl overflow-hidden">
+            <PerfectTraderProvider initialUser={initialUser} initialAuthUserId={initialAuthUserId}>
+              <TrackingProvider initialAuthUserId={initialAuthUserId}>
+                {children}
+                <ToastContainer />
+                <CookieConsent />
+              </TrackingProvider>
+            </PerfectTraderProvider>
+          </div>
+        </div>
       </body>
     </html>
   );

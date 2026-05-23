@@ -24,12 +24,24 @@ export default function BetaPage() {
         });
     }, [router]);
 
-    const submit = (e: React.FormEvent) => {
+    const submit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!email.trim()) return;
-        const list = JSON.parse(localStorage.getItem(WAITLIST_KEY) || '[]') as string[];
-        if (!list.includes(email.trim())) list.push(email.trim());
-        localStorage.setItem(WAITLIST_KEY, JSON.stringify(list));
+        const trimmed = email.trim().toLowerCase();
+        if (!trimmed) return;
+
+        try {
+            const res = await fetch('/api/beta-waitlist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: trimmed, source: 'beta_page' }),
+            });
+            if (!res.ok) throw new Error('waitlist_failed');
+        } catch {
+            const list = JSON.parse(localStorage.getItem(WAITLIST_KEY) || '[]') as string[];
+            if (!list.includes(trimmed)) list.push(trimmed);
+            localStorage.setItem(WAITLIST_KEY, JSON.stringify(list));
+        }
+
         track('beta_waitlist_joined', 'settings', { submission_method: 'page' });
         setDone(true);
     };

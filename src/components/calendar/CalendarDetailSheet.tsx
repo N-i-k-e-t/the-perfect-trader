@@ -5,6 +5,7 @@ import { X, TrendingUp, ShieldCheck, Zap, AlertCircle, ShoppingCart, Activity, B
 import { format } from 'date-fns';
 import { DailyLog, Trade, MarketEvent } from '@/types/trading';
 import { useModalTracking } from '@/lib/analytics';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 
 interface CalendarDetailSheetProps {
     isOpen: boolean;
@@ -15,6 +16,7 @@ interface CalendarDetailSheetProps {
 
 export default function CalendarDetailSheet({ isOpen, onClose, date, data }: CalendarDetailSheetProps) {
     useModalTracking('calendar_detail_sheet', isOpen);
+    useEscapeKey(onClose, isOpen && !!date);
     if (!date) return null;
 
     const trades: Trade[] = []; // This would come from context in a real app or be passed in
@@ -37,7 +39,7 @@ export default function CalendarDetailSheet({ isOpen, onClose, date, data }: Cal
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
                         transition={{ type: 'spring', damping: 30, stiffness: 300, mass: 0.8 }}
-                        className="fixed inset-x-0 bottom-0 bg-white rounded-t-[50px] z-[270] max-h-[94vh] overflow-y-auto pb-safe shadow-[0_-20px_60px_rgba(0,0,0,0.2)]"
+                        className="fixed inset-x-0 bottom-0 bg-white rounded-t-[50px] z-[270] max-h-[94vh] sheet-scroll pb-safe shadow-[0_-20px_60px_rgba(0,0,0,0.2)]"
                     >
                         {/* HANDLE */}
                         <div className="flex justify-center pt-6 pb-2">

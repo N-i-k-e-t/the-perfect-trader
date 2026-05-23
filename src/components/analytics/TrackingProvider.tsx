@@ -34,11 +34,10 @@ export default function TrackingProvider({
     useEffect(() => {
         initTrackingTransport();
         initGeoEnrichment();
-        const loadTime = loadStarted.current;
         track('app_loaded', 'technical', {
             cached_data_loaded: Boolean(localStorage.getItem('perfect_trader_data')),
-            load_time_ms: Math.round(loadTime),
-            time_to_first_interactive_ms: Math.round(performance.now()),
+            load_time_ms: Math.round(performance.now() - loadStarted.current),
+            time_to_first_interactive_ms: Math.round(performance.now() - loadStarted.current),
         });
     }, []);
 

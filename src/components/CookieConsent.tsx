@@ -48,7 +48,7 @@ export default function CookieConsent() {
                     <button
                         type="button"
                         onClick={() => accept(true)}
-                        className="flex-1 h-12 bg-[#1a1a2e] text-white rounded-full font-black text-[13px] uppercase tracking-wider"
+                        className="flex-1 h-12 btn-primary rounded-full font-black text-[13px] uppercase tracking-wider"
                     >
                         Accept all
                     </button>

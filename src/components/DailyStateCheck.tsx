@@ -1,11 +1,14 @@
+'use client';
+
 import React, { useState, useRef, useEffect } from 'react';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePerfectTrader } from '@/lib/context';
 import { track } from '@/lib/analytics';
 import { Shield, Battery, Moon, Smile, ArrowRight, Check, Coffee } from 'lucide-react';
 
 export default function DailyStateCheck() {
-    const { session, completePreSession, setEmotionalBaseline, rules } = usePerfectTrader();
+    const { session, completePreSession, setEmotionalBaseline, rules, showPreSessionCheck, closePreSessionCheck } = usePerfectTrader();
     const [step, setStep] = useState(1);
     const formOpenedAt = useRef(Date.now());
 
@@ -16,7 +19,10 @@ export default function DailyStateCheck() {
     const [sleepScore, setSleepScore] = useState(3);
     const [energyLevel, setEnergyLevel] = useState(3);
 
-    if (session.preSessionComplete) return null;
+    const isVisible = !session.preSessionComplete && showPreSessionCheck;
+    useEscapeKey(closePreSessionCheck, isVisible);
+
+    if (!isVisible) return null;
 
     const handleComplete = () => {
         const todayDate = new Date().toISOString().split('T')[0];
@@ -31,7 +37,7 @@ export default function DailyStateCheck() {
     };
 
     return (
-        <div className="fixed inset-0 z-[200] bg-white flex flex-col p-6 pb-[calc(env(safe-area-inset-bottom)+20px)] overflow-y-auto">
+        <div className="fixed inset-0 z-[200] bg-white flex flex-col p-6 pb-[calc(env(safe-area-inset-bottom)+20px)] sheet-scroll">
             <div className="absolute top-0 left-0 right-0 px-6 pt-4 flex gap-1 z-[210]">
                 {[1, 2].map((i) => (
                     <div key={i} className="h-1.5 flex-1 bg-gray-100 rounded-full overflow-hidden">
@@ -151,14 +157,14 @@ export default function DailyStateCheck() {
                 {step < 2 ? (
                     <button
                         onClick={() => setStep(step + 1)}
-                        className="w-full h-20 bg-[#1a1a2e] text-white rounded-full font-black text-xl flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all"
+                        className="w-full h-20 btn-primary rounded-full font-black text-xl flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all"
                     >
                         Next Step <ArrowRight size={20} strokeWidth={3} />
                     </button>
                 ) : (
                     <button
                         onClick={handleComplete}
-                        className="w-full h-20 bg-[#1a1a2e] text-white rounded-full font-black text-xl flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all"
+                        className="w-full h-20 btn-primary rounded-full font-black text-xl flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all"
                     >
                         Start My Session <Check size={24} strokeWidth={4} />
                     </button>

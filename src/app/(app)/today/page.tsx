@@ -22,15 +22,35 @@ import {
     Info
 } from 'lucide-react';
 import MentalReset from '@/components/MentalReset';
+import InsightCards from '@/components/InsightCards';
+import RiskAlertBanner from '@/components/retention/RiskAlertBanner';
+import { runOrchestrator } from '@/lib/agents/orchestrator';
 import {
     calculateRuleChecklistScore,
     scoreToGrade,
 } from '@/lib/discipline';
+import { PullToRefresh } from '@/components/ui/PullToRefresh';
+import { TodayPageSkeleton } from '@/components/ui/Skeleton';
+import { isAfterSessionEnd } from '@/lib/session-time';
 
 export default function DashboardPage() {
-    const { 
-        rules, trades, dailyLogs, session, logDaily, setCaptureOpen, setCaptureMode,
-        analytics, lockRules, showToast 
+    const {
+        rules,
+        trades,
+        dailyLogs,
+        session,
+        updateSession,
+        logDaily,
+        setCaptureOpen,
+        setCaptureMode,
+        analytics,
+        showToast,
+        riskAlerts,
+        dismissRiskAlert,
+        setCoachMessages,
+        userModel,
+        openPreSessionCheck,
+        refreshData,
     } = usePerfectTrader();
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
@@ -69,6 +89,35 @@ export default function DashboardPage() {
     const isPerfect = score === 100 && activeRules.length > 0;
 
     const streak = analytics.consistencyDays || 0;
+    const grade = scoreToGrade(score);
+
+    useEffect(() => {
+        if (!mounted) return;
+        const output = runOrchestrator(
+            trades,
+            rules,
+            dailyLogs,
+            streak,
+            streak,
+            targetLog?.mood ?? null,
+            userModel
+        );
+        setCoachMessages(output.coachMessages);
+    }, [mounted, trades, rules, dailyLogs, streak, userModel, targetLog?.mood, setCoachMessages]);
+
+    const showPostSession =
+        selectedDateStr === today &&
+        (targetTrades.length >= 1 || isAfterSessionEnd());
+
+    useEffect(() => {
+        if (!mounted || !isPerfect || !session.preSessionComplete || selectedDateStr !== today) return;
+        const key = `pt_confetti_shown_${today}`;
+        if (localStorage.getItem(key)) return;
+        localStorage.setItem(key, '1');
+        void import('canvas-confetti').then(({ default: confetti }) => {
+            confetti({ particleCount: 80, spread: 70, origin: { y: 0.65 } });
+        });
+    }, [mounted, isPerfect, session.preSessionComplete, selectedDateStr, today]);
 
     const handleToggleRule = (ruleId: string) => {
         if (session.rulesLocked) {
@@ -122,9 +171,8 @@ export default function DashboardPage() {
 
     if (!mounted) {
         return (
-            <div className="min-h-screen bg-[#fafafa] flex flex-col items-center pt-32 px-6">
-                <div className="w-48 h-10 bg-gray-100 rounded-full animate-pulse mb-10" />
-                <div className="w-72 h-72 rounded-full border-8 border-gray-100 animate-pulse" />
+            <div className="min-h-screen bg-[#fafafa]">
+                <TodayPageSkeleton />
             </div>
         );
     }
@@ -137,8 +185,17 @@ export default function DashboardPage() {
 
     return (
         <div className="min-h-[100dvh] bg-[#fafafa] pb-[calc(env(safe-area-inset-bottom)+120px)] selection:bg-blue-100 italic-none overflow-x-hidden">
-            <main className="px-5 pt-[calc(env(safe-area-inset-top)+20px)] flex flex-col items-center">
-                <header className="w-full mb-10 flex flex-col items-center">
+            <PullToRefresh onRefresh={refreshData} className="w-full">
+            <main className="px-5 pt-4 flex flex-col items-center w-full">
+                {riskAlerts.length > 0 && (
+                    <RiskAlertBanner
+                        alert={riskAlerts[0]}
+                        onDismiss={() => dismissRiskAlert(riskAlerts[0].timestamp)}
+                        onAction={() => setIsResetOpen(true)}
+                    />
+                )}
+
+                <header className="w-full mb-6 flex flex-col items-center">
                     <div className="w-full flex justify-between items-center mb-8 px-2">
                         <div className="flex flex-col">
                             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Account Level</span>
@@ -163,6 +220,66 @@ export default function DashboardPage() {
                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{selectedDate.getFullYear()}</span>
                     </div>
 
+                    {/* DISCIPLINE SCORE — hero above the fold */}
+                    <div className="w-full flex flex-col items-center mb-8">
+                        <div className="relative w-56 h-56">
+                            <motion.div 
+                                animate={{ scale: [1, 1.05, 1], opacity: [0.05, 0.1, 0.05] }}
+                                transition={{ duration: 4, repeat: Infinity }}
+                                className={`absolute inset-0 rounded-full blur-3xl -z-10 ${isPerfect ? 'bg-green-400' : 'bg-blue-400'}`}
+                            />
+                            <svg className="w-full h-full transform -rotate-90">
+                                <circle cx="112" cy="112" r="96" stroke="#f1f5f9" strokeWidth="16" fill="transparent" />
+                                <motion.circle 
+                                    cx="112" cy="112" r="96" 
+                                    stroke={isPerfect ? "#22c55e" : "#3b82f6"} 
+                                    strokeWidth="16"
+                                    strokeDasharray={603}
+                                    strokeDashoffset={603 - (603 * score / 100)}
+                                    strokeLinecap="round" 
+                                    fill="transparent"
+                                    className="transition-all duration-[1000ms] ease-out"
+                                />
+                            </svg>
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                <span className="text-[44px] font-black text-[#1a1a2e] tracking-tighter tabular-nums leading-none">
+                                    {score}<span className="text-[16px] font-bold text-gray-300 ml-0.5">%</span>
+                                </span>
+                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">Discipline</span>
+                                <span className={`text-[22px] font-black mt-1 ${isPerfect ? 'text-green-500' : 'text-blue-600'}`}>
+                                    {grade}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="w-full grid grid-cols-2 gap-3 mt-6">
+                            <div className="bg-white rounded-[24px] p-4 shadow-sm border border-gray-50 flex flex-col items-center gap-1">
+                                <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest flex items-center gap-1">
+                                    <Zap size={10} /> Rules Followed
+                                </span>
+                                <span className="text-[16px] font-black text-[#1a1a2e]">{checkedIds.length}/{activeRules.length}</span>
+                            </div>
+                            <div className="bg-white rounded-[24px] p-4 shadow-sm border border-gray-50 flex flex-col items-center gap-1">
+                                <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest flex items-center gap-1">
+                                    <TrendingUp size={10} /> Trades Today
+                                </span>
+                                <span className="text-[16px] font-black text-[#1a1a2e]">{targetTrades.length}/{session.tradesAllowed}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {!session.preSessionComplete && selectedDateStr === today && (
+                        <button
+                            type="button"
+                            onClick={openPreSessionCheck}
+                            className="w-full mb-6 flex items-center justify-between gap-3 px-5 py-4 min-h-[52px] bg-blue-50 border border-blue-100 rounded-[24px] active:scale-[0.98] transition-transform"
+                        >
+                            <span className="text-[14px] font-black text-[#1a1a2e] text-left">
+                                📋 Start your pre-session check-in →
+                            </span>
+                            <ChevronRight size={18} className="text-blue-500 shrink-0" />
+                        </button>
+                    )}
+
                     {/* WELCOME CARD - Fix 2 */}
                     <AnimatePresence>
                         {showWelcome && (
@@ -172,9 +289,14 @@ export default function DashboardPage() {
                                 exit={{ opacity: 0, scale: 0.9 }}
                                 className="w-full bg-[#1a1a2e] text-white rounded-[32px] p-7 mb-8 shadow-2xl relative overflow-hidden"
                             >
-                                <div className="absolute top-4 right-4 bg-white/10 p-1.5 rounded-full" onClick={handleDismissWelcome}>
-                                    <X size={14} className="cursor-pointer" />
-                                </div>
+                                <button
+                                    type="button"
+                                    className="absolute top-3 right-3 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/10 rounded-full"
+                                    onClick={handleDismissWelcome}
+                                    aria-label="Dismiss welcome"
+                                >
+                                    <X size={16} className="text-white" />
+                                </button>
                                 <h3 className="text-xl font-black mb-4 flex items-center gap-2">
                                     <Sparkles size={20} className="text-yellow-400" /> Welcome to The Perfect Trader!
                                 </h3>
@@ -205,11 +327,11 @@ export default function DashboardPage() {
                     {/* WEEK NAVIGATION */}
                     <div className="w-full flex flex-col gap-4 mb-8">
                         <div className="flex items-center justify-between px-2">
-                            <button onClick={() => setWeekOffset(weekOffset - 1)} className="p-2 bg-gray-50 border border-gray-100 rounded-full text-gray-400 active:scale-90 transition-all">
+                            <button type="button" onClick={() => setWeekOffset(weekOffset - 1)} className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-gray-50 border border-gray-100 rounded-full text-gray-400 active:scale-90 transition-all">
                                 <ChevronRight size={14} className="rotate-180" />
                             </button>
                             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">This Week</span>
-                            <button onClick={() => setWeekOffset(weekOffset + 1)} className="p-2 bg-gray-50 border border-gray-100 rounded-full text-gray-400 active:scale-90 transition-all">
+                            <button type="button" onClick={() => setWeekOffset(weekOffset + 1)} className="min-w-[44px] min-h-[44px] flex items-center justify-center bg-gray-50 border border-gray-100 rounded-full text-gray-400 active:scale-90 transition-all">
                                 <ChevronRight size={14} />
                             </button>
                         </div>
@@ -275,7 +397,9 @@ export default function DashboardPage() {
                     </div>
                 </section>
 
-                {/* TODAY'S RULES - HERO SECTION */}
+                <InsightCards />
+
+                {/* TODAY'S RULES */}
                 <section className="w-full flex flex-col gap-6 mb-12">
                     <div className="flex items-center gap-3 px-2">
                         <span className="text-[10px] font-black text-[#1a1a2e] uppercase tracking-widest">My Rules</span>
@@ -316,13 +440,19 @@ export default function DashboardPage() {
                                             </div>
                                         </div>
 
-                                        <div className={`w-8 h-8 rounded-full border-2 shrink-0 flex items-center justify-center transition-all ${
-                                            checkedIds.includes(rule.id)
-                                            ? 'bg-[#1a1a2e] border-[#1a1a2e] text-white shadow-lg'
-                                            : 'border-gray-100'
-                                        }`}>
+                                        <motion.div
+                                            key={checkedIds.includes(rule.id) ? `on-${rule.id}` : `off-${rule.id}`}
+                                            initial={{ scale: 0.75 }}
+                                            animate={{ scale: 1 }}
+                                            transition={{ type: 'spring', stiffness: 520, damping: 16 }}
+                                            className={`min-w-[44px] min-h-[44px] rounded-full border-2 shrink-0 flex items-center justify-center transition-colors ${
+                                                checkedIds.includes(rule.id)
+                                                ? 'bg-cta border-cta text-white shadow-lg'
+                                                : 'border-gray-100'
+                                            }`}
+                                        >
                                             {checkedIds.includes(rule.id) && <Check size={16} strokeWidth={4} />}
-                                        </div>
+                                        </motion.div>
                                     </motion.button>
                                 );
                             })
@@ -350,70 +480,33 @@ export default function DashboardPage() {
                             setCaptureMode('checklist');
                             setCaptureOpen(true);
                         }}
-                        className="w-full h-18 bg-[#1a1a2e] text-white rounded-[32px] font-black text-[16px] flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(26,26,46,0.2)] active:scale-95 transition-all py-5"
+                        className="w-full h-18 btn-primary rounded-[32px] font-black text-[16px] flex items-center justify-center gap-3 shadow-[0_20px_40px_rgba(16,185,129,0.25)] active:scale-95 transition-all py-5"
                     >
                         <Plus size={20} strokeWidth={4} />
                         Log Trade
                     </button>
                 </section>
 
-                {/* DISCIPLINE SCORE */}
-                <div className="w-full flex flex-col items-center mb-14">
-                    <div className="relative w-64 h-64">
-                        <motion.div 
-                            animate={{ scale: [1, 1.05, 1], opacity: [0.05, 0.1, 0.05] }}
-                            transition={{ duration: 4, repeat: Infinity }}
-                            className={`absolute inset-0 rounded-full blur-3xl -z-10 ${isPerfect ? 'bg-green-400' : 'bg-blue-400'}`}
+                {showPostSession && (
+                    <section className="w-full mb-10">
+                        <div className="flex items-center gap-3 mb-4 px-2">
+                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Post-Session Notes</span>
+                            <div className="h-[1px] flex-1 bg-gray-100" />
+                        </div>
+                        <textarea
+                            placeholder="How did the session go? Lessons for tomorrow..."
+                            rows={3}
+                            defaultValue={session.notes ?? ''}
+                            onBlur={(e) => {
+                                updateSession({ notes: e.target.value });
+                                showToast('Session notes saved', 'success');
+                            }}
+                            className="w-full bg-white rounded-[28px] p-5 font-bold text-[#1a1a2e] border border-gray-100 resize-none shadow-sm"
                         />
-                        
-                        <svg className="w-full h-full transform -rotate-90">
-                            <circle cx="128" cy="128" r="110" stroke="#f1f5f9" strokeWidth="18" fill="transparent" />
-                            <motion.circle 
-                                cx="128" cy="128" r="110" 
-                                stroke={isPerfect ? "#22c55e" : "#3b82f6"} 
-                                strokeWidth="18"
-                                strokeDasharray={691}
-                                strokeDashoffset={691 - (691 * score / 100)}
-                                strokeLinecap="round" 
-                                fill="transparent"
-                                className="transition-all duration-[1000ms] ease-out"
-                            />
-                        </svg>
-                        
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className="text-[52px] font-black text-[#1a1a2e] tracking-tighter tabular-nums leading-none">
-                                {score}<span className="text-[18px] font-bold text-gray-300 ml-0.5">%</span>
-                            </span>
-                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-2">Discipline Score</span>
-                        </div>
-                    </div>
-
-                    <div className="w-full grid grid-cols-2 gap-4 mt-10">
-                        <div className="bg-white rounded-[28px] p-5 shadow-sm border border-gray-50 flex flex-col items-center gap-1.5">
-                            <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest flex items-center gap-1">
-                                <Zap size={10} /> Rules Followed
-                            </span>
-                            <span className="text-[18px] font-black text-[#1a1a2e]">{score}%</span>
-                        </div>
-                        <div className="bg-white rounded-[28px] p-5 shadow-sm border border-gray-50 flex flex-col items-center gap-1.5">
-                            <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest flex items-center gap-1">
-                                <TrendingUp size={10} /> Today's Focus
-                            </span>
-                            <span className="text-[18px] font-black text-blue-600 uppercase">Strong</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* AI COACH - SIMPLIFIED */}
-                <div className="w-full bg-[#f8fafc] border border-gray-100 rounded-[28px] p-5 flex items-start gap-4">
-                    <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center shrink-0 text-[10px] font-black uppercase">
-                        AI
-                    </div>
-                    <p className="text-[14px] font-bold text-gray-600 leading-tight">
-                        {streak >= 30 ? "Elite focus today. How you're feeling is stable." : "Follow your rules for 5 days to unlock a special bonus."}
-                    </p>
-                </div>
+                    </section>
+                )}
             </main>
+            </PullToRefresh>
             <MentalReset isOpen={isResetOpen} onClose={() => setIsResetOpen(false)} />
         </div>
     );

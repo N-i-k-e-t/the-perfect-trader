@@ -1,4 +1,7 @@
+'use client';
+
 import { useState } from 'react';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 import { usePerfectTrader } from '@/lib/context';
 import { track, useModalTracking } from '@/lib/analytics';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,6 +16,7 @@ import { DiaryEntry } from '@/types/trading';
 export default function DiaryScannerModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
     const { addDiaryEntry, showToast } = usePerfectTrader();
     useModalTracking('diary_scanner_modal', isOpen);
+    useEscapeKey(onClose, isOpen);
     const [isScanning, setIsScanning] = useState(false);
     const [scanResult, setScanResult] = useState<Partial<DiaryEntry> | null>(null);
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -120,7 +124,7 @@ export default function DiaryScannerModal({ isOpen, onClose }: { isOpen: boolean
                             </button>
                         </header>
 
-                        <div className="flex-1 overflow-y-auto px-8 pb-8 bg-white">
+                        <div className="flex-1 sheet-scroll px-8 pb-8 bg-white">
                             {!uploadedImage ? (
                                 <div className="flex flex-col items-center justify-center py-20 border-4 border-dashed border-gray-50 rounded-[48px] bg-gray-50/30 group hover:border-[#1a1a2e]/10 transition-all cursor-pointer relative shadow-inner">
                                     <input 
@@ -205,7 +209,7 @@ export default function DiaryScannerModal({ isOpen, onClose }: { isOpen: boolean
                                 </button>
                                 <button 
                                     onClick={handleSave}
-                                    className="h-20 px-12 bg-[#1a1a2e] text-white rounded-full text-[17px] font-black shadow-2xl hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-4"
+                                    className="h-20 px-12 btn-primary rounded-full text-[17px] font-black shadow-2xl active:scale-95 transition-all flex items-center gap-4"
                                 >
                                     Save Scan
                                     <ChevronRight size={24} strokeWidth={3} />

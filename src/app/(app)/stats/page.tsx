@@ -262,7 +262,7 @@ export default function StatsPage() {
                                 setCaptureMode('checklist');
                                 setCaptureOpen(true);
                             }}
-                            className="bg-[#1a1a2e] text-white px-8 h-12 rounded-full font-black text-[13px] uppercase tracking-widest mt-2"
+                            className="btn-primary px-8 h-12 rounded-full font-black text-[13px] uppercase tracking-widest mt-2"
                         >
                             Start Today →
                         </button>

@@ -159,7 +159,7 @@ export default function PnLCalendar() {
 
                                 <button 
                                     onClick={() => setIsAdvancedPickerOpen(false)}
-                                    className="h-[64px] w-full bg-[#1a1a2e] text-white rounded-[28px] font-black text-[16px] shadow-2xl active:scale-95 transition-all mt-4"
+                                    className="h-[64px] w-full btn-primary rounded-[28px] font-black text-[16px] shadow-2xl active:scale-95 transition-all mt-4"
                                 >
                                     View Date
                                 </button>

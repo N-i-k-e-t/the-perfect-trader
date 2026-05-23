@@ -7,6 +7,7 @@ import { createClient } from '@/utils/supabase/client';
 import { usePerfectTrader } from '@/lib/context';
 import { useModalTracking } from '@/lib/analytics';
 import { formatAuthError } from '@/lib/auth-errors';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 import {
     getAuthLinkStatus,
     oauthProviderLabel,
@@ -102,7 +103,7 @@ export default function SetPasswordSheet({ isOpen, onClose }: SetPasswordSheetPr
                         animate={{ y: 0 }}
                         exit={{ y: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="relative w-full max-w-[430px] bg-white rounded-t-[32px] sm:rounded-[32px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
+                        className="relative w-full max-w-[390px] bg-white rounded-t-[32px] sm:rounded-[32px] overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
                     >
                         <div className="px-6 py-5 border-b border-gray-50 flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -121,7 +122,7 @@ export default function SetPasswordSheet({ isOpen, onClose }: SetPasswordSheetPr
                             </button>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+                        <div className="flex-1 sheet-scroll p-6 flex flex-col gap-6">
                             {loading ? (
                                 <div className="flex justify-center py-12">
                                     <Loader2 className="animate-spin text-[#1a1a2e]" size={28} />
@@ -204,7 +205,7 @@ export default function SetPasswordSheet({ isOpen, onClose }: SetPasswordSheetPr
                                         type="button"
                                         disabled={saving || !linkStatus?.email}
                                         onClick={handleSave}
-                                        className="w-full h-14 bg-[#1a1a2e] text-white font-black rounded-[20px] flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.98] transition-all"
+                                        className="w-full h-14 btn-primary font-black rounded-[20px] flex items-center justify-center gap-2 disabled:opacity-60 active:scale-[0.98] transition-all"
                                     >
                                         {saving ? (
                                             <Loader2 className="animate-spin" size={22} />

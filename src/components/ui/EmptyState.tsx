@@ -44,7 +44,7 @@ export function EmptyState({
             {handleAction && label && (
                 <button 
                     onClick={handleAction}
-                    className="h-12 px-8 bg-[#1a1a2e] text-white rounded-full font-black text-[14px] active:scale-95 transition-all shadow-lg shadow-gray-200"
+                    className="h-12 px-8 btn-primary rounded-full font-black text-[14px] active:scale-95 transition-all shadow-lg shadow-gray-200"
                 >
                     {label}
                 </button>

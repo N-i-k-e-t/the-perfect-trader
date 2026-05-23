@@ -309,7 +309,7 @@ export default function SignupPage() {
                             </div>
                             <button
                                 disabled={isLoading || !termsAccepted}
-                                className="w-full h-[60px] bg-[#1a1a2e] text-white font-black rounded-[20px] flex items-center justify-center gap-2 disabled:opacity-70"
+                                className="w-full h-[60px] btn-primary font-black rounded-[20px] flex items-center justify-center gap-2 disabled:opacity-70"
                             >
                                 {isLoading ? <Loader2 className="animate-spin" size={22} /> : 'Create account with email'}
                             </button>

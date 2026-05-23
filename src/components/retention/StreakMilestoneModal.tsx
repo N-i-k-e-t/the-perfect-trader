@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flame, X } from 'lucide-react';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
 
 export default function StreakMilestoneModal({
     days,
@@ -10,45 +11,61 @@ export default function StreakMilestoneModal({
     days: number;
     onClose: () => void;
 }) {
+    useEscapeKey(onClose, true);
+
     return (
         <AnimatePresence>
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-[500] flex items-center justify-center bg-black/40 p-6"
-                onClick={onClose}
+                className="fixed inset-0 z-[500] flex flex-col bg-gradient-to-b from-orange-400 via-orange-500 to-[#1a1a2e] text-white"
             >
-                <motion.div
-                    initial={{ scale: 0.9, y: 20 }}
-                    animate={{ scale: 1, y: 0 }}
-                    exit={{ scale: 0.9, y: 20 }}
-                    onClick={(e) => e.stopPropagation()}
-                    className="bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl text-center relative"
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="absolute top-[calc(env(safe-area-inset-top)+16px)] right-5 z-10 min-w-[44px] min-h-[44px] p-2 rounded-full bg-white/20 text-white flex items-center justify-center"
+                    aria-label="Close"
                 >
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 text-gray-500"
-                        aria-label="Close"
+                    <X size={22} />
+                </button>
+
+                <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
+                    <motion.div
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+                        className="w-28 h-28 mb-8 rounded-full bg-white/20 flex items-center justify-center text-white backdrop-blur-sm"
                     >
-                        <X size={18} />
-                    </button>
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-orange-100 flex items-center justify-center text-orange-600">
-                        <Flame size={32} />
-                    </div>
-                    <h2 className="text-2xl font-black text-[#1a1a2e] mb-2">{days} Day Streak!</h2>
-                    <p className="text-[14px] font-semibold text-gray-500 leading-relaxed">
+                        <Flame size={56} className="fill-white" />
+                    </motion.div>
+                    <motion.h2
+                        initial={{ y: 24, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.1 }}
+                        className="text-[48px] font-black leading-none mb-4 tracking-tight"
+                    >
+                        {days} Day Streak!
+                    </motion.h2>
+                    <motion.p
+                        initial={{ y: 16, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.18 }}
+                        className="text-[17px] font-semibold text-white/85 leading-relaxed max-w-[300px]"
+                    >
                         Your discipline is compounding. Keep showing up.
-                    </p>
+                    </motion.p>
+                </div>
+
+                <div className="px-8 pb-[calc(env(safe-area-inset-bottom)+28px)]">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="mt-6 w-full h-12 bg-[#1a1a2e] text-white rounded-2xl font-black text-[14px]"
+                        className="w-full h-16 btn-primary rounded-[28px] font-black text-[18px] shadow-2xl active:scale-95 transition-transform"
                     >
                         Keep going
                     </button>
-                </motion.div>
+                </div>
             </motion.div>
         </AnimatePresence>
     );

@@ -121,7 +121,7 @@ export default function RulesPage() {
                     <h1 className="text-[20px] font-black text-[#1a1a2e]">My Trading Plan</h1>
                     <button 
                         onClick={() => setIsSheetOpen(true)}
-                        className="h-10 px-5 rounded-full bg-[#1a1a2e] text-white text-[13px] font-black flex items-center gap-1.5 active:scale-95 transition-all shadow-lg shadow-[#1a1a2e]/10"
+                        className="h-10 px-5 rounded-full btn-primary text-[13px] font-black flex items-center gap-1.5 active:scale-95 transition-all shadow-lg shadow-emerald-500/20"
                     >
                         <Plus size={18} strokeWidth={3} />
                         Add Rule
@@ -381,7 +381,7 @@ export default function RulesPage() {
 
                                 <button 
                                     onClick={handleSaveRule}
-                                    className="w-full h-14 bg-[#1a1a2e] text-white rounded-full font-black text-[16px] shadow-xl shadow-[#1a1a2e]/20 active:scale-95 transition-all mt-4"
+                                    className="w-full h-14 btn-primary rounded-full font-black text-[16px] shadow-xl shadow-emerald-500/20 active:scale-95 transition-all mt-4"
                                 >
                                     Save Rule
                                 </button>

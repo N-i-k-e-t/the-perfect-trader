@@ -3,13 +3,13 @@
 import { useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Pencil } from 'lucide-react';
 import { usePerfectTrader } from '@/lib/context';
 
 export default function TradeDetailPage() {
     const { id } = useParams<{ id: string }>();
     const router = useRouter();
-    const { trades, rules } = usePerfectTrader();
+    const { trades, rules, openCaptureForEdit } = usePerfectTrader();
 
     const trade = useMemo(() => trades.find((t) => t.id === id), [trades, id]);
     const brokenRules = useMemo(
@@ -47,8 +47,16 @@ export default function TradeDetailPage() {
                 Journal
             </button>
 
-            <header className="bg-white rounded-[32px] p-6 border border-gray-100 shadow-sm">
-                <h1 className="text-[24px] font-black text-[#1a1a2e] mb-1">{trade.pair}</h1>
+            <header className="bg-white rounded-[32px] p-6 border border-gray-100 shadow-sm relative">
+                <button
+                    type="button"
+                    onClick={() => openCaptureForEdit(trade)}
+                    className="absolute top-5 right-5 min-w-[44px] min-h-[44px] flex items-center justify-center btn-primary rounded-full active:scale-95 shadow-lg"
+                    aria-label="Edit trade"
+                >
+                    <Pencil size={18} />
+                </button>
+                <h1 className="text-[24px] font-black text-[#1a1a2e] mb-1 pr-14">{trade.pair}</h1>
                 <p className="text-[12px] font-bold text-gray-400 uppercase tracking-wider">
                     {trade.date} · {trade.type}
                 </p>

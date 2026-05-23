@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { usePerfectTrader } from '@/lib/context';
 import { motion, AnimatePresence } from 'framer-motion';
+import BetaWaitlistPanel from '@/components/admin/BetaWaitlistPanel';
 import { 
     ShieldCheck, Users, TrendingUp, ShieldAlert, CheckCircle, 
     MoreHorizontal, Settings, ShieldQuestion, Activity, 
@@ -222,6 +223,17 @@ export default function AdminPage() {
                                 </div>
                             </div>
                         </div>
+                    </motion.div>
+                )}
+
+                {activeTab === 'users' && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="max-w-2xl"
+                    >
+                        <BetaWaitlistPanel />
                     </motion.div>
                 )}
 

@@ -14,13 +14,15 @@ import {
   Activity
 } from 'lucide-react';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { PullToRefresh } from '@/components/ui/PullToRefresh';
+import { JournalPageSkeleton } from '@/components/ui/Skeleton';
 import DiaryScannerModal from '@/components/diary/DiaryScannerModal';
 
 type ModeType = 'trades' | 'scans';
 type FilterType = 'all' | 'wins' | 'losses' | 'today' | 'week' | 'month';
 
 export default function JournalPage() {
-    const { trades, diaryEntries, setCaptureOpen, setCaptureMode } = usePerfectTrader();
+    const { trades, diaryEntries, setCaptureOpen, setCaptureMode, refreshData, isCheckingAuth } = usePerfectTrader();
     const router = useRouter();
     const [mode, setMode] = useState<ModeType>('trades');
     const [selectedFilter, setSelectedFilter] = useState<FilterType>('all');
@@ -58,10 +60,19 @@ export default function JournalPage() {
         { label: 'Today', value: 'today' },
     ];
 
+    if (isCheckingAuth) {
+        return (
+            <div className="min-h-[100dvh] bg-white">
+                <JournalPageSkeleton />
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-[100dvh] bg-white flex flex-col pb-[calc(env(safe-area-inset-bottom)+110px)] italic-none overflow-x-hidden">
+            <PullToRefresh onRefresh={refreshData} className="flex flex-col flex-1">
             {/* HEADER */}
-            <header className="px-5 pt-[calc(env(safe-area-inset-top)+20px)] mb-8">
+            <header className="px-5 pt-4 mb-8">
                 <div className="flex items-center justify-between mb-10">
                     <div className="flex flex-col">
                         <h1 className="text-[38px] font-black text-[#1a1a2e] leading-none mb-1 tracking-tighter">Trade <br/> Journal.</h1>
@@ -76,7 +87,7 @@ export default function JournalPage() {
                                 setIsScannerOpen(true);
                             }
                         }}
-                        className="w-16 h-16 bg-[#1a1a2e] text-white rounded-full flex items-center justify-center shadow-2xl active:scale-95 transition-all"
+                        className="w-16 h-16 btn-primary rounded-full flex items-center justify-center shadow-2xl active:scale-95 transition-all"
                     >
                         {mode === 'trades' ? <Activity size={28} strokeWidth={2.5} /> : <Camera size={28} strokeWidth={2.5} />}
                     </button>
@@ -172,7 +183,7 @@ export default function JournalPage() {
                                         setCaptureMode('checklist');
                                         setCaptureOpen(true);
                                     }}
-                                    className="bg-[#1a1a2e] text-white px-8 h-12 rounded-full font-black text-[13px] uppercase tracking-widest mt-2"
+                                    className="btn-primary px-8 h-12 rounded-full font-black text-[13px] uppercase tracking-widest mt-2"
                                 >
                                     Log My First Trade
                                 </button>
@@ -213,6 +224,7 @@ export default function JournalPage() {
                     )}
                 </AnimatePresence>
             </main>
+            </PullToRefresh>
 
             <DiaryScannerModal isOpen={isScannerOpen} onClose={() => setIsScannerOpen(false)} />
         </div>
