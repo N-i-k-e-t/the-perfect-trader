@@ -60,3 +60,20 @@ export const STREAK_COMPLIANCE_THRESHOLD = 75;
 
 /** Perfect discipline day (calendar heatmap, badges). */
 export const PERFECT_COMPLIANCE_SCORE = 100;
+
+/** Ring stroke color by letter grade */
+export function gradeRingColor(grade: DisciplineGrade): string {
+    switch (grade) {
+        case 'A':
+            return '#22c55e';
+        case 'B':
+            return '#eab308';
+        case 'C':
+        case 'D':
+            return '#f97316';
+        case 'F':
+            return '#ef4444';
+        default:
+            return '#3b82f6';
+    }
+}

@@ -15,11 +15,11 @@ export default function BetaPage() {
     const router = useRouter();
     const [email, setEmail] = useState('');
     const [done, setDone] = useState(false);
-    const [remaining, setRemaining] = useState<number | null>(null);
+    const [capacity, setCapacity] = useState<{ current: number; max: number; remaining: number } | null>(null);
 
     useEffect(() => {
         fetchBetaCapacity().then((c) => {
-            setRemaining(c.remaining);
+            setCapacity({ current: c.current, max: c.max, remaining: c.remaining });
             if (c.full) router.replace('/beta/full');
         });
     }, [router]);
@@ -61,11 +61,16 @@ export default function BetaPage() {
                     {APP_NAME} is in closed beta — <strong className="text-white">first {BETA_USER_CAP} traders only</strong>.
                     All features are free during beta.
                 </p>
-                {remaining !== null && remaining > 0 && (
-                    <p className="text-yellow-500 font-black text-[14px] uppercase tracking-widest mb-8">
-                        {remaining} spots remaining
+                {capacity !== null && (
+                    <p className="text-yellow-500 font-black text-[14px] uppercase tracking-widest mb-6">
+                        {capacity.current} / {capacity.max} spots filled · {capacity.remaining} left
                     </p>
                 )}
+                <ul className="text-left text-[14px] font-bold text-white/70 space-y-2 mb-8 max-w-[360px] mx-auto">
+                    <li>✓ Full access to all features during beta</li>
+                    <li>✓ Direct line to the founder</li>
+                    <li>✓ Founding member pricing when we launch</li>
+                </ul>
                 {done ? (
                     <div className="bg-white/10 rounded-[24px] p-8 border border-white/10">
                         <p className="font-black text-yellow-500 mb-2">You&apos;re on the list</p>

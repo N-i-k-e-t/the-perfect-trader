@@ -4,6 +4,7 @@ const EXTRA_KEYS = [
     'perfect_trader_cookie_consent',
     'perfect_trader_pwa_dismissed',
     'The Perfect Trader_welcome_dismissed',
+    'pt_welcome_card_dismissed',
     'The Perfect Trader_pricing_timer',
 ] as const;
 

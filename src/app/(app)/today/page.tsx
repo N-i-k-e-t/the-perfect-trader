@@ -14,7 +14,6 @@ import {
     Check, 
     ChevronRight, 
     Shield,
-    Sparkles,
     Zap,
     TrendingUp,
     ShieldCheck,
@@ -27,11 +26,14 @@ import RiskAlertBanner from '@/components/retention/RiskAlertBanner';
 import { runOrchestrator } from '@/lib/agents/orchestrator';
 import {
     calculateRuleChecklistScore,
+    gradeRingColor,
     scoreToGrade,
 } from '@/lib/discipline';
 import { PullToRefresh } from '@/components/ui/PullToRefresh';
 import { TodayPageSkeleton } from '@/components/ui/Skeleton';
 import { isAfterSessionEnd } from '@/lib/session-time';
+import MarketHoursBanner from '@/components/today/MarketHoursBanner';
+import DisciplineTrend from '@/components/today/DisciplineTrend';
 
 export default function DashboardPage() {
     const {
@@ -51,6 +53,7 @@ export default function DashboardPage() {
         userModel,
         openPreSessionCheck,
         refreshData,
+        toggleRuleViolation,
     } = usePerfectTrader();
     const router = useRouter();
     const [mounted, setMounted] = useState(false);
@@ -59,6 +62,11 @@ export default function DashboardPage() {
     const [weekOffset, setWeekOffset] = useState(0);
     const [showWelcome, setShowWelcome] = useState(false);
     const stabilityViewedRef = useRef(false);
+    const welcomeTrackedRef = useRef(false);
+    const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [sessionElapsed, setSessionElapsed] = useState<string | null>(null);
+
+    const WELCOME_CARD_KEY = 'pt_welcome_card_dismissed';
 
     const today = new Date().toISOString().split('T')[0];
     const selectedDateStr = selectedDate.toISOString().split('T')[0];
@@ -68,12 +76,26 @@ export default function DashboardPage() {
 
     useEffect(() => {
         setMounted(true);
-        // Show welcome if it's the first visit and no trades/logs exist yet
-        const welcomeDismissed = localStorage.getItem('The Perfect Trader_welcome_dismissed');
-        if (!welcomeDismissed && dailyLogs.length === 0 && trades.length === 0) {
-            setShowWelcome(true);
+    }, []);
+
+    useEffect(() => {
+        if (!mounted) return;
+        const dismissed = localStorage.getItem(WELCOME_CARD_KEY);
+        if (dismissed || trades.length > 0 || rules.length > 0) {
+            if ((trades.length > 0 || rules.length > 0) && !dismissed) {
+                localStorage.setItem(WELCOME_CARD_KEY, 'true');
+            }
+            setShowWelcome(false);
+            return;
         }
-    }, [dailyLogs.length, trades.length]);
+        setShowWelcome(true);
+    }, [mounted, trades.length, rules.length]);
+
+    useEffect(() => {
+        if (!mounted || !showWelcome || welcomeTrackedRef.current) return;
+        welcomeTrackedRef.current = true;
+        track('feature_first_use', 'engagement', { feature_name: 'welcome_card_shown' });
+    }, [mounted, showWelcome]);
 
     const activeRules = rules.filter(r => r.isActive !== false);
     const score = calculateRuleChecklistScore(activeRules.length, checkedIds.length);
@@ -108,6 +130,52 @@ export default function DashboardPage() {
     const showPostSession =
         selectedDateStr === today &&
         (targetTrades.length >= 1 || isAfterSessionEnd());
+
+    useEffect(() => {
+        if (!mounted || selectedDateStr !== today || !session.preSessionComplete) return;
+        const key = `pt_session_started_${today}`;
+        if (!localStorage.getItem(key)) {
+            localStorage.setItem(key, String(Date.now()));
+        }
+    }, [mounted, session.preSessionComplete, selectedDateStr, today]);
+
+    useEffect(() => {
+        if (selectedDateStr !== today || !session.preSessionComplete) {
+            setSessionElapsed(null);
+            return;
+        }
+        const tick = () => {
+            const start = Number(localStorage.getItem(`pt_session_started_${today}`));
+            if (!start) return;
+            const ms = Date.now() - start;
+            const h = Math.floor(ms / 3_600_000);
+            const m = Math.floor((ms % 3_600_000) / 60_000);
+            setSessionElapsed(h > 0 ? `${h}h ${m}m` : `${m}m`);
+        };
+        tick();
+        const id = setInterval(tick, 60_000);
+        return () => clearInterval(id);
+    }, [session.preSessionComplete, selectedDateStr, today]);
+
+    const ringColor = gradeRingColor(grade);
+
+    const startRuleLongPress = (ruleId: string) => {
+        longPressTimerRef.current = setTimeout(() => {
+            toggleRuleViolation(ruleId);
+            showToast('Rule flagged as violated today', 'error');
+            track('rule_violated_flagged', 'rules', { rule_id: ruleId, trade_id: null });
+            if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                navigator.vibrate(10);
+            }
+        }, 600);
+    };
+
+    const cancelRuleLongPress = () => {
+        if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+        }
+    };
 
     useEffect(() => {
         if (!mounted || !isPerfect || !session.preSessionComplete || selectedDateStr !== today) return;
@@ -166,7 +234,7 @@ export default function DashboardPage() {
 
     const handleDismissWelcome = () => {
         setShowWelcome(false);
-        localStorage.setItem('The Perfect Trader_welcome_dismissed', 'true');
+        localStorage.setItem(WELCOME_CARD_KEY, 'true');
     };
 
     if (!mounted) {
@@ -195,6 +263,8 @@ export default function DashboardPage() {
                     />
                 )}
 
+                {selectedDateStr === today && <MarketHoursBanner />}
+
                 <header className="w-full mb-6 flex flex-col items-center">
                     <div className="w-full flex justify-between items-center mb-8 px-2">
                         <div className="flex flex-col">
@@ -218,6 +288,11 @@ export default function DashboardPage() {
                             </div>
                         </div>
                         <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{selectedDate.getFullYear()}</span>
+                        {sessionElapsed && selectedDateStr === today && (
+                            <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest mt-1">
+                                Session · {sessionElapsed}
+                            </span>
+                        )}
                     </div>
 
                     {/* DISCIPLINE SCORE — hero above the fold */}
@@ -232,7 +307,7 @@ export default function DashboardPage() {
                                 <circle cx="112" cy="112" r="96" stroke="#f1f5f9" strokeWidth="16" fill="transparent" />
                                 <motion.circle 
                                     cx="112" cy="112" r="96" 
-                                    stroke={isPerfect ? "#22c55e" : "#3b82f6"} 
+                                    stroke={ringColor} 
                                     strokeWidth="16"
                                     strokeDasharray={603}
                                     strokeDashoffset={603 - (603 * score / 100)}
@@ -246,11 +321,18 @@ export default function DashboardPage() {
                                     {score}<span className="text-[16px] font-bold text-gray-300 ml-0.5">%</span>
                                 </span>
                                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mt-1">Discipline</span>
-                                <span className={`text-[22px] font-black mt-1 ${isPerfect ? 'text-green-500' : 'text-blue-600'}`}>
+                                <span className="text-[22px] font-black mt-1" style={{ color: ringColor }}>
                                     {grade}
                                 </span>
                             </div>
                         </div>
+                        {selectedDateStr === today && (
+                            <DisciplineTrend
+                                dailyLogs={dailyLogs}
+                                today={today}
+                                todayScore={score}
+                            />
+                        )}
                         <div className="w-full grid grid-cols-2 gap-3 mt-6">
                             <div className="bg-white rounded-[24px] p-4 shadow-sm border border-gray-50 flex flex-col items-center gap-1">
                                 <span className="text-[9px] font-black text-gray-300 uppercase tracking-widest flex items-center gap-1">
@@ -280,7 +362,7 @@ export default function DashboardPage() {
                         </button>
                     )}
 
-                    {/* WELCOME CARD - Fix 2 */}
+                    {/* First-session welcome — beta onboarding */}
                     <AnimatePresence>
                         {showWelcome && (
                             <motion.div 
@@ -297,28 +379,23 @@ export default function DashboardPage() {
                                 >
                                     <X size={16} className="text-white" />
                                 </button>
-                                <h3 className="text-xl font-black mb-4 flex items-center gap-2">
-                                    <Sparkles size={20} className="text-yellow-400" /> Welcome to The Perfect Trader!
+                                <h3 className="text-xl font-black mb-5 pr-10 leading-tight">
+                                    Welcome — let&apos;s make today count.
                                 </h3>
-                                <div className="space-y-4 mb-6 text-[13px] font-bold text-gray-300">
-                                    <div className="flex gap-3">
-                                        <div className="w-6 h-6 bg-white/10 rounded-full flex items-center justify-center text-[11px] font-black shrink-0">1</div>
-                                        <p><span className="text-white">Check in</span> (rate your sleep, energy, mood) — 30 seconds</p>
-                                    </div>
-                                    <div className="flex gap-3">
-                                        <div className="w-6 h-6 bg-white/10 rounded-full flex items-center justify-center text-[11px] font-black shrink-0">2</div>
-                                        <p><span className="text-white">Review your rules</span> before trading — 1 minute</p>
-                                    </div>
-                                    <div className="flex gap-3">
-                                        <div className="w-6 h-6 bg-white/10 rounded-full flex items-center justify-center text-[11px] font-black shrink-0">3</div>
-                                        <p><span className="text-white">After each trade</span>, tap + to log it — 2 minutes</p>
-                                    </div>
+                                <div className="space-y-3.5 mb-5 text-[14px] font-bold text-gray-200 leading-snug">
+                                    <p>① Finish your 2-min profile setup.</p>
+                                    <p>② Add your top 3 rules (the ones you break when it hurts).</p>
+                                    <p>③ Log your next trade — win or loss, just be honest.</p>
                                 </div>
+                                <p className="text-[12px] font-bold text-gray-400 mb-5 leading-relaxed">
+                                    Discipline score updates when you check rules. That&apos;s the game.
+                                </p>
                                 <button 
+                                    type="button"
                                     onClick={handleDismissWelcome}
                                     className="w-full h-12 bg-white text-[#1a1a2e] font-black text-[13px] rounded-full active:scale-95 transition-all shadow-xl"
                                 >
-                                    Got it, let's go
+                                    Got it, let&apos;s go
                                 </button>
                             </motion.div>
                         )}
@@ -417,8 +494,14 @@ export default function DashboardPage() {
                                     <motion.button
                                         key={rule.id}
                                         onClick={() => handleToggleRule(rule.id)}
+                                        onPointerDown={() => startRuleLongPress(rule.id)}
+                                        onPointerUp={cancelRuleLongPress}
+                                        onPointerLeave={cancelRuleLongPress}
+                                        onPointerCancel={cancelRuleLongPress}
                                         whileTap={{ scale: 0.98 }}
                                         className={`w-full p-4 rounded-[24px] border-2 transition-all flex items-center justify-between group ${
+                                            rule.violated ? 'border-red-200 bg-red-50/40' : ''
+                                        } ${
                                             checkedIds.includes(rule.id) 
                                             ? 'bg-blue-50/30 border-blue-50' 
                                             : 'bg-white border-transparent shadow-sm'
@@ -436,7 +519,9 @@ export default function DashboardPage() {
                                                 </span>
                                                 <span className="text-[9px] font-bold text-gray-400 mt-0.5 uppercase tracking-widest">
                                                     {phase.name} • {checkedIds.includes(rule.id) ? 'Followed' : 'Not checked yet'}
+                                                    {rule.violated ? ' · Violated' : ''}
                                                 </span>
+                                                <span className="text-[8px] font-bold text-gray-300 mt-0.5">Long-press to flag violation</span>
                                             </div>
                                         </div>
 

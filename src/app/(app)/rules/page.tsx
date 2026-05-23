@@ -78,6 +78,8 @@ export default function RulesPage() {
     const [ruleText, setRuleText] = useState('');
     const [ruleEmoji, setRuleEmoji] = useState('🎯');
     const [ruleCategory, setRuleCategory] = useState<Category>('Psychology');
+    const [importOpen, setImportOpen] = useState(false);
+    const [importText, setImportText] = useState('');
 
     const activeRules = useMemo(() => rules.filter(r => r.isActive !== false), [rules]);
 
@@ -95,6 +97,29 @@ export default function RulesPage() {
 
         const percentage = Math.round((followedDays / 30) * 100);
         return { count: followedDays, percent: percentage };
+    };
+
+    const handleImportRules = () => {
+        const lines = importText
+            .split(/\n|;/)
+            .map((l) => l.replace(/^[-•*\d.)]+\s*/, '').trim())
+            .filter((l) => l.length > 3);
+        if (lines.length === 0) {
+            showToast('Paste one rule per line', 'info');
+            return;
+        }
+        lines.forEach((text, i) => {
+            addRule({
+                id: `import_${Date.now()}_${i}`,
+                text,
+                emoji: '🎯',
+                category: 'Psychology',
+                isActive: true,
+            });
+        });
+        showToast(`${lines.length} rules imported`, 'success');
+        setImportText('');
+        setImportOpen(false);
     };
 
     const handleSaveRule = () => {
@@ -152,6 +177,32 @@ export default function RulesPage() {
             </header>
 
             <main className="px-5 flex-1 pt-4">
+                {activeTab === 'active' && (
+                    <button
+                        type="button"
+                        onClick={() => setImportOpen((o) => !o)}
+                        className="w-full mb-4 h-12 rounded-2xl border border-dashed border-gray-200 text-[13px] font-black text-gray-500"
+                    >
+                        {importOpen ? 'Hide import' : 'Paste rules as text →'}
+                    </button>
+                )}
+                {importOpen && activeTab === 'active' && (
+                    <div className="mb-4 flex flex-col gap-3 p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                        <textarea
+                            value={importText}
+                            onChange={(e) => setImportText(e.target.value)}
+                            placeholder="One rule per line&#10;Never risk more than 1%&#10;No trades in first 15 minutes"
+                            className="w-full min-h-[100px] rounded-xl p-3 text-[14px] font-bold border-none outline-none"
+                        />
+                        <button
+                            type="button"
+                            onClick={handleImportRules}
+                            className="h-11 btn-primary rounded-full font-black text-[13px]"
+                        >
+                            Import rules
+                        </button>
+                    </div>
+                )}
                 <AnimatePresence mode="wait">
                     {activeTab === 'active' ? (
                         <motion.div 
